@@ -3,6 +3,8 @@ import { groupBy, Dictionary } from "lodash";
 import axios, { AxiosResponse } from "axios";
 import { AtendimentoProfissional } from "./AtendimentoProfissional";
 import { Tabela } from "./Tabela";
+import { Filtro } from "./Filtro";
+import { TabelaWithCells } from "./TabelaWithCells";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -28,32 +30,41 @@ export const CountableKeys = ["key", "count"];
 type KeyType = keyof Omit<SubType<Teste, number>, "id">;
 
 export function Tests(props: any) {
-  const [data, setData] = useState();
+  const [data, setData] = useState<AtendimentoProfissional[]>();
 
-  const keys: Array<keyof AtendimentoProfissional> = [
-    "unidadeSaude",
-    "tipoAtendimento",
-    "sexo",
-    "nomeProfissional"
-  ];
+  const [keys, setKeys] = useState<Array<keyof AtendimentoProfissional>>([]);
+
+  const [result, setResult] = useState<Dictionary<AtendimentoProfissional> & Countable>();
 
   useEffect(() => {
     console.log("fetching...");
     axios
-      .get("http://localhost:8080/api/atendimentos")
+      .get("http://150.162.18.178:8080/api/atendimentos")
       .then((response: AxiosResponse<AtendimentoProfissional[]>) => {
-        const inicio = new Date().getTime();
         console.log("fetched");
-        console.log("grouping...");
-        const grouped = group<AtendimentoProfissional>(response.data, keys);
-        console.log("grouped", (new Date().getTime() - inicio) / 1000);
-        console.log(grouped);
-        setData(grouped);
+        setData(response.data);
       });
   }, []);
 
-  if (data) {
-    return <Tabela<AtendimentoProfissional> mapa={data} chaves={keys} />;
+  useEffect(() => {
+    if (data) {
+      const inicio = new Date().getTime();
+      console.log("grouping...");
+      setResult(group<AtendimentoProfissional>(data, keys));
+      console.log("grouped", (new Date().getTime() - inicio) / 1000);
+    }
+  }, [data, keys]);
+
+  const handleSubmit = (value: any) => setKeys(value);
+
+  console.log(result);
+  if (result) {
+    return (
+      <>
+        <Filtro handleSubmit={handleSubmit} />
+        <TabelaWithCells<AtendimentoProfissional> mapa={result} chavesLinhas={keys} />
+      </>
+    );
   } else {
     return null;
   }
@@ -81,11 +92,7 @@ function group<T>(arr: T[], keys: Array<keyof T>): any & Countable {
   return obj;
 }
 
-function media<T>(
-  list: T[],
-  key: keyof Omit<SubType<T, number>, "id">,
-  lista: T[]
-) {
+function media<T>(list: T[], key: keyof Omit<SubType<T, number>, "id">, lista: T[]) {
   let x = 0;
   lista.forEach(value => (x += Number(value[key])));
   return x / list.length;

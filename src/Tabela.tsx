@@ -1,9 +1,10 @@
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "./Testes";
+import { Dictionary } from "lodash";
 
 export type TabelaProps<T> = {
   chaves: Array<keyof T>;
-  mapa: any & Countable;
+  mapa: Dictionary<T> & Countable;
 };
 
 export function Tabela<T>(props: TabelaProps<T>) {
@@ -25,7 +26,7 @@ export function Tabela<T>(props: TabelaProps<T>) {
 
         const root = (
           <tr>
-            <th rowSpan={children.length + 1}>{key}</th>
+            <th rowSpan={children.length}>{key}</th>
           </tr>
         );
 
