@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { groupBy, Dictionary } from "lodash";
 import axios, { AxiosResponse } from "axios";
+import { Dictionary, groupBy } from "lodash";
+import React, { useEffect, useState } from "react";
 import { AtendimentoProfissional } from "./AtendimentoProfissional";
-import { Tabela } from "./Tabela";
 import { Filtro } from "./Filtro";
-import { TabelaWithCells } from "./TabelaWithCells";
+import { TabelaWithCellsColumn } from "./TabelaWithCellsColumn";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -62,7 +61,10 @@ export function Tests(props: any) {
     return (
       <>
         <Filtro handleSubmit={handleSubmit} />
-        <TabelaWithCells<AtendimentoProfissional> mapa={result} chavesLinhas={keys} />
+        <TabelaWithCellsColumn<AtendimentoProfissional>
+          mapa={result}
+          chavesLinhas={keys}
+        />
       </>
     );
   } else {
