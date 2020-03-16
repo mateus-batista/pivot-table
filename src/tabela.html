@@ -14,88 +14,48 @@
     </style>
   </head>
   <body>
-    <table>
-      <tbody>
-        <tr>
-          <th rowspan="7">Centro Saude</th>
-        </tr>
-        <tr>
-          <th colspan="1" rowspan="3">Programada</th>
-        </tr>
-        <tr>
-          <th colspan="1" rowspan="1">Programada</th>
-        </tr>
-        <tr>
-          <th colspan="1" rowspan="1">Programada</th>
-        </tr>
-        <tr>
-          <th colspan="1" rowspan="3">Agendada</th>
-        </tr>
-        <tr>
-          <th colspan="1" rowspan="1">Programada</th>
-        </tr>
-        <tr>
-          <th colspan="1" rowspan="1">Programada</th>
-        </tr>
-      </tbody>
-    </table>
-
-    <div style="display: flex; flex-direction: row;">
-      <div style="display: flex; flex-direction: column; order: 1;">
-        <div>
-          Centro Saude 1
-        </div>
+    <div
+      style="display: grid; grid-template-columns: auto auto auto auto; grid-gap: 10px; place-content: stretch stretch;"
+    >
+      <div
+        style="grid-area: 1 / 2 / 2 / 3; display: flex; justify-content: center; align-items: center;"
+      >
+        Feminino
       </div>
-      <div style="display: flex; flex-direction: column; order: 2">
-        <div style="flex-grow: 1;">
-          Programada
-        </div>
-        <div style="flex-grow: 1;">
-          Agendada
-        </div>
+      <div
+        style="grid-area: 1 / 3 / 2 / 4; display: flex; justify-content: center; align-items: center;"
+      >
+        Masculino
       </div>
-      <div style="display: flex; flex-direction: column; order: 3">
-        <div>
-          Programada
-        </div>
-        <div>
-          Agendada
-        </div>
-        <div>
-          Programada
-        </div>
-        <div>
-          Agendada
-        </div>
+      <div
+        style="grid-area: 2 / 1 / 3 / 2; display: flex; justify-content: center; align-items: center;"
+      >
+        CONSULTA AGENDADA / CUIDADO CONTINUADO
       </div>
-    </div>
-    <div style="display: flex; flex-direction: row;">
-      <div style="display: flex; flex-direction: column; order: 1;">
-        <div>
-          Centro Saude 1
-        </div>
+      <div
+        style="grid-area: 3 / 1 / 4 / 2; display: flex; justify-content: center; align-items: center;"
+      >
+        CONSULTA AGENDADA
       </div>
-      <div style="display: flex; flex-direction: column; order: 2">
-        <div style="flex-grow: 1;">
-          Programada
-        </div>
-        <div style="flex-grow: 1;">
-          Agendada
-        </div>
+      <div
+        style="grid-area: 2 / 2 / 3 / 3; display: flex; justify-content: center; align-items: center;"
+      >
+        2092
       </div>
-      <div style="display: flex; flex-direction: column; order: 3">
-        <div>
-          Programada
-        </div>
-        <div>
-          Agendada
-        </div>
-        <div>
-          Programada
-        </div>
-        <div>
-          Agendada
-        </div>
+      <div
+        style="grid-area: 3 / 2 / 4 / 3; display: flex; justify-content: center; align-items: center;"
+      >
+        533
+      </div>
+      <div
+        style="grid-area: 2 / 3 / 3 / 4; display: flex; justify-content: center; align-items: center;"
+      >
+        803
+      </div>
+      <div
+        style="grid-area: 3 / 3 / 4 / 4; display: flex; justify-content: center; align-items: center;"
+      >
+        395
       </div>
     </div>
   </body>
