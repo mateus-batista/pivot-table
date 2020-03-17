@@ -11,6 +11,9 @@ export type TabelaMixedProps<T> = {
 export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   const { mapa, linhas, colunas } = props;
 
+  const [children, columnCount] = getRow(mapa, [], linhas, 2);
+
+  console.log("coluna", columnCount);
   return (
     <>
       <div
@@ -22,7 +25,7 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
         }}
         className="table"
       >
-        {getRow(mapa, [], linhas)}
+        {children}
       </div>
     </>
   );
@@ -34,11 +37,11 @@ function getRow<T>(
   linhas: Array<keyof T>,
   row = 1,
   column = 1
-): ReactElement[] {
+): [ReactElement[], number] {
   const linha = linhas[0];
 
   if (!linha) {
-    return rows;
+    return [rows, column];
   }
 
   if (obj instanceof Array) {
@@ -47,14 +50,14 @@ function getRow<T>(
         {obj.length}
       </div>
     );
-    return rows;
+    return [rows, column + 1];
   }
 
   linhas = linhas.splice(1, linhas.length);
 
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
-      const children = getRow(obj[key], [], linhas, row, column + 1);
+      const [children] = getRow(obj[key], [], linhas, row, column + 1);
 
       const root = (
         <div
@@ -76,5 +79,5 @@ function getRow<T>(
     }
   });
 
-  return rows;
+  return [rows, column + 1];
 }
