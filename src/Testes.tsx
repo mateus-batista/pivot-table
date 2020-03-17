@@ -5,6 +5,7 @@ import { AtendimentoProfissional, atendimentos } from "./AtendimentoProfissional
 import { Filtro } from "./Filtro";
 import { TabelaVertical } from "./TabelaVertical";
 import { TabelaHorizontal } from "./TabelaHorizontal";
+import { TabelaMixed } from "./TabelaMixed";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -78,7 +79,7 @@ export function Tests(props: any) {
         ) : linhas.length === 0 && colunas.length > 0 ? (
           <TabelaVertical<AtendimentoProfissional> mapa={result} colunas={colunas} />
         ) : (
-          "Já vamo chegar lá"
+          <TabelaMixed mapa={result} colunas={colunas} linhas={linhas} />
         )}
       </>
     );

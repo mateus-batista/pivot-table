@@ -3,22 +3,16 @@ import { Countable, CountableKeys } from "./Testes";
 import { Dictionary } from "lodash";
 
 export type TabelaMixedProps<T> = {
-  chavesLinhas: Array<keyof T>;
-  chavesColunas?: Array<keyof T>;
+  linhas: Array<keyof T>;
+  colunas: Array<keyof T>;
   mapa: Dictionary<T> & Countable;
 };
 
 export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
-  const { mapa } = props;
+  const { mapa, linhas, colunas } = props;
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-        {props.chavesLinhas.map(v => (
-          <span>{v}</span>
-        ))}
-        <span>valor</span>
-      </div>
       <div
         style={{
           display: "grid",
@@ -26,27 +20,46 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
           gridGap: "10px",
           placeContent: "stretch stretch",
         }}
+        className="table"
       >
-        {getRow(mapa, [])}
+        {getRow(mapa, [], linhas)}
       </div>
     </>
   );
 }
 
-function getRow(obj: any & Countable, rows: ReactElement[], nivel = 1): ReactElement[] {
-  if (obj instanceof Array) {
-    rows.push(<div style={{ gridRowStart: nivel }}>{obj.length}</div>);
+function getRow<T>(
+  obj: any & Countable,
+  rows: ReactElement[],
+  linhas: Array<keyof T>,
+  row = 1,
+  column = 1
+): ReactElement[] {
+  const linha = linhas[0];
+
+  if (!linha) {
     return rows;
   }
 
+  if (obj instanceof Array) {
+    rows.push(
+      <div style={{ gridArea: `${row} / ${column} / ${row + 1} / ${column + 1}` }}>
+        {obj.length}
+      </div>
+    );
+    return rows;
+  }
+
+  linhas = linhas.splice(1, linhas.length);
+
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
-      const children = getRow(obj[key], [], nivel);
+      const children = getRow(obj[key], [], linhas, row, column + 1);
 
       const root = (
         <div
           style={{
-            gridRow: `${nivel} / span ${children.length}`,
+            gridArea: `${row} / ${column} / ${row + children.length} / ${column + 1}`,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -56,7 +69,7 @@ function getRow(obj: any & Countable, rows: ReactElement[], nivel = 1): ReactEle
         </div>
       );
 
-      nivel += children.length + 1;
+      row += children.length + 1;
 
       rows.push(root);
       rows.push(...children);

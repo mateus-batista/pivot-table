@@ -27,20 +27,29 @@ export function TabelaHorizontal<T>(props: TabelaHorizontalProps<T>) {
   );
 }
 
-function getRow(obj: any & Countable, rows: ReactElement[], nivel = 1): ReactElement[] {
+function getRow(
+  obj: any & Countable,
+  rows: ReactElement[],
+  row = 1,
+  column = 1
+): ReactElement[] {
   if (obj instanceof Array) {
-    rows.push(<div style={{ gridRowStart: nivel }}>{obj.length}</div>);
+    rows.push(
+      <div style={{ gridArea: `${row} / ${column} / ${row + 1} / ${column + 1}` }}>
+        {obj.length}
+      </div>
+    );
     return rows;
   }
 
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
-      const children = getRow(obj[key], [], nivel);
+      const children = getRow(obj[key], [], row, column + 1);
 
       const root = (
         <div
           style={{
-            gridRow: `${nivel} / span ${children.length}`,
+            gridArea: `${row} / ${column} / ${row + children.length} / ${column + 1}`,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -50,7 +59,7 @@ function getRow(obj: any & Countable, rows: ReactElement[], nivel = 1): ReactEle
         </div>
       );
 
-      nivel += children.length + 1;
+      row += children.length + 1;
 
       rows.push(root);
       rows.push(...children);
