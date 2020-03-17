@@ -10,10 +10,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-table,
-th,
-td,
-div {
+.table > div {
   border: 1px solid black;
   text-align: center;
 }

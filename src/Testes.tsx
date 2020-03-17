@@ -1,9 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import { Dictionary, groupBy } from "lodash";
 import React, { useEffect, useState } from "react";
-import { AtendimentoProfissional } from "./AtendimentoProfissional";
+import { AtendimentoProfissional, atendimentos } from "./AtendimentoProfissional";
 import { Filtro } from "./Filtro";
-import { TabelaWithCellsColumn } from "./TabelaWithCellsColumn";
+import { TabelaVertical } from "./TabelaVertical";
+import { TabelaHorizontal } from "./TabelaHorizontal";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -31,40 +32,54 @@ type KeyType = keyof Omit<SubType<Teste, number>, "id">;
 export function Tests(props: any) {
   const [data, setData] = useState<AtendimentoProfissional[]>();
 
-  const [keys, setKeys] = useState<Array<keyof AtendimentoProfissional>>([]);
+  const [linhas, setLinhas] = useState<Array<keyof AtendimentoProfissional>>([]);
+
+  const [colunas, setColunas] = useState<Array<keyof AtendimentoProfissional>>([]);
 
   const [result, setResult] = useState<Dictionary<AtendimentoProfissional> & Countable>();
 
   useEffect(() => {
-    console.log("fetching...");
-    axios
-      .get("http://150.162.18.178:8080/api/atendimentos")
-      .then((response: AxiosResponse<AtendimentoProfissional[]>) => {
-        console.log("fetched");
-        setData(response.data);
-      });
+    // console.log("fetching...");
+    // axios
+    //   .get("http://150.162.18.178:8080/api/atendimentos")
+    //   .then((response: AxiosResponse<AtendimentoProfissional[]>) => {
+    //     console.log("fetched");
+    //     setData(response.data);
+    // });
+    setData(atendimentos);
   }, []);
 
   useEffect(() => {
     if (data) {
       const inicio = new Date().getTime();
       console.log("grouping...");
-      setResult(group<AtendimentoProfissional>(data, keys));
+      setResult(
+        group<AtendimentoProfissional>(data, [...linhas, ...colunas])
+      );
       console.log("grouped", (new Date().getTime() - inicio) / 1000);
     }
-  }, [data, keys]);
+  }, [data, linhas, colunas]);
 
-  const handleSubmit = (value: any) => setKeys(value);
+  const handleSubmit = (
+    values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]
+  ) => {
+    const [linhas, colunas] = values;
+    setLinhas(linhas);
+    setColunas(colunas);
+  };
 
   console.log(result);
   if (result) {
     return (
       <>
         <Filtro handleSubmit={handleSubmit} />
-        <TabelaWithCellsColumn<AtendimentoProfissional>
-          mapa={result}
-          chavesLinhas={keys}
-        />
+        {linhas.length > 0 && colunas.length === 0 ? (
+          <TabelaHorizontal mapa={result} linhas={linhas} />
+        ) : linhas.length === 0 && colunas.length > 0 ? (
+          <TabelaVertical<AtendimentoProfissional> mapa={result} colunas={colunas} />
+        ) : (
+          "Já vamo chegar lá"
+        )}
       </>
     );
   } else {

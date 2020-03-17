@@ -2,24 +2,17 @@ import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "./Testes";
 import { Dictionary } from "lodash";
 
-export type TabelaWithCellsColumnProps<T> = {
-  chavesLinhas: Array<keyof T>;
-  chavesColunas?: Array<keyof T>;
+export type TabelaVerticalProps<T> = {
+  colunas: Array<keyof T>;
   mapa: Dictionary<T> & Countable;
 };
 
-export function TabelaWithCellsColumn<T>(props: TabelaWithCellsColumnProps<T>) {
+export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
   const { mapa } = props;
 
   const [items] = getRow(mapa, []);
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-        {props.chavesLinhas.map(v => (
-          <span>{v}</span>
-        ))}
-        <span>valor</span>
-      </div>
       <div
         style={{
           display: "grid",
@@ -27,6 +20,7 @@ export function TabelaWithCellsColumn<T>(props: TabelaWithCellsColumnProps<T>) {
           gridGap: "10px",
           placeContent: "stretch stretch",
         }}
+        className="table"
       >
         {items}
       </div>
