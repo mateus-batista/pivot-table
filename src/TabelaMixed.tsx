@@ -52,8 +52,7 @@ function getRow<T>(
     );
     return [rows, column + 1];
   }
-
-  linhas = linhas.splice(1, linhas.length);
+  linhas = [...linhas].splice(1, linhas.length);
 
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
