@@ -10,7 +10,7 @@ export type TabelaVerticalProps<T> = {
 export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
   const { mapa } = props;
 
-  const [items] = getRow(mapa, []);
+  const [items] = getColumn(mapa, []);
   return (
     <>
       <div
@@ -28,7 +28,7 @@ export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
   );
 }
 
-function getRow(
+function getColumn(
   obj: any & Countable,
   rows: ReactElement[],
   row = 1,
@@ -48,7 +48,7 @@ function getRow(
   Object.keys(obj)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
-      const [children, childColumnSpan] = getRow(obj[key], [], row + 1, column);
+      const [children, childColumnSpan] = getColumn(obj[key], [], row + 1, column);
       columnSpan = childColumnSpan;
       const root = (
         <div
