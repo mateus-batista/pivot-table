@@ -58,6 +58,7 @@ function getRow<T>(
   }
 
   linhas = [...linhas].splice(1, linhas.length);
+
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
       const [children] = getRow(obj[key], [], linhas, row, column + 1);
