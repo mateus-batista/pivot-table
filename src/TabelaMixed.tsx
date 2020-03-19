@@ -15,13 +15,12 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   const countLinhas = linhas.length;
   const countColunas = colunas.length;
 
-  const [rows, rowCount] = getRow(mapaLinhas, [], linhas, countColunas + 1);
+  const [rows, rowMap] = getRow(mapaLinhas, [], linhas, new Map<string, number>(), countColunas + 1);
 
-  console.log("linhas", linhas);
+  console.log("rowMap", rowMap);
 
-  const [columns, columnCount] = getColumn(mapaColunas, rows, colunas, 1, countLinhas + 1);
+  const [table] = getColumn(mapaColunas, rows, colunas, rowMap, 1, countLinhas + 1);
 
-  console.log("coluna", columnCount);
   return (
     <>
       <div
@@ -33,7 +32,7 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
         }}
         className="table"
       >
-        {columns}
+        {table}
       </div>
     </>
   );
@@ -42,30 +41,36 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
 function getRow<T>(
   obj: any & Countable,
   rows: ReactElement[],
-  linhas: Array<keyof T>,
-  row = 1,
-  column = 1
-): [ReactElement[], number] {
-  const linha = linhas[0];
+  rowKeys: Array<keyof T>,
+  rowMap: Map<string, number>,
+  startRow = 1,
+  startColumn = 1,
+  rowPath = ""
+): [ReactElement[], Map<string, number>] {
+  const linha = rowKeys[0];
 
   if (!linha) {
-    return [rows, column];
+    return [rows, rowMap];
   }
 
   if (obj instanceof Array) {
-    rows.push(<div style={{ gridArea: `${row} / ${column} / ${row + 1} / ${column + 1}` }}>{obj.length}</div>);
-    return [rows, column + 1];
+    rows.push(
+      <div style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}>
+        {obj.length}
+      </div>
+    );
+    return [rows, rowMap];
   }
 
-  linhas = [...linhas].splice(1, linhas.length);
+  rowKeys = [...rowKeys].splice(1, rowKeys.length);
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
-      const [children] = getRow(obj[key], [], linhas, row, column + 1);
+      const [children] = getRow(obj[key], [], rowKeys, rowMap, startRow, startColumn + 1, rowPath + key);
 
       const root = (
         <div
           style={{
-            gridArea: `${row} / ${column} / ${row + children.length} / ${column + 1}`,
+            gridArea: `${startRow} / ${startColumn} / ${startRow + children.length} / ${startColumn + 1}`,
             display: "flex",
             justifyContent: "center",
             alignItems: "center"
@@ -74,41 +79,54 @@ function getRow<T>(
           {key}
         </div>
       );
+      rowMap.set(rowPath + key, startRow.valueOf());
 
-      row += children.length + 1;
+      startRow += children.length + 1;
 
       rows.push(root);
       rows.push(...children);
     }
   });
 
-  return [rows, column + 1];
+  return [rows, rowMap];
 }
 
 function getColumn<T>(
   obj: any & Countable,
   rows: ReactElement[],
-  colunas: Array<keyof T>,
-  row = 1,
-  column = 1
+  columnKeys: Array<keyof T>,
+  rowMap: Map<string, number>,
+  startRow = 1,
+  startColumn = 1,
+  rowPath = ""
 ): [ReactElement[], number] {
   if (obj instanceof Array) {
-    rows.push(<div style={{ gridArea: `${row} / ${column} / ${row + 1} / ${column + 1}` }}>{/* {obj.length} */}</div>);
-    return [rows, column + 1];
+    console.log("rowPath", rowPath);
+    const r = rowMap.get(rowPath) || 0;
+    rows.push(<div style={{ gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}` }}>{obj.length}</div>);
+    return [rows, startColumn + 1];
   }
 
   let columnSpan: number = 0;
 
-  const process = colunas.includes(obj.key);
+  const rootKey = columnKeys.includes(obj.key);
   Object.keys(obj)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
-      const [children, childColumnSpan] = getColumn(obj[key], [], colunas, process ? row + 1 : row, column);
+      const [children, childColumnSpan] = getColumn(
+        obj[key],
+        [],
+        columnKeys,
+        rowMap,
+        rootKey ? startRow + 1 : startRow,
+        startColumn,
+        !rootKey ? rowPath + key : rowPath
+      );
       columnSpan = childColumnSpan;
       const root = (
         <div
           style={{
-            gridArea: `${row} / ${column} / ${row + 1} / ${childColumnSpan}`,
+            gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`,
             display: "flex",
             justifyContent: "center",
             alignItems: "center"
@@ -118,9 +136,11 @@ function getColumn<T>(
         </div>
       );
 
-      column = childColumnSpan;
+      if (rootKey) {
+        startColumn = childColumnSpan;
+      }
 
-      if (process) {
+      if (rootKey) {
         rows.push(root);
       }
       rows.push(...children);
