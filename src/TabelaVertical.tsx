@@ -18,7 +18,7 @@ export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
           display: "grid",
           gridTemplateColumns: "auto auto auto auto",
           gridGap: "10px",
-          placeContent: "stretch stretch",
+          placeContent: "stretch stretch"
         }}
         className="table"
       >
@@ -31,16 +31,16 @@ export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
 function getColumn(
   obj: any & Countable,
   rows: ReactElement[],
-  row = 1,
-  column = 1
+  startRow = 1,
+  startColumn = 1
 ): [ReactElement[], number] {
   if (obj instanceof Array) {
     rows.push(
-      <div style={{ gridArea: `${row} / ${column} / ${row + 1} / ${column + 1}` }}>
+      <div style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}>
         {obj.length}
       </div>
     );
-    return [rows, column + 1];
+    return [rows, startColumn + 1];
   }
 
   let columnSpan: number = 0;
@@ -48,22 +48,22 @@ function getColumn(
   Object.keys(obj)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
-      const [children, childColumnSpan] = getColumn(obj[key], [], row + 1, column);
+      const [children, childColumnSpan] = getColumn(obj[key], [], startRow + 1, startColumn);
       columnSpan = childColumnSpan;
       const root = (
         <div
           style={{
-            gridArea: `${row} / ${column} / ${row + 1} / ${childColumnSpan}`,
+            gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`,
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
+            alignItems: "center"
           }}
         >
           {key}
         </div>
       );
 
-      column = childColumnSpan;
+      startColumn = childColumnSpan;
 
       rows.push(root);
       rows.push(...children);

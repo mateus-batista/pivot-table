@@ -16,11 +16,9 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   const countColunas = colunas.length;
 
   const [rows, rowMap] = getRow(mapaLinhas, [], linhas, new Map<string, number>(), countColunas + 1);
-
-  console.log("rowMap", rowMap);
-
   const [table] = getColumn(mapaColunas, rows, colunas, rowMap, 1, countLinhas + 1);
 
+  console.log(rowMap);
   return (
     <>
       <div
@@ -50,15 +48,6 @@ function getRow<T>(
   const linha = rowKeys[0];
 
   if (!linha) {
-    return [rows, rowMap];
-  }
-
-  if (obj instanceof Array) {
-    rows.push(
-      <div style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}>
-        {obj.length}
-      </div>
-    );
     return [rows, rowMap];
   }
 
@@ -101,7 +90,6 @@ function getColumn<T>(
   rowPath = ""
 ): [ReactElement[], number] {
   if (obj instanceof Array) {
-    console.log("rowPath", rowPath);
     const r = rowMap.get(rowPath) || 0;
     rows.push(<div style={{ gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}` }}>{obj.length}</div>);
     return [rows, startColumn + 1];

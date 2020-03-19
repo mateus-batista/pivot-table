@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-import { Draggable } from "./Draggable";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
-import { Dropable, DragItem } from "./Dropable";
-import ItemTypes from "./ItemTypes";
 import { AtendimentoProfissional } from "./AtendimentoProfissional";
+import { Dropable } from "./Dropable";
+import ItemTypes from "./ItemTypes";
 
 interface BoardProps {
-  handleSubmit: (
-    values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]
-  ) => void;
+  handleSubmit: (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => void;
 }
 
 export function Board(props: BoardProps) {
@@ -33,13 +30,7 @@ export function Board(props: BoardProps) {
     <Dropable
       handleUpdate={handleUpdateVazio}
       types={[ItemTypes.FILTER]}
-      initialState={[
-        "duracao",
-        "unidadeSaude",
-        "sexo",
-        "nomeProfissional",
-        "tipoAtendimento",
-      ]}
+      initialState={["duracao", "unidadeSaude", "sexo", "nomeProfissional", "tipoAtendimento"]}
       id={0}
     >
       <div>
@@ -49,12 +40,7 @@ export function Board(props: BoardProps) {
     </Dropable>
   );
   drops.push(
-    <Dropable
-      handleUpdate={handleUpdateLinhas}
-      types={[ItemTypes.FILTER]}
-      initialState={[]}
-      id={1}
-    >
+    <Dropable handleUpdate={handleUpdateLinhas} types={[ItemTypes.FILTER]} initialState={[]} id={1}>
       <div>
         <span>Linhas</span>
         <hr />
@@ -62,12 +48,7 @@ export function Board(props: BoardProps) {
     </Dropable>
   );
   drops.push(
-    <Dropable
-      handleUpdate={handleUpdateColunas}
-      types={[ItemTypes.FILTER]}
-      initialState={[]}
-      id={2}
-    >
+    <Dropable handleUpdate={handleUpdateColunas} types={[ItemTypes.FILTER]} initialState={[]} id={2}>
       <div>
         <span>Colunas</span>
         <hr />
@@ -78,15 +59,13 @@ export function Board(props: BoardProps) {
     <DndProvider backend={Backend}>
       <div
         style={{
-          width: "500px",
-          height: "300",
           flexWrap: "wrap",
-          display: "flex",
+          display: "flex"
         }}
       >
         {drops}
       </div>
-      <button onClick={handleSubmit}>batata</button>
+      <button onClick={handleSubmit}>Aplicar</button>
       <div>{linhas}</div>
     </DndProvider>
   );

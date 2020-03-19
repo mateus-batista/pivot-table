@@ -11,13 +11,13 @@ interface DraggableProps {
 }
 
 export function Draggable(props: DraggableProps) {
-  const [{ isDragging }, drag, preview] = useDrag({
+  const [{ isDragging }, drag] = useDrag({
     item: { type: props.type, id: props.id, origin: props.origin },
     end: (item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (dropResult == null) {
       } else {
-        if (dropResult.id != -1) {
+        if (dropResult.id !== -1) {
           props.func();
         }
       }

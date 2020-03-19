@@ -17,7 +17,7 @@ export function TabelaHorizontal<T>(props: TabelaHorizontalProps<T>) {
           display: "grid",
           gridTemplateColumns: "auto auto auto auto",
           gridGap: "10px",
-          placeContent: "stretch stretch",
+          placeContent: "stretch stretch"
         }}
         className="table"
       >
@@ -27,44 +27,39 @@ export function TabelaHorizontal<T>(props: TabelaHorizontalProps<T>) {
   );
 }
 
-function getRow(
-  obj: any & Countable,
-  rows: ReactElement[],
-  row = 1,
-  column = 1
-): ReactElement[] {
+function getRow(obj: any & Countable, rows: ReactElement[], startRow = 1, startColumn = 1): ReactElement[] {
   if (obj instanceof Array) {
     rows.push(
-      <div style={{ gridArea: `${row} / ${column} / ${row + 1} / ${column + 1}` }}>
+      <div style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}>
         {obj.length}
       </div>
     );
     return rows;
   }
 
-  Object.keys(obj).forEach(key => {
-    if (!CountableKeys.includes(key)) {
-      const children = getRow(obj[key], [], row, column + 1);
+  Object.keys(obj)
+    .filter(k => !CountableKeys.includes(k))
+    .forEach(key => {
+      const children = getRow(obj[key], [], startRow, startColumn + 1);
 
       const root = (
         <div
           style={{
-            gridArea: `${row} / ${column} / ${row + children.length} / ${column + 1}`,
+            gridArea: `${startRow} / ${startColumn} / ${startRow + children.length} / ${startColumn + 1}`,
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
+            alignItems: "center"
           }}
         >
           {key}
         </div>
       );
 
-      row += children.length + 1;
+      startRow += children.length + 1;
 
       rows.push(root);
       rows.push(...children);
-    }
-  });
+    });
 
   return rows;
 }

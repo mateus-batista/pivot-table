@@ -2,7 +2,6 @@ import axios, { AxiosResponse } from "axios";
 import { Dictionary, groupBy } from "lodash";
 import React, { useEffect, useState } from "react";
 import { AtendimentoProfissional, atendimentos } from "./AtendimentoProfissional";
-import { Filtro } from "./Filtro";
 import { TabelaVertical } from "./TabelaVertical";
 import { TabelaHorizontal } from "./TabelaHorizontal";
 import { TabelaMixed } from "./TabelaMixed";
@@ -38,9 +37,9 @@ export function Tests(props: any) {
 
   const [colunas, setColunas] = useState<Array<keyof AtendimentoProfissional>>([]);
 
-  const [result, setResult] = useState<Dictionary<AtendimentoProfissional> & Countable>();
+  const [agrupadoUnico, setAgrupadoUnico] = useState<Dictionary<AtendimentoProfissional> & Countable>();
 
-  const [result2, setResult2] = useState<Dictionary<AtendimentoProfissional> & Countable>();
+  const [agrupadoMisto, setAgrupadoMisto] = useState<Dictionary<AtendimentoProfissional> & Countable>();
 
   useEffect(() => {
     // console.log("fetching...");
@@ -57,12 +56,14 @@ export function Tests(props: any) {
     if (data) {
       const inicio = new Date().getTime();
       console.log("grouping...");
-      setResult(
+      setAgrupadoUnico(
         group<AtendimentoProfissional>(data, [...linhas, ...colunas])
       );
-      setResult2(
-        group<AtendimentoProfissional>(data, [...colunas, ...linhas])
-      );
+      if (linhas.length > 0 && colunas.length > 0) {
+        setAgrupadoMisto(
+          group<AtendimentoProfissional>(data, [...colunas, ...linhas])
+        );
+      }
       console.log("grouped", (new Date().getTime() - inicio) / 1000);
     }
   }, [data, linhas, colunas]);
@@ -74,24 +75,21 @@ export function Tests(props: any) {
     setColunas(colunas);
   };
 
-  console.log("result", result);
-  console.log("result2", result2);
-  if (result && result2) {
-    return (
-      <>
-        <Board handleSubmit={handleSubmit} />
-        {linhas.length > 0 && colunas.length === 0 ? (
-          <TabelaHorizontal mapa={result} linhas={linhas} />
-        ) : linhas.length === 0 && colunas.length > 0 ? (
-          <TabelaVertical<AtendimentoProfissional> mapa={result} colunas={colunas} />
-        ) : (
-          <TabelaMixed mapaLinhas={result} mapaColunas={result2} colunas={colunas} linhas={linhas} />
-        )}
-      </>
-    );
-  } else {
-    return null;
-  }
+  console.log(agrupadoUnico);
+  console.log(agrupadoMisto);
+
+  return (
+    <>
+      <Board handleSubmit={handleSubmit} />
+      {agrupadoUnico && agrupadoMisto ? (
+        <TabelaMixed mapaLinhas={agrupadoUnico} mapaColunas={agrupadoMisto} colunas={colunas} linhas={linhas} />
+      ) : agrupadoUnico && linhas.length > 0 && colunas.length === 0 ? (
+        <TabelaHorizontal mapa={agrupadoUnico} linhas={linhas} />
+      ) : agrupadoUnico && linhas.length === 0 && colunas.length > 0 ? (
+        <TabelaVertical<AtendimentoProfissional> mapa={agrupadoUnico} colunas={colunas} />
+      ) : null}
+    </>
+  );
 }
 
 function group<T>(arr: T[], keys: Array<keyof T>): any & Countable {
