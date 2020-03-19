@@ -6,6 +6,7 @@ import { Filtro } from "./Filtro";
 import { TabelaVertical } from "./TabelaVertical";
 import { TabelaHorizontal } from "./TabelaHorizontal";
 import { TabelaMixed } from "./TabelaMixed";
+import { Board } from "./Board";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -68,6 +69,7 @@ export function Tests(props: any) {
 
   const handleSubmit = (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => {
     const [linhas, colunas] = values;
+
     setLinhas(linhas);
     setColunas(colunas);
   };
@@ -77,7 +79,7 @@ export function Tests(props: any) {
   if (result && result2) {
     return (
       <>
-        <Filtro handleSubmit={handleSubmit} />
+        <Board handleSubmit={handleSubmit} />
         {linhas.length > 0 && colunas.length === 0 ? (
           <TabelaHorizontal mapa={result} linhas={linhas} />
         ) : linhas.length === 0 && colunas.length > 0 ? (
