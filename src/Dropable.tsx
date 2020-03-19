@@ -1,10 +1,10 @@
-import React, { ReactElement, useState, Children, FunctionComponent } from "react";
+import React, { ReactElement, useState } from "react";
 import { useDrop } from "react-dnd";
-import { Draggable } from "./Draggable";
 import { AtendimentoProfissional } from "./AtendimentoProfissional";
-//import { Draggable } from "./Draggable";
+import { Draggable } from "./Draggable";
 
 interface DropableProps {
+  position:string
   handleUpdate: (values: Array<keyof AtendimentoProfissional>) => void;
   id: number;
   types: string[];
@@ -61,7 +61,7 @@ export function Dropable(props: DropableProps) {
     <div
       ref={drag}
       style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }}
-      className="dnd-container"
+      className={"border dnd-container-"+props.position}
     >
       {props.children}
       {c}

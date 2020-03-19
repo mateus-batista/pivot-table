@@ -28,6 +28,7 @@ export function Board(props: BoardProps) {
 
   drops.push(
     <Dropable
+      position={"topleft"}
       handleUpdate={handleUpdateVazio}
       types={[ItemTypes.FILTER]}
       initialState={["duracao", "unidadeSaude", "sexo", "nomeProfissional", "tipoAtendimento"]}
@@ -40,7 +41,7 @@ export function Board(props: BoardProps) {
     </Dropable>
   );
   drops.push(
-    <Dropable handleUpdate={handleUpdateLinhas} types={[ItemTypes.FILTER]} initialState={[]} id={1}>
+    <Dropable position={"bottomleft"} handleUpdate={handleUpdateLinhas} types={[ItemTypes.FILTER]} initialState={[]} id={1}>
       <div>
         <span>Linhas</span>
         <hr />
@@ -48,7 +49,7 @@ export function Board(props: BoardProps) {
     </Dropable>
   );
   drops.push(
-    <Dropable handleUpdate={handleUpdateColunas} types={[ItemTypes.FILTER]} initialState={[]} id={2}>
+    <Dropable position={"topright"} handleUpdate={handleUpdateColunas} types={[ItemTypes.FILTER]} initialState={[]} id={2}>
       <div>
         <span>Colunas</span>
         <hr />
@@ -57,16 +58,8 @@ export function Board(props: BoardProps) {
   );
   return (
     <DndProvider backend={Backend}>
-      <div
-        style={{
-          flexWrap: "wrap",
-          display: "flex"
-        }}
-      >
-        {drops}
-      </div>
+      {drops}
       <button onClick={handleSubmit}>Aplicar</button>
-      <div>{linhas}</div>
     </DndProvider>
   );
 }

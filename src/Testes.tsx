@@ -1,11 +1,10 @@
-import axios, { AxiosResponse } from "axios";
 import { Dictionary, groupBy } from "lodash";
 import React, { useEffect, useState } from "react";
 import { AtendimentoProfissional, atendimentos } from "./AtendimentoProfissional";
-import { TabelaVertical } from "./TabelaVertical";
+import { Board } from "./Board";
 import { TabelaHorizontal } from "./TabelaHorizontal";
 import { TabelaMixed } from "./TabelaMixed";
-import { Board } from "./Board";
+import { TabelaVertical } from "./TabelaVertical";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -80,14 +79,18 @@ export function Tests(props: any) {
 
   return (
     <>
-      <Board handleSubmit={handleSubmit} />
-      {agrupadoUnico && agrupadoMisto ? (
-        <TabelaMixed mapaLinhas={agrupadoUnico} mapaColunas={agrupadoMisto} colunas={colunas} linhas={linhas} />
-      ) : agrupadoUnico && linhas.length > 0 && colunas.length === 0 ? (
-        <TabelaHorizontal mapa={agrupadoUnico} linhas={linhas} />
-      ) : agrupadoUnico && linhas.length === 0 && colunas.length > 0 ? (
-        <TabelaVertical<AtendimentoProfissional> mapa={agrupadoUnico} colunas={colunas} />
-      ) : null}
+      <div className={"caixao"}>
+        <Board handleSubmit={handleSubmit} />
+        <div className="dnd-container-bottomright border">
+          {agrupadoUnico && agrupadoMisto ? (
+            <TabelaMixed mapaLinhas={agrupadoUnico} mapaColunas={agrupadoMisto} colunas={colunas} linhas={linhas} />
+          ) : agrupadoUnico && linhas.length > 0 && colunas.length === 0 ? (
+            <TabelaHorizontal mapa={agrupadoUnico} linhas={linhas} />
+          ) : agrupadoUnico && linhas.length === 0 && colunas.length > 0 ? (
+            <TabelaVertical<AtendimentoProfissional> mapa={agrupadoUnico} colunas={colunas} />
+          ) : null}
+        </div>
+      </div>
     </>
   );
 }
