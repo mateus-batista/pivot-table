@@ -40,6 +40,8 @@ export function Tests(props: any) {
 
   const [result, setResult] = useState<Dictionary<AtendimentoProfissional> & Countable>();
 
+  const [result2, setResult2] = useState<Dictionary<AtendimentoProfissional> & Countable>();
+
   useEffect(() => {
     // console.log("fetching...");
     // axios
@@ -58,21 +60,23 @@ export function Tests(props: any) {
       setResult(
         group<AtendimentoProfissional>(data, [...linhas, ...colunas])
       );
+      setResult2(
+        group<AtendimentoProfissional>(data, [...colunas, ...linhas])
+      );
       console.log("grouped", (new Date().getTime() - inicio) / 1000);
     }
   }, [data, linhas, colunas]);
 
-  const handleSubmit = (
-    values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]
-  ) => {
+  const handleSubmit = (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => {
     const [linhas, colunas] = values;
 
     setLinhas(linhas);
     setColunas(colunas);
   };
 
-  console.log(result);
-  if (result) {
+  console.log("result", result);
+  console.log("result2", result2);
+  if (result && result2) {
     return (
       <>
         <Board handleSubmit={handleSubmit} />
@@ -81,7 +85,7 @@ export function Tests(props: any) {
         ) : linhas.length === 0 && colunas.length > 0 ? (
           <TabelaVertical<AtendimentoProfissional> mapa={result} colunas={colunas} />
         ) : (
-          <TabelaMixed mapa={result} colunas={colunas} linhas={colunas} />
+          <TabelaMixed mapaLinhas={result} mapaColunas={result2} colunas={colunas} linhas={linhas} />
         )}
       </>
     );
