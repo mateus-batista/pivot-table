@@ -19,17 +19,44 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   const [table] = getColumn(mapaColunas, rows, colunas, rowMap, 1, countLinhas + 1);
 
   console.log(rowMap);
-  return (
-    <>
+  const l: ReactElement[] = [];
+  const c: ReactElement[] = [];
+  var cont = 0;
+  linhas.forEach(linha => {
+    cont = cont + 1;
+    l.push(
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "auto auto auto auto",
-          gridGap: "10px",
-          placeContent: "stretch stretch"
+          gridArea: colunas.length + 1 + "/" + cont + "/" + (colunas.length + 2) + "/" + (cont + 1)
         }}
-        className="table"
       >
+        {linha}
+      </div>
+    );
+  });
+  cont = 0;
+  colunas.forEach(coluna => {
+    cont = cont + 1;
+    l.push(
+      <div style={{ gridArea: cont + "/" + (linhas.length + 1) + "/" + (cont + 1) + "/" + (linhas.length + 2) }}>
+        {coluna}
+      </div>
+    );
+  });
+  const temp = (
+    <div
+      style={{ display: "grid", gridArea: "1/1/" + (colunas.length + 1) + "/" + (linhas.length + 1) }}
+      className="table"
+      id="mini-table"
+    >
+      {l}
+      {c}
+    </div>
+  );
+  return (
+    <>
+      <div className="table result-table">
+        {temp}
         {table}
       </div>
     </>
@@ -69,10 +96,7 @@ function getRow<T>(
       const root = (
         <div
           style={{
-            gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`
           }}
         >
           {key}
@@ -124,10 +148,7 @@ function getColumn<T>(
       const root = (
         <div
           style={{
-            gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`
           }}
         >
           {key}

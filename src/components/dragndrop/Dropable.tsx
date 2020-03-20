@@ -4,7 +4,7 @@ import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
 import { Draggable } from "./Draggable";
 
 interface DropableProps {
-  position:string
+  position: string;
   handleUpdate: (values: Array<keyof AtendimentoProfissional>) => void;
   id: number;
   types: string[];
@@ -20,9 +20,7 @@ export interface DragItem {
 export function Dropable(props: DropableProps) {
   const { initialState } = props;
 
-  const [ids, setIds] = useState<Array<keyof AtendimentoProfissional>>(
-    initialState || []
-  );
+  const [ids, setIds] = useState<Array<keyof AtendimentoProfissional>>(initialState || []);
 
   const [{ isOver }, drag] = useDrop({
     accept: props.types,
@@ -37,18 +35,13 @@ export function Dropable(props: DropableProps) {
     },
     collect: monitor => ({
       canDrop: !!monitor.canDrop(),
-      isOver: monitor.isOver() ? monitor.getItem().origin !== props.id : monitor.isOver(),
-    }),
+      isOver: monitor.isOver() ? monitor.getItem().origin !== props.id : monitor.isOver()
+    })
   });
   const c: ReactElement[] = [];
   ids.forEach(id => {
     c.push(
-      <Draggable
-        type={props.types[0]}
-        id={id}
-        origin={props.id}
-        func={() => deleteById(id)}
-      >
+      <Draggable type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
         <div id={props.id + "-" + id}>
           <input type="hidden" name={props.id + "[]"} value={id}></input>
           {id}
@@ -58,11 +51,7 @@ export function Dropable(props: DropableProps) {
   });
 
   return (
-    <div
-      ref={drag}
-      style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }}
-      className={"border dnd-container-"+props.position}
-    >
+    <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {c}
     </div>

@@ -17,17 +17,7 @@ export function TabelaHorizontal<T>(props: TabelaHorizontalProps<T>) {
   children.push(...Array.from(headerSection.values()));
   return (
     <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto auto auto auto",
-          gridGap: "10px",
-          placeContent: "stretch stretch"
-        }}
-        className="table"
-      >
-        {children}
-      </div>
+      <div className="table result-table">{children}</div>
     </>
   );
 }
@@ -66,10 +56,7 @@ function getRow<T>(
       const root = (
         <div
           style={{
-            gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`
           }}
         >
           {key}
@@ -80,10 +67,7 @@ function getRow<T>(
         obj.key,
         <div
           style={{
-            gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}`
           }}
         >
           <b>{obj.key}</b>
