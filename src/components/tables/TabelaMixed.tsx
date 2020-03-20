@@ -39,17 +39,7 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   table.push(...Array.from(columnHeaderSection.values()));
   return (
     <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto auto auto auto",
-          gridGap: "10px",
-          placeContent: "stretch stretch"
-        }}
-        className="table"
-      >
-        {table}
-      </div>
+      <div className="table result-table">{table}</div>
     </>
   );
 }
@@ -97,10 +87,7 @@ function getRow<T>(
           style={{
             gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${
               lastChild ? startColumn + 2 : startColumn + 1
-            }`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            }`
           }}
         >
           {key}
@@ -169,10 +156,7 @@ function getColumn<T>(
       const root = (
         <div
           style={{
-            gridArea: `${startRow} / ${startColumn} / ${lastChild ? startRow + 2 : startRow + 1} / ${childColumnSpan}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startRow} / ${startColumn} / ${lastChild ? startRow + 2 : startRow + 1} / ${childColumnSpan}`
           }}
         >
           {key}

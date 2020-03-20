@@ -4,6 +4,7 @@ import Backend from "react-dnd-html5-backend";
 import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
 import { Dropable } from "../dragndrop/Dropable";
 import ItemTypes from "../../types/ItemTypes";
+import "../../css/Tabela.css";
 
 interface BoardProps {
   handleSubmit: (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => void;
@@ -28,7 +29,7 @@ export function Board(props: BoardProps) {
 
   drops.push(
     <Dropable
-      position={"topleft"}
+      position={"table-topleft"}
       handleUpdate={handleUpdateVazio}
       types={[ItemTypes.FILTER]}
       initialState={["duracao", "unidadeSaude", "sexo", "nomeProfissional", "tipoAtendimento"]}
@@ -41,7 +42,13 @@ export function Board(props: BoardProps) {
     </Dropable>
   );
   drops.push(
-    <Dropable position={"bottomleft"} handleUpdate={handleUpdateLinhas} types={[ItemTypes.FILTER]} initialState={[]} id={1}>
+    <Dropable
+      position={"table-bottomleft"}
+      handleUpdate={handleUpdateLinhas}
+      types={[ItemTypes.FILTER]}
+      initialState={[]}
+      id={1}
+    >
       <div>
         <span>Linhas</span>
         <hr />
@@ -49,7 +56,13 @@ export function Board(props: BoardProps) {
     </Dropable>
   );
   drops.push(
-    <Dropable position={"topright"} handleUpdate={handleUpdateColunas} types={[ItemTypes.FILTER]} initialState={[]} id={2}>
+    <Dropable
+      position={"table-topright"}
+      handleUpdate={handleUpdateColunas}
+      types={[ItemTypes.FILTER]}
+      initialState={[]}
+      id={2}
+    >
       <div>
         <span>Colunas</span>
         <hr />

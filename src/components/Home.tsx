@@ -6,6 +6,7 @@ import { TabelaHorizontal } from "./tables/TabelaHorizontal";
 import { TabelaMixed } from "./tables/TabelaMixed";
 import { TabelaVertical } from "./tables/TabelaVertical";
 import { Countable, CountableKeys } from "../types/Countable";
+import "../css/Tabela.css";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -73,9 +74,9 @@ export function Home(props: any) {
 
   return (
     <>
-      <div className={"caixao"}>
+      <div className={"filter-table table"}>
         <Board handleSubmit={handleSubmit} />
-        <div className="dnd-container-bottomright border">
+        <div className="table-bottomright">
           {agrupadoUnico && agrupadoMisto ? (
             <TabelaMixed mapaLinhas={agrupadoUnico} mapaColunas={agrupadoMisto} colunas={colunas} linhas={linhas} />
           ) : agrupadoUnico && linhas.length > 0 && colunas.length === 0 ? (

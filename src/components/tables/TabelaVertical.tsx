@@ -17,17 +17,7 @@ export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
   children.push(...Array.from(headerSection.values()));
   return (
     <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto auto auto auto",
-          gridGap: "10px",
-          placeContent: "stretch stretch"
-        }}
-        className="table"
-      >
-        {children}
-      </div>
+      <div className="table result-table">{children}</div>
     </>
   );
 }
@@ -65,10 +55,7 @@ function getColumn<T>(
       const root = (
         <div
           style={{
-            gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`
           }}
         >
           {key}
@@ -79,10 +66,7 @@ function getColumn<T>(
         obj.key,
         <div
           style={{
-            gridArea: `${startRow} / 1 / ${startRow + 1} / 2`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startRow} / 1 / ${startRow + 1} / 2`
           }}
         >
           <b>{obj.key}</b>
