@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
-import { AtendimentoProfissional } from "./AtendimentoProfissional";
-import { Dropable } from "./Dropable";
-import ItemTypes from "./ItemTypes";
+import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
+import { Dropable } from "../dragndrop/Dropable";
+import ItemTypes from "../../types/ItemTypes";
 
 interface BoardProps {
   handleSubmit: (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => void;

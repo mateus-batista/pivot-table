@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AtendimentoProfissional } from "./AtendimentoProfissional";
+import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
 
 export type FiltroProps = {
   handleSubmit: (

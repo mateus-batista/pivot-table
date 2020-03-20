@@ -1,6 +1,6 @@
 import React, { ReactElement, useState } from "react";
 import { useDrop } from "react-dnd";
-import { AtendimentoProfissional } from "./AtendimentoProfissional";
+import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
 import { Draggable } from "./Draggable";
 
 interface DropableProps {

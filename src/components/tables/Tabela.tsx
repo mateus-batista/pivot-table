@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { Countable, CountableKeys } from "./Testes";
+import { Countable, CountableKeys } from "../../types/Countable";
 import { Dictionary } from "lodash";
 
 export type TabelaProps<T> = {

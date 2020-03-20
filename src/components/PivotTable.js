@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import PivotTableUI from "react-pivottable/PivotTableUI";
+import React, { useEffect, useState } from "react";
 import "react-pivottable/pivottable.css";
-import * as axios from "axios";
+import PivotTableUI from "react-pivottable/PivotTableUI";
+import createPlotlyRenderers from "react-pivottable/PlotlyRenderers";
 import TableRenderers from "react-pivottable/TableRenderers";
 import Plot from "react-plotly.js";
-import createPlotlyRenderers from "react-pivottable/PlotlyRenderers";
+import { atendimentos } from "../types/AtendimentoProfissional";
 
 const PlotlyRenderers = createPlotlyRenderers(Plot);
 
@@ -14,11 +14,7 @@ export function PivotTable(props) {
   const [data, setDate] = useState();
 
   useEffect(() => {
-    axios.default
-      .get("http://localhost:8080/api/atendimentos")
-      .then(response => {
-        setDate(response.data);
-      });
+        setDate(atendimentos);
   }, []);
 
   if (data) {

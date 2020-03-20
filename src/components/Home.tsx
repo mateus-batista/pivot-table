@@ -1,10 +1,11 @@
 import { Dictionary, groupBy } from "lodash";
 import React, { useEffect, useState } from "react";
-import { AtendimentoProfissional, atendimentos } from "./AtendimentoProfissional";
-import { Board } from "./Board";
-import { TabelaHorizontal } from "./TabelaHorizontal";
-import { TabelaMixed } from "./TabelaMixed";
-import { TabelaVertical } from "./TabelaVertical";
+import { AtendimentoProfissional, atendimentos } from "../types/AtendimentoProfissional";
+import { Board } from "./filter/Board";
+import { TabelaHorizontal } from "./tables/TabelaHorizontal";
+import { TabelaMixed } from "./tables/TabelaMixed";
+import { TabelaVertical } from "./tables/TabelaVertical";
+import { Countable, CountableKeys } from "../types/Countable";
 
 type FilterFlags<Base, Condition> = {
   [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
@@ -20,16 +21,9 @@ type Teste = {
   name: string;
 };
 
-export type Countable = {
-  key?: string;
-  count?: number;
-};
-
-export const CountableKeys = ["key", "count"];
-
 type KeyType = keyof Omit<SubType<Teste, number>, "id">;
 
-export function Tests(props: any) {
+export function Home(props: any) {
   const [data, setData] = useState<AtendimentoProfissional[]>();
 
   const [linhas, setLinhas] = useState<Array<keyof AtendimentoProfissional>>([]);
