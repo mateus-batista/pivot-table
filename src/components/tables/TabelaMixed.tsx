@@ -15,7 +15,7 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   const countLinhas = linhas.length;
   const countColunas = colunas.length;
 
-  const [rows, rowMap] = getRow(mapaLinhas, [], linhas, new Map<string, number>(), countColunas + 1);
+  const [rows, , rowMap] = getRow(mapaLinhas, [], linhas, new Map<string, number>(), countColunas + 1);
   const [table] = getColumn(mapaColunas, rows, colunas, rowMap, 1, countLinhas + 1);
 
   console.log(rowMap);
@@ -44,22 +44,32 @@ function getRow<T>(
   startRow = 1,
   startColumn = 1,
   rowPath = ""
-): [ReactElement[], Map<string, number>] {
+): [ReactElement[], number, Map<string, number>] {
   const linha = rowKeys[0];
 
   if (!linha) {
-    return [rows, rowMap];
+    return [rows, startRow + 1, rowMap];
   }
 
+  let rowSpan = 0;
   rowKeys = [...rowKeys].splice(1, rowKeys.length);
   Object.keys(obj).forEach(key => {
     if (!CountableKeys.includes(key)) {
-      const [children] = getRow(obj[key], [], rowKeys, rowMap, startRow, startColumn + 1, rowPath + key);
+      const [children, childrenRowSpan] = getRow(
+        obj[key],
+        [],
+        rowKeys,
+        rowMap,
+        startRow,
+        startColumn + 1,
+        rowPath + key
+      );
+      rowSpan = childrenRowSpan;
 
       const root = (
         <div
           style={{
-            gridArea: `${startRow} / ${startColumn} / ${startRow + children.length} / ${startColumn + 1}`,
+            gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`,
             display: "flex",
             justifyContent: "center",
             alignItems: "center"
@@ -70,14 +80,14 @@ function getRow<T>(
       );
       rowMap.set(rowPath + key, startRow.valueOf());
 
-      startRow += children.length + 1;
+      startRow = childrenRowSpan + 1;
 
       rows.push(root);
       rows.push(...children);
     }
   });
 
-  return [rows, rowMap];
+  return [rows, rowSpan, rowMap];
 }
 
 function getColumn<T>(
