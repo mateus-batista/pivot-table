@@ -49,7 +49,6 @@ export function Home(props: any) {
   useEffect(() => {
     if (data) {
       const inicio = new Date().getTime();
-      console.log("grouping...");
       setAgrupadoUnico(
         group<AtendimentoProfissional>(data, [...linhas, ...colunas])
       );
@@ -67,10 +66,9 @@ export function Home(props: any) {
 
     setLinhas(linhas);
     setColunas(colunas);
+    setAgrupadoMisto(undefined);
+    setAgrupadoUnico(undefined);
   };
-
-  console.log(agrupadoUnico);
-  console.log(agrupadoMisto);
 
   return (
     <>

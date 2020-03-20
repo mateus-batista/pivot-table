@@ -39,7 +39,9 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
   table.push(...Array.from(columnHeaderSection.values()));
   return (
     <>
-      <div className="table result-table">{table}</div>
+      <div key="table" className="table result-table">
+        {table}
+      </div>
     </>
   );
 }
@@ -84,6 +86,7 @@ function getRow<T>(
 
       const root = (
         <div
+          key={`${startRow}/${startColumn}/${childrenRowSpan}/${lastChild ? startColumn + 2 : startColumn + 1}${key}`}
           style={{
             gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${
               lastChild ? startColumn + 2 : startColumn + 1
@@ -96,6 +99,7 @@ function getRow<T>(
       headerSection.set(
         obj.key,
         <div
+          key={`${startHeader}/${startColumn}/${startHeader + 1}/${startColumn + 1}${obj.key}`}
           style={{
             gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`,
             display: "flex",
@@ -108,7 +112,7 @@ function getRow<T>(
       );
       rowMap.set(rowPath + key, startRow.valueOf());
 
-      startRow = childrenRowSpan + 1;
+      startRow = childrenRowSpan;
 
       rows.push(root);
       rows.push(...children);
@@ -130,7 +134,14 @@ function getColumn<T>(
 ): [ReactElement[], number, Map<string, ReactElement>] {
   if (obj instanceof Array) {
     const r = rowMap.get(rowPath) || 0;
-    rows.push(<div style={{ gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}` }}>{obj.length}</div>);
+    rows.push(
+      <div
+        key={`${r}/${startColumn}/${r + 1}/${startColumn + 1}${obj.length}`}
+        style={{ gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}` }}
+      >
+        {obj.length}
+      </div>
+    );
     return [rows, startColumn + 1, headerSection];
   }
 
@@ -155,6 +166,7 @@ function getColumn<T>(
       const lastChild = columnKeys.length === 0;
       const root = (
         <div
+          key={`${startRow}/${startColumn}/${lastChild ? startRow + 2 : startRow + 1}/${childColumnSpan}- ${key}`}
           style={{
             gridArea: `${startRow} / ${startColumn} / ${lastChild ? startRow + 2 : startRow + 1} / ${childColumnSpan}`
           }}
@@ -166,6 +178,7 @@ function getColumn<T>(
         headerSection.set(
           obj.key,
           <div
+            key={`${startRow}/${startHeader}/${startRow + 1}/${startHeader + 1}${obj.key}`}
             style={{
               gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`,
               display: "flex",

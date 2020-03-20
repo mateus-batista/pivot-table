@@ -32,13 +32,16 @@ function getColumn<T>(
 ): [ReactElement[], number, Map<string, ReactElement>] {
   if (obj instanceof Array) {
     rows.push(
-      <div style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}>
+      <div
+        key={`${startRow}/${startColumn}/${startRow + 1}/${startColumn + 1}`}
+        style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}
+      >
         {obj.length}
       </div>
     );
     headerSection.set(
       "totais",
-      <div style={{ gridArea: `${startRow} / 1 / ${startRow + 1} / 2 ` }}>
+      <div key={`${startRow}/1/${startRow + 1}/2`} style={{ gridArea: `${startRow} / 1 / ${startRow + 1} / 2 ` }}>
         <b>Totais</b>
       </div>
     );
@@ -54,6 +57,7 @@ function getColumn<T>(
       columnSpan = childColumnSpan;
       const root = (
         <div
+          key={`${startRow}/${startColumn}/${startRow + 1}/${childColumnSpan}`}
           style={{
             gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${childColumnSpan}`
           }}
@@ -65,6 +69,7 @@ function getColumn<T>(
       headerSection.set(
         obj.key,
         <div
+          key={`${startRow}/1/${startRow + 1}/2`}
           style={{
             gridArea: `${startRow} / 1 / ${startRow + 1} / 2`
           }}

@@ -38,22 +38,18 @@ export function Dropable(props: DropableProps) {
       isOver: monitor.isOver() ? monitor.getItem().origin !== props.id : monitor.isOver()
     })
   });
-  const c: ReactElement[] = [];
-  ids.forEach(id => {
-    c.push(
-      <Draggable type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
-        <div id={props.id + "-" + id}>
-          <input type="hidden" name={props.id + "[]"} value={id}></input>
-          {id}
-        </div>
-      </Draggable>
-    );
-  });
 
   return (
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
-      {c}
+      {ids.map(id => (
+        <Draggable key={id} type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
+          <div id={props.id + "-" + id}>
+            <input type="hidden" name={props.id + "[]"} value={id}></input>
+            {id}
+          </div>
+        </Draggable>
+      ))}
     </div>
   );
   function deleteById(id: keyof AtendimentoProfissional) {

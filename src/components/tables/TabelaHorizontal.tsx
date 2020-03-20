@@ -32,13 +32,19 @@ function getRow<T>(
 ): [ReactElement[], number, Map<string, ReactElement>] {
   if (obj instanceof Array) {
     rows.push(
-      <div style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}>
+      <div
+        key={`${startRow}/${startColumn}/${startRow + 1}/${startColumn + 1}`}
+        style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}
+      >
         {obj.length}
       </div>
     );
     headerSection.set(
       "totais",
-      <div style={{ gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}` }}>
+      <div
+        key={`1/${startColumn}/2/${startColumn + 1}`}
+        style={{ gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}` }}
+      >
         <b>Totais</b>
       </div>
     );
@@ -55,6 +61,7 @@ function getRow<T>(
 
       const root = (
         <div
+          key={`${startRow}/${startColumn}/${childrenRowSpan}/${startColumn + 1}`}
           style={{
             gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`
           }}
@@ -66,6 +73,7 @@ function getRow<T>(
       headerSection.set(
         obj.key,
         <div
+          key={`1/${startColumn}/2/${startColumn + 1}`}
           style={{
             gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}`
           }}
@@ -75,7 +83,7 @@ function getRow<T>(
       );
       filterKeys = filterKeys.filter(k => k !== obj.key);
 
-      startRow = childrenRowSpan + 1;
+      startRow = childrenRowSpan;
 
       rows.push(root);
       rows.push(...children);
