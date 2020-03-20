@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { useDrag } from "react-dnd";
-import "./Dnd.css";
+import "../../css/Dnd.css";
 
 interface DraggableProps {
   type: string;
