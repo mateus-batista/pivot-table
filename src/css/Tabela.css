@@ -9,9 +9,7 @@
   text-align: center;
   box-shadow:0 0 0 0.5px black;
   box-sizing: border-box;
-  
 }
-
 .result-table > div {
   display: flex;
   justify-content: center;
@@ -30,7 +28,6 @@
   place-content: start start;
   margin: 8px 8px;
 }
-
 .table-topleft {
   grid-area: 1/1/2/2;
 }

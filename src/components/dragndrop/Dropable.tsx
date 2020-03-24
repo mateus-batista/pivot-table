@@ -43,7 +43,7 @@ export function Dropable(props: DropableProps) {
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {ids.map(id => (
-        <Draggable key={id} type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
+        <Draggable type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
           <div id={props.id + "-" + id}>
             {Nomes[id]}
           </div>
