@@ -70,6 +70,8 @@ export function Home(props: any) {
     setAgrupadoUnico(undefined);
   };
 
+  console.log("linhas", agrupadoUnico);
+  console.log("colunas", agrupadoMisto);
   return (
     <>
       <div className={"filter-table table"}>

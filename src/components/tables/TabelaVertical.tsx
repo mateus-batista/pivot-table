@@ -7,12 +7,28 @@ export type TabelaVerticalProps<T> = {
   mapa: Dictionary<T> & Countable;
 };
 
+type GetColumnInputProps<T> = {
+  obj: any & Countable;
+  rows: ReactElement[];
+  filterKeys: Array<keyof T>;
+  headerSection?: Map<string, ReactElement>;
+  startRow?: number;
+  startColumn?: number;
+};
+
+type GetColumnReturnProps<T> = {
+  children: ReactElement[];
+  columnSpan: number;
+  rowSpan: number;
+  headerSection: Map<string, ReactElement>;
+};
+
 export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
   const { mapa } = props;
 
   const colunas = [...props.colunas];
 
-  const [children, , headerSection] = getColumn(mapa, [], colunas);
+  const { children, headerSection } = getColumn({ obj: mapa, rows: [], filterKeys: colunas });
 
   children.push(...Array.from(headerSection.values()));
   return (
@@ -22,14 +38,14 @@ export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
   );
 }
 
-function getColumn<T>(
-  obj: any & Countable,
-  rows: ReactElement[],
-  filterKeys: Array<keyof T>,
-  headerSection: Map<string, ReactElement> = new Map(),
+function getColumn<T>({
+  obj,
+  rows,
+  filterKeys,
+  headerSection = new Map(),
   startRow = 1,
   startColumn = 2
-): [ReactElement[], number, Map<string, ReactElement>] {
+}: GetColumnInputProps<T>): GetColumnReturnProps<T> {
   if (obj instanceof Array) {
     rows.push(
       <div
@@ -45,16 +61,25 @@ function getColumn<T>(
         <b>Totais</b>
       </div>
     );
-    return [rows, startColumn + 1, headerSection];
+    return { children: rows, columnSpan: startColumn + 1, rowSpan: startRow + 1, headerSection: headerSection };
   }
 
   let columnSpan = 0;
+  let rowSpan = 0;
 
   Object.keys(obj)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
-      const [children, childColumnSpan] = getColumn(obj[key], [], filterKeys, headerSection, startRow + 1, startColumn);
+      const { children, columnSpan: childColumnSpan, rowSpan: childRowSpan } = getColumn({
+        obj: obj[key],
+        rows: [],
+        filterKeys: filterKeys,
+        headerSection: headerSection,
+        startRow: startRow + 1,
+        startColumn: startColumn
+      });
       columnSpan = childColumnSpan;
+      rowSpan = childRowSpan;
       const root = (
         <div
           key={`${startRow}/${startColumn}/${startRow + 1}/${childColumnSpan}`}
@@ -77,7 +102,6 @@ function getColumn<T>(
           <b>{obj.key}</b>
         </div>
       );
-      filterKeys = filterKeys.filter(k => k !== obj.key);
 
       startColumn = childColumnSpan;
 
@@ -85,5 +109,30 @@ function getColumn<T>(
       rows.push(...children);
     });
 
-  return [rows, columnSpan, headerSection];
+  if (obj.key === filterKeys[0]) {
+    headerSection.set(
+      "totalLabel",
+      <div
+        key={`1 / ${columnSpan} / ${rowSpan - 1} / ${columnSpan + 1}`}
+        style={{
+          gridArea: `1 / ${columnSpan} / ${rowSpan - 1} / ${columnSpan + 1}`
+        }}
+      >
+        <b>Total</b>
+      </div>
+    );
+    headerSection.set(
+      "totalValue",
+      <div
+        key={`${rowSpan - 1} / ${columnSpan} / ${rowSpan} / ${columnSpan + 1}`}
+        style={{
+          gridArea: `${rowSpan - 1} / ${columnSpan} / ${rowSpan} / ${columnSpan + 1}`
+        }}
+      >
+        <b>{obj.count}</b>
+      </div>
+    );
+  }
+
+  return { children: rows, columnSpan: columnSpan, rowSpan: rowSpan, headerSection: headerSection };
 }
