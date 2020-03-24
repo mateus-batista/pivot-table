@@ -1,6 +1,7 @@
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 import { Dictionary } from "lodash";
+import { AtendimentoProfissional, Nomes } from "../../types/AtendimentoProfissional";
 
 export type TabelaMixedProps<T> = {
   linhas: Array<keyof T>;
@@ -96,6 +97,7 @@ function getRow<T>(
           {key}
         </div>
       );
+      var titulos:keyof AtendimentoProfissional = obj.key
       headerSection.set(
         obj.key,
         <div
@@ -104,7 +106,7 @@ function getRow<T>(
             gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`
           }}
         >
-          <b>{obj.key}</b>
+          <b>{Nomes[titulos]}</b>
         </div>
       );
       rowMap.set(rowPath + key, startRow.valueOf());
@@ -172,6 +174,7 @@ function getColumn<T>(
         </div>
       );
       if (rootKey) {
+        var titulos:keyof AtendimentoProfissional = obj.key
         headerSection.set(
           obj.key,
           <div
@@ -180,7 +183,7 @@ function getColumn<T>(
               gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`
             }}
           >
-            <b>{obj.key}</b>
+            <b>{Nomes[titulos]}</b>
           </div>
         );
       }

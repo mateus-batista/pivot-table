@@ -1,6 +1,7 @@
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 import { Dictionary } from "lodash";
+import { AtendimentoProfissional, Nomes } from "../../types/AtendimentoProfissional";
 
 export type TabelaVerticalProps<T> = {
   colunas: Array<keyof T>;
@@ -90,7 +91,7 @@ function getColumn<T>({
           {key}
         </div>
       );
-
+      var titulos:keyof AtendimentoProfissional = obj.key
       headerSection.set(
         obj.key,
         <div
@@ -99,7 +100,7 @@ function getColumn<T>({
             gridArea: `${startRow} / 1 / ${startRow + 1} / 2`
           }}
         >
-          <b>{obj.key}</b>
+          <b>{Nomes[titulos]}</b>
         </div>
       );
 
