@@ -101,10 +101,7 @@ function getRow<T>(
         <div
           key={`${startHeader}/${startColumn}/${startHeader + 1}/${startColumn + 1}${obj.key}`}
           style={{
-            gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`
           }}
         >
           <b>{obj.key}</b>
@@ -180,10 +177,7 @@ function getColumn<T>(
           <div
             key={`${startRow}/${startHeader}/${startRow + 1}/${startHeader + 1}${obj.key}`}
             style={{
-              gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
+              gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`
             }}
           >
             <b>{obj.key}</b>
