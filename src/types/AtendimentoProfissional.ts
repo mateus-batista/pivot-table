@@ -6,6 +6,14 @@ export type AtendimentoProfissional = {
   duracao: number;
 };
 
+export const Nomes = {
+  "nomeProfissional": "Nome do Profissional",
+  "tipoAtendimento": "Tipo de Atendimento",
+  "unidadeSaude": "Unidade de Saúde",
+  "sexo": "Sexo",
+  "duracao": "Duração",
+}
+
 export const atendimentos: AtendimentoProfissional[] = [
   {
     nomeProfissional: "PROFISSIONAL 1",

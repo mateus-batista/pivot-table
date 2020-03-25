@@ -1,6 +1,7 @@
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 import { Dictionary } from "lodash";
+import { AtendimentoProfissional, Nomes } from "../../types/AtendimentoProfissional";
 
 export type TabelaMixedProps<T> = {
   linhas: Array<keyof T>;
@@ -185,18 +186,16 @@ function getRow<T>({
           <b>{key}</b>
         </div>
       );
+      var titulos:keyof AtendimentoProfissional = obj.key
       headerSection.set(
         obj.key,
         <div
           key={`${startHeader}/${startColumn}/${startHeader + 1}/${startColumn + 1}${obj.key}`}
           style={{
-            gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`
           }}
         >
-          <b>{obj.key}</b>
+          <b>{Nomes[titulos]}</b>
         </div>
       );
 
@@ -282,18 +281,16 @@ function getColumn<T>({
         </div>
       );
       if (rootKey) {
+        var titulos:keyof AtendimentoProfissional = obj.key
         headerSection.set(
           obj.key,
           <div
             key={`${startRow}/${startHeader}/${startRow + 1}/${startHeader + 1}${obj.key}`}
             style={{
-              gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
+              gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`
             }}
           >
-            <b>{obj.key}</b>
+            <b>{Nomes[titulos]}</b>
           </div>
         );
       }

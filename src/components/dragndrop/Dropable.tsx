@@ -1,6 +1,6 @@
 import React, { ReactElement, useState } from "react";
 import { useDrop } from "react-dnd";
-import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
+import { AtendimentoProfissional, Nomes} from "../../types/AtendimentoProfissional";
 import { Draggable } from "./Draggable";
 
 interface DropableProps {
@@ -43,10 +43,9 @@ export function Dropable(props: DropableProps) {
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {ids.map(id => (
-        <Draggable key={id} type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
+        <Draggable type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
           <div id={props.id + "-" + id}>
-            <input type="hidden" name={props.id + "[]"} value={id}></input>
-            {id}
+            {Nomes[id]}
           </div>
         </Draggable>
       ))}

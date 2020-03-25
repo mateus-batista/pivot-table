@@ -1,6 +1,7 @@
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 import { Dictionary } from "lodash";
+import { Nomes, AtendimentoProfissional } from "../../types/AtendimentoProfissional";
 
 export type TabelaHorizontalProps<T> = {
   linhas: Array<keyof T>;
@@ -98,7 +99,7 @@ function getRow<T>({
           <b>{key}</b>
         </div>
       );
-
+      var titulos:keyof AtendimentoProfissional = obj.key
       headerSection.set(
         obj.key,
         <div
@@ -106,8 +107,8 @@ function getRow<T>({
           style={{
             gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}`
           }}
-        >
-          <b>{obj.key}</b>
+        > 
+          <b>{Nomes[titulos]}</b>
         </div>
       );
       startRow = childrenRowSpan;
