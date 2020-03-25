@@ -8842,6 +8842,13 @@ export const atendimentos: AtendimentoProfissional[] = [
     duracao: 2
   },
   {
+    nomeProfissional: "PROFISSIONAL 2",
+    tipoAtendimento: "TIPO ATENDIMENTO 1",
+    unidadeSaude: "UNIDADE SAUDE 2",
+    sexo: "MASCULINO",
+    duracao: 2
+  },
+  {
     nomeProfissional: "PROFISSIONAL 1",
     tipoAtendimento: "TIPO ATENDIMENTO 2",
     unidadeSaude: "UNIDADE SAUDE 1",

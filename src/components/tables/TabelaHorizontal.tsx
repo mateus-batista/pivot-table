@@ -95,7 +95,7 @@ function getRow<T>({
             gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`
           }}
         >
-          {key}
+          <b>{key}</b>
         </div>
       );
 
