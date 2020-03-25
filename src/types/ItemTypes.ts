@@ -1,3 +1,3 @@
-export default {
-  FILTER: "filter"
-};
+export enum ItemTypes {
+  FILTER = "filter"
+}

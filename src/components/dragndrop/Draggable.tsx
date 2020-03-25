@@ -1,25 +1,23 @@
 import React, { ReactElement } from "react";
 import { useDrag } from "react-dnd";
 import "../../css/Dnd.css";
+import { ItemTypes } from "../../types/ItemTypes";
 
 interface DraggableProps<T> {
   id: keyof T;
-  type: string;
+  type: ItemTypes;
   origin: number;
-  func: () => void;
   children?: ReactElement;
+  onDragEnd: () => void;
 }
 
 export function Draggable<T>(props: DraggableProps<T>) {
   const [{ isDragging }, drag] = useDrag({
     item: { type: props.type, id: props.id, origin: props.origin },
-    end: (item, monitor) => {
+    end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
-      if (dropResult == null) {
-      } else {
-        if (dropResult.id !== -1) {
-          props.func();
-        }
+      if (dropResult != null && dropResult.id !== -1) {
+        props.onDragEnd();
       }
     },
     collect: monitor => ({

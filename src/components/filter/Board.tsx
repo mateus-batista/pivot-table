@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
+import "../../css/Tabela.css";
 import { AtendimentoProfissional, AtendimentoProfissonalKeyMapping } from "../../types/AtendimentoProfissional";
 import { Dropable } from "../dragndrop/Dropable";
-import ItemTypes from "../../types/ItemTypes";
-import "../../css/Tabela.css";
-
+import { ItemTypes } from "../../types/ItemTypes";
 interface BoardProps {
   handleSubmit: (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => void;
 }
@@ -26,11 +25,11 @@ export function Board(props: BoardProps) {
 
   return (
     <DndProvider backend={Backend}>
-      <Dropable
+      <Dropable<AtendimentoProfissional>
         position={"table-topleft"}
         handleUpdate={handleUpdateVazio}
-        types={[ItemTypes.FILTER]}
-        idMapping={AtendimentoProfissonalKeyMapping}
+        type={ItemTypes.FILTER}
+        keyMapping={AtendimentoProfissonalKeyMapping}
         initialState={["duracao", "unidadeSaude", "sexo", "nomeProfissional", "tipoAtendimento"]}
         id={0}
       >
@@ -39,11 +38,11 @@ export function Board(props: BoardProps) {
           <hr />
         </div>
       </Dropable>
-      <Dropable
+      <Dropable<AtendimentoProfissional>
         position={"table-bottomleft"}
         handleUpdate={handleUpdateLinhas}
-        types={[ItemTypes.FILTER]}
-        idMapping={AtendimentoProfissonalKeyMapping}
+        type={ItemTypes.FILTER}
+        keyMapping={AtendimentoProfissonalKeyMapping}
         id={1}
       >
         <div>
@@ -51,12 +50,12 @@ export function Board(props: BoardProps) {
           <hr />
         </div>
       </Dropable>
-      <Dropable
+      <Dropable<AtendimentoProfissional>
         id={2}
-        idMapping={AtendimentoProfissonalKeyMapping}
+        keyMapping={AtendimentoProfissonalKeyMapping}
         position={"table-topright"}
         handleUpdate={handleUpdateColunas}
-        types={[ItemTypes.FILTER]}
+        type={ItemTypes.FILTER}
       >
         <div>
           <span>Colunas</span>
