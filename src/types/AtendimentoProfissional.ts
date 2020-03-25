@@ -6,13 +6,14 @@ export type AtendimentoProfissional = {
   duracao: number;
 };
 
-export const Nomes = {
-  "nomeProfissional": "Nome do Profissional",
-  "tipoAtendimento": "Tipo de Atendimento",
-  "unidadeSaude": "Unidade de Saúde",
-  "sexo": "Sexo",
-  "duracao": "Duração",
-}
+export const AtendimentoProfissonalKeyMapping: Map<keyof AtendimentoProfissional, string> = new Map([
+  ["nomeProfissional", "Nome do Profissional"],
+  ["tipoAtendimento", "Tipo de Atendimento"],
+  ["unidadeSaude", "Unidade de Saúde"],
+  ["sexo", "Sexo"],
+  ["duracao", "Duração"]
+])
+
 
 export const atendimentos: AtendimentoProfissional[] = [
   {

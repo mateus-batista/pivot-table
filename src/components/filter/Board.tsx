@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
-import { AtendimentoProfissional } from "../../types/AtendimentoProfissional";
+import { AtendimentoProfissional, AtendimentoProfissonalKeyMapping } from "../../types/AtendimentoProfissional";
 import { Dropable } from "../dragndrop/Dropable";
 import ItemTypes from "../../types/ItemTypes";
 import "../../css/Tabela.css";
@@ -30,6 +30,7 @@ export function Board(props: BoardProps) {
         position={"table-topleft"}
         handleUpdate={handleUpdateVazio}
         types={[ItemTypes.FILTER]}
+        idMapping={AtendimentoProfissonalKeyMapping}
         initialState={["duracao", "unidadeSaude", "sexo", "nomeProfissional", "tipoAtendimento"]}
         id={0}
       >
@@ -42,7 +43,7 @@ export function Board(props: BoardProps) {
         position={"table-bottomleft"}
         handleUpdate={handleUpdateLinhas}
         types={[ItemTypes.FILTER]}
-        initialState={[]}
+        idMapping={AtendimentoProfissonalKeyMapping}
         id={1}
       >
         <div>
@@ -51,11 +52,11 @@ export function Board(props: BoardProps) {
         </div>
       </Dropable>
       <Dropable
+        id={2}
+        idMapping={AtendimentoProfissonalKeyMapping}
         position={"table-topright"}
         handleUpdate={handleUpdateColunas}
         types={[ItemTypes.FILTER]}
-        initialState={[]}
-        id={2}
       >
         <div>
           <span>Colunas</span>

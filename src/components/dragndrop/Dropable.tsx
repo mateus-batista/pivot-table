@@ -1,30 +1,30 @@
 import React, { ReactElement, useState } from "react";
 import { useDrop } from "react-dnd";
-import { AtendimentoProfissional, Nomes} from "../../types/AtendimentoProfissional";
 import { Draggable } from "./Draggable";
 
-interface DropableProps {
-  position: string;
-  handleUpdate: (values: Array<keyof AtendimentoProfissional>) => void;
+interface DropableProps<T> {
   id: number;
   types: string[];
-  initialState?: Array<keyof AtendimentoProfissional>;
+  position: string;
+  idMapping: Map<keyof T, string>;
+  initialState?: Array<keyof T>;
   children?: ReactElement;
+  handleUpdate: (values: Array<keyof T>) => void;
 }
-export interface DragItem {
+export interface DragItem<T> {
   type: string;
-  id: keyof AtendimentoProfissional;
+  id: keyof T;
   origin: number;
 }
 
-export function Dropable(props: DropableProps) {
-  const { initialState } = props;
+export function Dropable<T>(props: DropableProps<T>) {
+  const { initialState, idMapping } = props;
 
-  const [ids, setIds] = useState<Array<keyof AtendimentoProfissional>>(initialState || []);
+  const [ids, setIds] = useState<Array<keyof T>>(initialState || []);
 
   const [{ isOver }, drag] = useDrop({
     accept: props.types,
-    drop(item: DragItem) {
+    drop(item: DragItem<T>) {
       if (!ids.includes(item.id)) {
         var temp = [...ids, item.id];
         setIds(temp);
@@ -43,15 +43,13 @@ export function Dropable(props: DropableProps) {
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {ids.map(id => (
-        <Draggable type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
-          <div id={props.id + "-" + id}>
-            {Nomes[id]}
-          </div>
+        <Draggable<T> type={props.types[0]} id={id} origin={props.id} func={() => deleteById(id)}>
+          <div id={props.id + "-" + id}>{idMapping.get(id)}</div>
         </Draggable>
       ))}
     </div>
   );
-  function deleteById(id: keyof AtendimentoProfissional) {
+  function deleteById(id: keyof T) {
     var temp = [...ids];
     var index = temp.indexOf(id);
     if (index > -1) {

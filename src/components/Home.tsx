@@ -1,6 +1,10 @@
 import { Dictionary, groupBy } from "lodash";
 import React, { useEffect, useState } from "react";
-import { AtendimentoProfissional, atendimentos } from "../types/AtendimentoProfissional";
+import {
+  AtendimentoProfissional,
+  atendimentos,
+  AtendimentoProfissonalKeyMapping
+} from "../types/AtendimentoProfissional";
 import { Board } from "./filter/Board";
 import { TabelaHorizontal } from "./tables/TabelaHorizontal";
 import { TabelaMixed } from "./tables/TabelaMixed";
@@ -75,11 +79,21 @@ export function Home(props: any) {
         <Board handleSubmit={handleSubmit} />
         <div className="table-bottomright">
           {agrupadoUnico && agrupadoMisto ? (
-            <TabelaMixed mapaLinhas={agrupadoUnico} mapaColunas={agrupadoMisto} colunas={colunas} linhas={linhas} />
+            <TabelaMixed
+              rowData={agrupadoUnico}
+              columnData={agrupadoMisto}
+              columnKeys={colunas}
+              rowKeys={linhas}
+              keysMapping={AtendimentoProfissonalKeyMapping}
+            />
           ) : agrupadoUnico && linhas.length > 0 && colunas.length === 0 ? (
-            <TabelaHorizontal mapa={agrupadoUnico} linhas={linhas} />
+            <TabelaHorizontal data={agrupadoUnico} keys={linhas} keysMapping={AtendimentoProfissonalKeyMapping} />
           ) : agrupadoUnico && linhas.length === 0 && colunas.length > 0 ? (
-            <TabelaVertical<AtendimentoProfissional> mapa={agrupadoUnico} colunas={colunas} />
+            <TabelaVertical<AtendimentoProfissional>
+              data={agrupadoUnico}
+              keys={colunas}
+              keysMapping={AtendimentoProfissonalKeyMapping}
+            />
           ) : null}
         </div>
       </div>

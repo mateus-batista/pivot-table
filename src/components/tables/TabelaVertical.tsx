@@ -1,59 +1,61 @@
+import { Dictionary } from "lodash";
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
-import { Dictionary } from "lodash";
-import { AtendimentoProfissional, Nomes } from "../../types/AtendimentoProfissional";
 
 export type TabelaVerticalProps<T> = {
-  colunas: Array<keyof T>;
-  mapa: Dictionary<T> & Countable;
+  keys: Array<keyof T>;
+  keysMapping: Map<keyof T, string>;
+  data: Dictionary<T> & Countable;
 };
 
 type GetColumnInputProps<T> = {
-  obj: any & Countable;
+  data: any & Countable;
   rows: ReactElement[];
-  filterKeys: Array<keyof T>;
+  keys: Array<keyof T>;
+  keysMapping: Map<keyof T, string>;
   headerSection?: Map<string, ReactElement>;
   startRow?: number;
   startColumn?: number;
 };
 
 type GetColumnReturnProps<T> = {
-  children: ReactElement[];
+  elements: ReactElement[];
   columnSpan: number;
   rowSpan: number;
   headerSection: Map<string, ReactElement>;
 };
 
 export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
-  const { mapa } = props;
+  const { data, keysMapping } = props;
 
-  const colunas = [...props.colunas];
+  const keys = [...props.keys];
 
-  const { children, headerSection } = getColumn({ obj: mapa, rows: [], filterKeys: colunas });
+  const { elements, headerSection } = getColumn({ data, rows: [], keys, keysMapping });
 
-  children.push(...Array.from(headerSection.values()));
+  elements.push(...Array.from(headerSection.values()));
   return (
     <>
-      <div className="table result-table">{children}</div>
+      <div className="table result-table">{elements}</div>
     </>
   );
 }
 
 function getColumn<T>({
-  obj,
+  data,
   rows,
-  filterKeys,
+  keys,
+  keysMapping,
   headerSection = new Map(),
   startRow = 1,
   startColumn = 2
 }: GetColumnInputProps<T>): GetColumnReturnProps<T> {
-  if (obj instanceof Array) {
+  if (data instanceof Array) {
     rows.push(
       <div
         key={`${startRow}/${startColumn}/${startRow + 1}/${startColumn + 1}`}
         style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}
       >
-        {obj.length}
+        {data.length}
       </div>
     );
     headerSection.set(
@@ -62,22 +64,23 @@ function getColumn<T>({
         <b>Totais</b>
       </div>
     );
-    return { children: rows, columnSpan: startColumn + 1, rowSpan: startRow + 1, headerSection: headerSection };
+    return { elements: rows, columnSpan: startColumn + 1, rowSpan: startRow + 1, headerSection: headerSection };
   }
 
   let columnSpan = 0;
   let rowSpan = 0;
 
-  Object.keys(obj)
+  Object.keys(data)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
-      const { children, columnSpan: childColumnSpan, rowSpan: childRowSpan } = getColumn({
-        obj: obj[key],
+      const { elements: children, columnSpan: childColumnSpan, rowSpan: childRowSpan } = getColumn({
+        data: data[key],
         rows: [],
-        filterKeys: filterKeys,
-        headerSection: headerSection,
-        startRow: startRow + 1,
-        startColumn: startColumn
+        keys,
+        keysMapping,
+        headerSection,
+        startColumn,
+        startRow: startRow + 1
       });
       columnSpan = childColumnSpan;
       rowSpan = childRowSpan;
@@ -91,16 +94,15 @@ function getColumn<T>({
           <b>{key}</b>
         </div>
       );
-      var titulos:keyof AtendimentoProfissional = obj.key
       headerSection.set(
-        obj.key,
+        data.key,
         <div
           key={`${startRow}/1/${startRow + 1}/2`}
           style={{
             gridArea: `${startRow} / 1 / ${startRow + 1} / 2`
           }}
         >
-          <b>{Nomes[titulos]}</b>
+          <b>{keysMapping.get(data.key)}</b>
         </div>
       );
 
@@ -110,7 +112,7 @@ function getColumn<T>({
       rows.push(...children);
     });
 
-  if (obj.key === filterKeys[0]) {
+  if (data.key === keys[0]) {
     headerSection.set(
       "totalLabel",
       <div
@@ -130,10 +132,10 @@ function getColumn<T>({
           gridArea: `${rowSpan - 1} / ${columnSpan} / ${rowSpan} / ${columnSpan + 1}`
         }}
       >
-        <b>{obj.count}</b>
+        <b>{data.count}</b>
       </div>
     );
   }
 
-  return { children: rows, columnSpan: columnSpan, rowSpan: rowSpan, headerSection: headerSection };
+  return { elements: rows, columnSpan: columnSpan, rowSpan: rowSpan, headerSection: headerSection };
 }

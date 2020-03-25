@@ -1,21 +1,22 @@
+import { Dictionary } from "lodash";
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
-import { Dictionary } from "lodash";
-import { AtendimentoProfissional, Nomes } from "../../types/AtendimentoProfissional";
 
 export type TabelaMixedProps<T> = {
-  linhas: Array<keyof T>;
-  colunas: Array<keyof T>;
-  mapaLinhas: Dictionary<T> & Countable;
-  mapaColunas: Dictionary<T> & Countable;
+  rowKeys: Array<keyof T>;
+  columnKeys: Array<keyof T>;
+  keysMapping: Map<keyof T, string>;
+  rowData: Dictionary<T> & Countable;
+  columnData: Dictionary<T> & Countable;
 };
 
 type GetRowInputProps<T> = {
-  obj: any & Countable;
+  data: any & Countable;
   rows: ReactElement[];
-  rowKeys: Array<keyof T>;
-  rowMap?: Map<string, number>;
-  resultMap?: Map<string, number>;
+  keys: Array<keyof T>;
+  keysMapping: Map<keyof T, string>;
+  rowPositionMap?: Map<string, number>;
+  rowKeyCountMap?: Map<string, number>;
   columnRootKey: keyof T;
   headerSection?: Map<string, ReactElement>;
   startHeader: number;
@@ -25,7 +26,7 @@ type GetRowInputProps<T> = {
 };
 
 type GetRowReturnProps<T> = {
-  children: ReactElement[];
+  elements: ReactElement[];
   rowSpan: number;
   columnSpan: number;
   rowMap: Map<string, number>;
@@ -34,10 +35,11 @@ type GetRowReturnProps<T> = {
 };
 
 type GetColumnInputProps<T> = {
-  obj: any & Countable;
-  rows: ReactElement[];
-  columnKeys: Array<keyof T>;
-  rowMap: Map<string, number>;
+  data: any & Countable;
+  columns: ReactElement[];
+  keys: Array<keyof T>;
+  keysMapping: Map<keyof T, string>;
+  rowPositionMap: Map<string, number>;
   rootRowKey: keyof T;
   headerSection?: Map<string, ReactElement>;
   startHeader: number;
@@ -47,37 +49,39 @@ type GetColumnInputProps<T> = {
 };
 
 type GetColumnReturnProps<T> = {
-  children: ReactElement[];
+  elements: ReactElement[];
   columnSpan: number;
   headerSection: Map<string, ReactElement>;
 };
-
+const TOTAL_ROW_ID = "totalRowID";
 export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
-  const { mapaLinhas, mapaColunas, linhas, colunas } = props;
+  const { rowData, columnData, rowKeys, columnKeys, keysMapping } = props;
 
-  const countLinhas = linhas.length;
-  const countColunas = colunas.length;
+  const countLinhas = rowKeys.length;
+  const countColunas = columnKeys.length;
 
-  const { children, rowMap, resultMap, headerSection } = getRow({
-    obj: mapaLinhas,
+  const { elements, rowMap, resultMap, headerSection } = getRow({
+    data: rowData,
     rows: [],
-    rowKeys: linhas,
-    columnRootKey: colunas[0],
+    keys: rowKeys,
+    keysMapping,
+    columnRootKey: columnKeys[0],
     startHeader: countColunas + 1,
     startRow: countColunas + 2
   });
-  const { children: table, headerSection: columnHeaderSection, columnSpan } = getColumn({
-    obj: mapaColunas,
-    rows: children,
-    columnKeys: colunas,
-    rowMap,
-    rootRowKey: linhas[0],
+  const { elements: table, headerSection: columnHeaderSection, columnSpan } = getColumn({
+    data: columnData,
+    columns: elements,
+    keys: columnKeys,
+    keysMapping,
+    rowPositionMap: rowMap,
+    rootRowKey: rowKeys[0],
     startHeader: countLinhas + 1,
     startRow: 1,
     startColumn: countLinhas + 2
   });
 
-  const totaisColunasRowNumber = rowMap.get("totaisColunas") || 0;
+  const totaisColunasRowNumber = rowMap.get(TOTAL_ROW_ID) || 0;
   table.push(
     <div
       key={`${totaisColunasRowNumber} / ${columnSpan} / ${totaisColunasRowNumber + 1} / ${columnSpan + 1}`}
@@ -85,13 +89,13 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
         gridArea: `${totaisColunasRowNumber} / ${columnSpan} / ${totaisColunasRowNumber + 1} / ${columnSpan + 1}`
       }}
     >
-      <b>{mapaColunas.count}</b>
+      <b>{columnData.count}</b>
     </div>
   );
   table.push(
     <div
-      key={`1 / ${columnSpan} / ${colunas.length + 1} / ${columnSpan + 1}`}
-      style={{ gridArea: `1 / ${columnSpan} / ${colunas.length + 2} / ${columnSpan + 1}` }}
+      key={`1 / ${columnSpan} / ${columnKeys.length + 1} / ${columnSpan + 1}`}
+      style={{ gridArea: `1 / ${columnSpan} / ${columnKeys.length + 2} / ${columnSpan + 1}` }}
     >
       <b>Totais</b>
     </div>
@@ -120,13 +124,14 @@ export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
 }
 
 function getRow<T>({
-  obj,
+  data,
   rows,
-  rowKeys,
-  rowMap = new Map<string, number>(),
+  keys: rowKeys,
+  keysMapping,
+  rowPositionMap: rowMap = new Map<string, number>(),
   columnRootKey,
   headerSection = new Map(),
-  resultMap = new Map<string, number>(),
+  rowKeyCountMap: resultMap = new Map<string, number>(),
   startHeader,
   startRow = 1,
   startColumn = 1,
@@ -134,13 +139,13 @@ function getRow<T>({
 }: GetRowInputProps<T>): GetRowReturnProps<T> {
   const linha = rowKeys[0];
 
-  if (obj.key === columnRootKey) {
-    resultMap.set(rowPath, obj.count);
+  if (data.key === columnRootKey) {
+    resultMap.set(rowPath, data.count);
   }
 
   if (!linha) {
     return {
-      children: rows,
+      elements: rows,
       rowSpan: startRow + 1,
       columnSpan: startColumn + 1,
       rowMap: rowMap,
@@ -152,15 +157,16 @@ function getRow<T>({
   let rowSpan = 0;
   let columnSpan = 0;
   rowKeys = [...rowKeys].splice(1, rowKeys.length);
-  Object.keys(obj)
+  Object.keys(data)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
-      const { children, rowSpan: childrenRowSpan, columnSpan: childrenColumnSpan } = getRow({
-        obj: obj[key],
+      const { elements: children, rowSpan: childrenRowSpan, columnSpan: childrenColumnSpan } = getRow({
+        data: data[key],
         rows: [],
-        rowKeys: rowKeys,
-        rowMap: rowMap,
-        resultMap,
+        keys: rowKeys,
+        keysMapping,
+        rowPositionMap: rowMap,
+        rowKeyCountMap: resultMap,
         columnRootKey,
         headerSection: headerSection,
         startHeader: startHeader,
@@ -186,16 +192,15 @@ function getRow<T>({
           <b>{key}</b>
         </div>
       );
-      var titulos:keyof AtendimentoProfissional = obj.key
       headerSection.set(
-        obj.key,
+        data.key,
         <div
-          key={`${startHeader}/${startColumn}/${startHeader + 1}/${startColumn + 1}${obj.key}`}
+          key={`${startHeader}/${startColumn}/${startHeader + 1}/${startColumn + 1}${data.key}`}
           style={{
             gridArea: `${startHeader} / ${startColumn} / ${startHeader + 1} / ${startColumn + 1}`
           }}
         >
-          <b>{Nomes[titulos]}</b>
+          <b>{keysMapping.get(data.key)}</b>
         </div>
       );
 
@@ -207,9 +212,9 @@ function getRow<T>({
       rows.push(...children);
     });
 
-  if (obj.key === linha) {
+  if (data.key === linha) {
     headerSection.set(
-      "totaisColunas",
+      TOTAL_ROW_ID,
       <div
         key={`${rowSpan} / 1 / ${rowSpan + 1} / ${columnSpan}`}
         style={{
@@ -219,17 +224,18 @@ function getRow<T>({
         <b>Totais</b>
       </div>
     );
-    rowMap.set("totaisColunas", rowSpan);
+    rowMap.set(TOTAL_ROW_ID, rowSpan);
   }
 
-  return { children: rows, rowSpan, columnSpan, rowMap, resultMap, headerSection };
+  return { elements: rows, rowSpan, columnSpan, rowMap, resultMap, headerSection };
 }
 
 function getColumn<T>({
-  obj,
-  rows,
-  columnKeys,
-  rowMap,
+  data,
+  columns: rows,
+  keys: columnKeys,
+  keysMapping,
+  rowPositionMap: rowMap,
   rootRowKey,
   headerSection = new Map(),
   startHeader,
@@ -237,31 +243,32 @@ function getColumn<T>({
   startColumn = 1,
   rowPath = ""
 }: GetColumnInputProps<T>): GetColumnReturnProps<T> {
-  if (obj instanceof Array) {
+  if (data instanceof Array) {
     const r = rowMap.get(rowPath) || 0;
     rows.push(
       <div
-        key={`${r}/${startColumn}/${r + 1}/${startColumn + 1}${obj.length}`}
+        key={`${r}/${startColumn}/${r + 1}/${startColumn + 1}${data.length}`}
         style={{ gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}` }}
       >
-        {obj.length}
+        {data.length}
       </div>
     );
-    return { children: rows, columnSpan: startColumn + 1, headerSection };
+    return { elements: rows, columnSpan: startColumn + 1, headerSection };
   }
 
   let columnSpan: number = 0;
-  const rootKey = columnKeys.includes(obj.key);
+  const rootKey = columnKeys.includes(data.key);
   columnKeys = [...columnKeys].splice(1, columnKeys.length);
-  Object.keys(obj)
+  Object.keys(data)
     .filter(k => !CountableKeys.includes(k))
     .forEach(key => {
       const lastChild = columnKeys.length === 0;
-      const { children, columnSpan: childColumnSpan } = getColumn({
-        obj: obj[key],
-        rows: [],
-        columnKeys,
-        rowMap,
+      const { elements: children, columnSpan: childColumnSpan } = getColumn({
+        data: data[key],
+        columns: [],
+        keys: columnKeys,
+        keysMapping,
+        rowPositionMap: rowMap,
         rootRowKey,
         headerSection,
         startHeader,
@@ -281,26 +288,25 @@ function getColumn<T>({
         </div>
       );
       if (rootKey) {
-        var titulos:keyof AtendimentoProfissional = obj.key
         headerSection.set(
-          obj.key,
+          data.key,
           <div
-            key={`${startRow}/${startHeader}/${startRow + 1}/${startHeader + 1}${obj.key}`}
+            key={`${startRow}/${startHeader}/${startRow + 1}/${startHeader + 1}${data.key}`}
             style={{
               gridArea: `${startRow} / ${startHeader} / ${startRow + 1} / ${startHeader + 1}`
             }}
           >
-            <b>{Nomes[titulos]}</b>
+            <b>{keysMapping.get(data.key)}</b>
           </div>
         );
       }
 
-      if (obj.key === rootRowKey) {
-        const r = rowMap.get("totaisColunas") || 0;
+      if (data.key === rootRowKey) {
+        const r = rowMap.get(TOTAL_ROW_ID) || 0;
         headerSection.set(
-          obj.key + startColumn + "total",
+          data.key + startColumn + "total",
           <div
-            key={`${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}${obj.key}`}
+            key={`${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}${data.key}`}
             style={{
               gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}`,
               display: "flex",
@@ -308,7 +314,7 @@ function getColumn<T>({
               alignItems: "center"
             }}
           >
-            <b>{obj.count}</b>
+            <b>{data.count}</b>
           </div>
         );
       }
@@ -323,5 +329,5 @@ function getColumn<T>({
       rows.push(...children);
     });
 
-  return { children: rows, columnSpan, headerSection };
+  return { elements: rows, columnSpan, headerSection };
 }
