@@ -2,7 +2,7 @@ import { Dictionary } from "lodash";
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 
-export type TabelaVerticalProps<T> = {
+export type VerticalTableProps<T> = {
   keys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
   data: Dictionary<T> & Countable;
@@ -25,7 +25,7 @@ type GetColumnReturnProps<T> = {
   headerSection: Map<string, ReactElement>;
 };
 
-export function TabelaVertical<T>(props: TabelaVerticalProps<T>) {
+export function VerticalTable<T>(props: VerticalTableProps<T>) {
   const { data, keysMapping } = props;
 
   const keys = [...props.keys];

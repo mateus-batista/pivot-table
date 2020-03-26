@@ -29,7 +29,7 @@ export function Dropable<T>(props: DropableProps<T>) {
       var temp = [...keys, item.id];
       setKeys(temp);
       handleUpdate(temp);
-      return { result:1 };
+      return { result: 1 };
     },
     collect: monitor => ({
       canDrop: !!monitor.canDrop(),
@@ -51,7 +51,7 @@ export function Dropable<T>(props: DropableProps<T>) {
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {keys.map(key => (
-        <Draggable<T> type={type} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
+        <Draggable<T> key={key as string} type={type} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
           <div id={id + "-" + key}>{keyMapping.get(key)}</div>
         </Draggable>
       ))}
