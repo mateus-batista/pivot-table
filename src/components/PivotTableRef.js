@@ -8,13 +8,13 @@ import { atendimentos } from "../types/AtendimentoProfissional";
 
 const PlotlyRenderers = createPlotlyRenderers(Plot);
 
-export function PivotTable(props) {
+export function PivotTableRef(props) {
   const [tableState, setTableState] = useState();
 
   const [data, setDate] = useState();
 
   useEffect(() => {
-        setDate(atendimentos);
+    setDate(atendimentos);
   }, []);
 
   if (data) {

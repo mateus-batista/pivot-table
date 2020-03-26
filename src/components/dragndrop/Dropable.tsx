@@ -26,13 +26,11 @@ export function Dropable<T>(props: DropableProps<T>) {
   const [{ isOver }, drag] = useDrop({
     accept: type,
     drop(item: DragItem<T>) {
-      if (!keys.includes(item.id)) {
-        var temp = [...keys, item.id];
-        setKeys(temp);
-        handleUpdate(temp);
-        return { id: id };
-      }
-      return { id: -1 };
+
+      var temp = [...keys, item.id];
+      setKeys(temp);
+      handleUpdate(temp);
+      return { result: 1 };
     },
     collect: monitor => ({
       canDrop: !!monitor.canDrop(),
@@ -54,7 +52,8 @@ export function Dropable<T>(props: DropableProps<T>) {
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {keys.map(key => (
-        <Draggable<T> type={type} key={key+''} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
+
+        <Draggable<T> key={key as string} type={type} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
           <div id={id + "-" + key}>{keyMapping.get(key)}</div>
         </Draggable>
       ))}

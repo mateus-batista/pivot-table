@@ -2,7 +2,7 @@ import { Dictionary } from "lodash";
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 
-export type TabelaMixedProps<T> = {
+export type MixedTableProps<T> = {
   rowKeys: Array<keyof T>;
   columnKeys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
@@ -53,8 +53,10 @@ type GetColumnReturnProps<T> = {
   columnSpan: number;
   headerSection: Map<string, ReactElement>;
 };
+
 const TOTAL_ROW_ID = "totalRowID";
-export function TabelaMixed<T>(props: TabelaMixedProps<T>) {
+
+export function MixedTable<T>(props: MixedTableProps<T>) {
   const { rowData, columnData, rowKeys, columnKeys, keysMapping } = props;
 
   const countLinhas = rowKeys.length;

@@ -2,35 +2,37 @@ import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
 import "../../css/Tabela.css";
-import { AtendimentoProfissional, AtendimentoProfissonalKeyMapping } from "../../types/AtendimentoProfissional";
-import { Dropable } from "../dragndrop/Dropable";
 import { ItemTypes } from "../../types/ItemTypes";
-interface BoardProps {
-  handleSubmit: (values: [Array<keyof AtendimentoProfissional>, Array<keyof AtendimentoProfissional>]) => void;
+import { Dropable } from "../dragndrop/Dropable";
+interface BoardProps<T> {
+  keys: Array<keyof T>;
+  keyMapping: Map<keyof T, string>;
+  handleSubmit: (values: [Array<keyof T>, Array<keyof T>]) => void;
 }
 
-export function Board(props: BoardProps) {
-  const [linhas, setLinhas] = useState<Array<keyof AtendimentoProfissional>>([]);
-  const [colunas, setColunas] = useState<Array<keyof AtendimentoProfissional>>([]);
-  const handleSubmit = (event: any) => {
-    props.handleSubmit([linhas, colunas]);
+export function Board<T>(props: BoardProps<T>) {
+  const { keys, keyMapping, handleSubmit } = props;
+  const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
+  const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
+  const onClick = (event: any) => {
+    handleSubmit([rowKeys, columnKeys]);
   };
-  const handleUpdateLinhas = (linhas: Array<keyof AtendimentoProfissional>) => {
-    setLinhas(linhas);
+  const handleUpdateRowKeys = (rowKeys: Array<keyof T>) => {
+    setRowKeys(rowKeys);
   };
-  const handleUpdateColunas = (colunas: Array<keyof AtendimentoProfissional>) => {
-    setColunas(colunas);
+  const handleUpdateColumnKeys = (columnKeys: Array<keyof T>) => {
+    setColumnKeys(columnKeys);
   };
-  const handleUpdateVazio = (colunas: Array<keyof AtendimentoProfissional>) => {};
+  const handleUpdateEmpty = (keys: Array<keyof T>) => {};
 
   return (
     <DndProvider backend={Backend}>
-      <Dropable<AtendimentoProfissional>
+      <Dropable<T>
         position={"table-topleft"}
-        handleUpdate={handleUpdateVazio}
+        handleUpdate={handleUpdateEmpty}
         type={ItemTypes.FILTER}
-        keyMapping={AtendimentoProfissonalKeyMapping}
-        initialState={["duracao", "unidadeSaude", "sexo", "nomeProfissional", "tipoAtendimento"]}
+        keyMapping={keyMapping}
+        initialState={keys}
         id={0}
       >
         <div>
@@ -38,11 +40,11 @@ export function Board(props: BoardProps) {
           <hr />
         </div>
       </Dropable>
-      <Dropable<AtendimentoProfissional>
+      <Dropable<T>
         position={"table-bottomleft"}
-        handleUpdate={handleUpdateLinhas}
+        handleUpdate={handleUpdateRowKeys}
         type={ItemTypes.FILTER}
-        keyMapping={AtendimentoProfissonalKeyMapping}
+        keyMapping={keyMapping}
         id={1}
       >
         <div>
@@ -50,11 +52,11 @@ export function Board(props: BoardProps) {
           <hr />
         </div>
       </Dropable>
-      <Dropable<AtendimentoProfissional>
+      <Dropable<T>
         id={2}
-        keyMapping={AtendimentoProfissonalKeyMapping}
+        keyMapping={keyMapping}
         position={"table-topright"}
-        handleUpdate={handleUpdateColunas}
+        handleUpdate={handleUpdateColumnKeys}
         type={ItemTypes.FILTER}
       >
         <div>
@@ -62,7 +64,7 @@ export function Board(props: BoardProps) {
           <hr />
         </div>
       </Dropable>
-      <button onClick={handleSubmit}>Aplicar</button>
+      <button onClick={onClick}>Aplicar</button>
     </DndProvider>
   );
 }

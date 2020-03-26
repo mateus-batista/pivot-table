@@ -12,8 +12,7 @@ export const AtendimentoProfissonalKeyMapping: Map<keyof AtendimentoProfissional
   ["unidadeSaude", "Unidade de Saúde"],
   ["sexo", "Sexo"],
   ["duracao", "Duração"]
-])
-
+]);
 
 export const atendimentos: AtendimentoProfissional[] = [
   {
