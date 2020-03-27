@@ -18,6 +18,8 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [dataKeyValues, setDataKeyValues] = useState<Map<keyof T, Set<string>>>();
 
+  const [ignoredDataKeyValues, setIgnoredDataKeyValue] = useState<Map<keyof T, Set<string>>>();
+
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
 
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
@@ -49,12 +51,12 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
   useEffect(() => {
     const inicio = new Date().getTime();
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys]));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
     }
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys]));
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
 
     console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
-  }, [data, rowKeys, columnKeys]);
+  }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>]) => {
     const [rowKeys, columnKeys] = values;
@@ -67,11 +69,12 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   console.log("data", data);
   console.log("defaultTree", defaultTree);
+  console.log("dataKeyValues", dataKeyValues);
   if (dataKeyValues) {
     return (
       <>
         <div className={"filter-table table"}>
-          <Board keys={Array.from(dataKeyValues.keys())} keyMapping={keyMapping} handleSubmit={handleSubmit} />
+          <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
           <div className="table-bottomright">
             {defaultTree && complemetaryTree ? (
               <MixedTable

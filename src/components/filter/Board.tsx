@@ -5,7 +5,7 @@ import "../../css/Tabela.css";
 import { ItemTypes } from "../../types/ItemTypes";
 import { Dropable } from "../dragndrop/Dropable";
 interface BoardProps<T> {
-  keys: Array<keyof T>;
+  keys: Map<keyof T, Set<string>>;
   keyMapping: Map<keyof T, string>;
   handleSubmit: (values: [Array<keyof T>, Array<keyof T>]) => void;
 }
@@ -23,16 +23,14 @@ export function Board<T>(props: BoardProps<T>) {
   const handleUpdateColumnKeys = (columnKeys: Array<keyof T>) => {
     setColumnKeys(columnKeys);
   };
-  const handleUpdateEmpty = (keys: Array<keyof T>) => {};
 
   return (
     <DndProvider backend={Backend}>
       <Dropable<T>
         position={"table-topleft"}
-        handleUpdate={handleUpdateEmpty}
         type={ItemTypes.FILTER}
         keyMapping={keyMapping}
-        initialState={keys}
+        initialState={Array.from(keys.keys())}
         id={0}
       >
         <div>

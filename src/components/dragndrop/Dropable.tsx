@@ -10,7 +10,7 @@ interface DropableProps<T> {
   keyMapping: Map<keyof T, string>;
   initialState?: Array<keyof T>;
   children?: ReactElement;
-  handleUpdate: (values: Array<keyof T>) => void;
+  handleUpdate?: (values: Array<keyof T>) => void;
 }
 export interface DragItem<T> {
   type: ItemTypes;
@@ -29,11 +29,10 @@ export function Dropable<T>(props: DropableProps<T>) {
       if (!keys.includes(item.id)) {
         var temp = [...keys, item.id];
         setKeys(temp);
-        handleUpdate(temp);
+        handleUpdate && handleUpdate(temp);
         return { id: id };
       }
       return { id: -1 };
-
     },
     collect: monitor => ({
       canDrop: !!monitor.canDrop(),
@@ -48,14 +47,13 @@ export function Dropable<T>(props: DropableProps<T>) {
       temp.splice(index, 1);
     }
     setKeys(temp);
-    handleUpdate(temp);
+    handleUpdate && handleUpdate(temp);
   }
 
   return (
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {keys.map(key => (
-
         <Draggable<T> key={key as string} type={type} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
           <div id={id + "-" + key}>{keyMapping.get(key)}</div>
         </Draggable>
