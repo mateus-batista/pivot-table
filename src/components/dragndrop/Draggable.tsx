@@ -3,7 +3,7 @@ import { useDrag } from "react-dnd";
 import "../../css/Dnd.css";
 import { ItemTypes } from "../../types/ItemTypes";
 
-import { Button, Dropdown, DropdownDivider, DropdownItem, Tooltip } from "bold-ui";
+import { Button, Dropdown, DropdownItem } from "bold-ui";
 
 interface DraggableProps<T> {
   id: keyof T;
@@ -11,9 +11,11 @@ interface DraggableProps<T> {
   type: ItemTypes;
   origin: number;
   value: string;
-  children?: ReactElement;
+  filterSet: Set<string>;
   onDragEnd: () => void;
 }
+
+function updateFilter(filter: string) {}
 
 export function Draggable<T>(props: DraggableProps<T>) {
   const [{ isDragging }, drag] = useDrag({
@@ -35,6 +37,16 @@ export function Draggable<T>(props: DraggableProps<T>) {
     setOpen(false);
     buttonRef.current.focus();
   };
+  const handleSelect = (x: string) => {
+    return function e() {
+      console.log(x);
+    };
+  };
+  const filterList: ReactElement[] = [];
+
+  props.filterSet.forEach(element => {
+    filterList.push(<DropdownItem onClick={handleSelect(element)}>{element}</DropdownItem>);
+  });
 
   return (
     <div
@@ -55,17 +67,9 @@ export function Draggable<T>(props: DraggableProps<T>) {
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
         >
-          <DropdownItem onClick={console.log}>Item #1</DropdownItem>
-          <DropdownDivider />
-          <DropdownItem component="a" href="/">
-            Link item
-          </DropdownItem>
-          <DropdownItem type="danger" onClick={console.log}>
-            Item #3
-          </DropdownItem>
+          {filterList}
         </Dropdown>
       </>
-      {props.children}
     </div>
   );
 }

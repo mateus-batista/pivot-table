@@ -1,6 +1,4 @@
-import { Dictionary, groupBy } from "lodash";
 import React, { useEffect, useState } from "react";
-// import generated from "../data/generated.json";
 import "../css/Tabela.css";
 import { Countable, CountableKeys } from "../types/Countable";
 import { Board } from "./filter/Board";
@@ -13,18 +11,22 @@ export type PivotTableProps<T> = {
   keyMapping: Map<keyof T, string>;
 };
 
+export type Dictionary<T extends any, K extends keyof T> = Record<T[K], T[]>;
+
 export function PivotTable<T>(props: PivotTableProps<T>) {
   const { data, keyMapping } = props;
 
   const [dataKeyValues, setDataKeyValues] = useState<Map<keyof T, Set<string>>>();
 
+  const [ignoredDataKeyValues, setIgnoredDataKeyValue] = useState<Map<keyof T, Set<string>>>();
+
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
 
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
 
-  const [defaultTree, setDefaultTree] = useState<Dictionary<T> & Countable>();
+  const [defaultTree, setDefaultTree] = useState<Dictionary<T, keyof T> & Countable>();
 
-  const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T> & Countable>();
+  const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & Countable>();
 
   useEffect(() => {
     const uniqueKeysValues = new Map<keyof T, Set<string>>();
@@ -49,12 +51,12 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
   useEffect(() => {
     const inicio = new Date().getTime();
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys]));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
     }
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys]));
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
 
     console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
-  }, [data, rowKeys, columnKeys]);
+  }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>]) => {
     const [rowKeys, columnKeys] = values;
@@ -65,11 +67,14 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setComplementaryTree(undefined);
   };
 
+  console.log("data", data);
+  console.log("defaultTree", defaultTree);
+  console.log("dataKeyValues", dataKeyValues);
   if (dataKeyValues) {
     return (
       <>
         <div className={"filter-table table"}>
-          <Board keys={Array.from(dataKeyValues.keys())} keyMapping={keyMapping} handleSubmit={handleSubmit} />
+          <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
           <div className="table-bottomright">
             {defaultTree && complemetaryTree ? (
               <MixedTable
@@ -101,24 +106,49 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
   }
 }
 
-function group<T>(arr: T[], keys: Array<keyof T>): any & Countable {
+function group<T extends any, K extends keyof T>(
+  arr: T[],
+  keys: Array<K>,
+  filterKeys?: Map<K, Set<String>>
+): any & Countable {
   let key = keys[0];
 
   if (!key) {
     return arr;
   }
+  const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
 
-  const obj: Dictionary<T[]> & Countable = groupBy(arr, key);
+  const obj: T & Countable = groupByKey(arr, key, valuesToIgnore);
 
-  obj.key = key as string;
-  obj.count = arr.length;
+  obj.key = key;
 
+  let count = 0;
   Object.keys(obj)
     .filter(k => !CountableKeys.includes(k))
     .forEach(k => {
       const arr = obj[k];
+      count += arr.length;
       obj[k] = group(arr, keys.slice(1, keys.length));
     });
+  obj.count = count;
 
   return obj;
+}
+
+function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore: Set<T[K]> | null) {
+  return arr.reduce((result, curr) => {
+    const keyValue = curr[key];
+
+    if (valuesToIgnore != null && valuesToIgnore.has(keyValue)) {
+      return result;
+    }
+
+    if (!result[keyValue]) {
+      result[keyValue] = [];
+    }
+
+    result[keyValue].push(curr);
+
+    return result;
+  }, {} as Dictionary<T, K>);
 }

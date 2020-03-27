@@ -6,11 +6,12 @@ import { ItemTypes } from "../../types/ItemTypes";
 interface DropableProps<T> {
   id: number;
   type: ItemTypes;
+  titulo: string;
   position: string;
   keyMapping: Map<keyof T, string>;
   initialState?: Array<keyof T>;
-  children?: ReactElement;
-  handleUpdate: (values: Array<keyof T>) => void;
+  keys: Map<keyof T, Set<string>>;
+  handleUpdate?: (values: Array<keyof T>) => void;
 }
 export interface DragItem<T> {
   type: ItemTypes;
@@ -29,7 +30,7 @@ export function Dropable<T>(props: DropableProps<T>) {
       if (!keys.includes(item.id)) {
         var temp = [...keys, item.id];
         setKeys(temp);
-        handleUpdate(temp);
+        handleUpdate && handleUpdate(temp);
         return { id: id };
       }
       return { id: -1 };
@@ -47,14 +48,17 @@ export function Dropable<T>(props: DropableProps<T>) {
       temp.splice(index, 1);
     }
     setKeys(temp);
-    handleUpdate(temp);
+    handleUpdate && handleUpdate(temp);
   }
 
   const draglist: ReactElement[] = [];
 
   return (
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
-      {props.children}
+      <div>
+        <span>{props.titulo}</span>
+        <hr />
+      </div>
       {keys.map(key => (
         <Draggable<T>
           key={key as string}
@@ -63,8 +67,9 @@ export function Dropable<T>(props: DropableProps<T>) {
           id={key}
           value={keyMapping.get(key) as string}
           origin={id}
+          filterSet={props.keys.get(key) as Set<string>}
           onDragEnd={() => deleteByKey(key)}
-        ></Draggable>
+        />
       ))}
     </div>
   );
