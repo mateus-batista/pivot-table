@@ -1,4 +1,4 @@
-import { Dictionary } from "lodash";
+import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 
@@ -6,8 +6,8 @@ export type MixedTableProps<T> = {
   rowKeys: Array<keyof T>;
   columnKeys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
-  rowData: Dictionary<T> & Countable;
-  columnData: Dictionary<T> & Countable;
+  rowData: Dictionary<T, keyof T> & Countable;
+  columnData: Dictionary<T, keyof T> & Countable;
 };
 
 type GetRowInputProps<T> = {

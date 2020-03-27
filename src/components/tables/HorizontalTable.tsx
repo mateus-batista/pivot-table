@@ -1,11 +1,11 @@
-import { Dictionary } from "lodash";
+import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
 import { Countable, CountableKeys } from "../../types/Countable";
 
 export type HorizontalTableProps<T> = {
   keys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
-  data: Dictionary<T> & Countable;
+  data: Dictionary<T, keyof T> & Countable;
 };
 
 type GetRowInputProps<T> = {
