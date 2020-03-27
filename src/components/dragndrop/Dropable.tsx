@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useState, useRef } from "react";
 import { useDrop } from "react-dnd";
 import { Draggable } from "./Draggable";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -33,7 +33,6 @@ export function Dropable<T>(props: DropableProps<T>) {
         return { id: id };
       }
       return { id: -1 };
-
     },
     collect: monitor => ({
       canDrop: !!monitor.canDrop(),
@@ -51,14 +50,21 @@ export function Dropable<T>(props: DropableProps<T>) {
     handleUpdate(temp);
   }
 
+  const draglist: ReactElement[] = [];
+
   return (
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
       {props.children}
       {keys.map(key => (
-
-        <Draggable<T> key={key as string} type={type} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
-          <div id={id + "-" + key}>{keyMapping.get(key)}</div>
-        </Draggable>
+        <Draggable<T>
+          key={key as string}
+          type={type}
+          className={"dnd-box"}
+          id={key}
+          value={keyMapping.get(key) as string}
+          origin={id}
+          onDragEnd={() => deleteByKey(key)}
+        ></Draggable>
       ))}
     </div>
   );
