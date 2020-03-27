@@ -16,7 +16,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
     item: { type: props.type, id: props.id, origin: props.origin },
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
-      if (dropResult != null) {
+      if (dropResult != null && dropResult.id !== -1) {
         props.onDragEnd();
       }
     },
