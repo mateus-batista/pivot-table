@@ -46,6 +46,7 @@ type GetColumnInputProps<T> = {
   startRow?: number;
   startColumn?: number;
   rowPath?: string;
+  pathPositions?: Set<number>;
 };
 
 type GetColumnReturnProps<T> = {
@@ -237,16 +238,18 @@ function getColumn<T>({
   columns: rows,
   keys: columnKeys,
   keysMapping,
-  rowPositionMap: rowMap,
+  rowPositionMap,
   rootRowKey,
   headerSection = new Map(),
   startHeader,
   startRow = 1,
   startColumn = 1,
-  rowPath = ""
+  rowPath = "",
+  pathPositions = new Set<number>()
 }: GetColumnInputProps<T>): GetColumnReturnProps<T> {
   if (data instanceof Array) {
-    const r = rowMap.get(rowPath) || 0;
+    const r = rowPositionMap.get(rowPath) || 0;
+    pathPositions.add(r);
     rows.push(
       <div
         key={`${r}/${startColumn}/${r + 1}/${startColumn + 1}${data.length}`}
@@ -270,13 +273,14 @@ function getColumn<T>({
         columns: [],
         keys: columnKeys,
         keysMapping,
-        rowPositionMap: rowMap,
+        rowPositionMap,
         rootRowKey,
         headerSection,
         startHeader,
         startRow: rootKey ? startRow + 1 : startRow,
         startColumn,
-        rowPath: !rootKey ? rowPath + key : rowPath
+        rowPath: !rootKey ? rowPath + key : rowPath,
+        pathPositions: new Set()
       });
       columnSpan = childColumnSpan;
       const root = (
@@ -303,24 +307,6 @@ function getColumn<T>({
         );
       }
 
-      if (data.key === rootRowKey) {
-        const r = rowMap.get(TOTAL_ROW_ID) || 0;
-        headerSection.set(
-          data.key + startColumn + "total",
-          <div
-            key={`${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}${data.key}`}
-            style={{
-              gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}`,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <b>{data.count}</b>
-          </div>
-        );
-      }
-
       if (rootKey) {
         startColumn = childColumnSpan;
       }
@@ -330,6 +316,34 @@ function getColumn<T>({
       }
       rows.push(...children);
     });
+
+  if (data.key === rootRowKey) {
+    const r = rowPositionMap.get(TOTAL_ROW_ID) || 0;
+    headerSection.set(
+      data.key + startColumn + "total",
+      <div
+        key={`${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}${data.key}`}
+        style={{
+          gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}`,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <b>{data.count}</b>
+      </div>
+    );
+    for (let i = startRow + 1; i < r; i++) {
+      if (!pathPositions.has(i)) {
+        rows.push(
+          <span
+            key={`${i}/${startColumn}/${i + 1}/${startColumn + 1}`}
+            style={{ gridArea: `${i} / ${startColumn} / ${i + 1} / ${startColumn + 1}` }}
+          ></span>
+        );
+      }
+    }
+  }
 
   return { elements: rows, columnSpan, headerSection };
 }

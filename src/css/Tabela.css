@@ -4,13 +4,15 @@
   grid-template-columns: 250px auto;
   grid-template-rows: 200px auto 40px;
 }
-.table > div {
+.table > div,
+span {
   border: 0.5px solid black;
   text-align: center;
-  box-shadow:0 0 0 0.5px black;
+  box-shadow: 0 0 0 0.5px black;
   box-sizing: border-box;
 }
-.result-table > div {
+.result-table > div,
+span {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,7 +21,7 @@
   padding-left: 8px;
   padding-right: 8px;
   padding-top: 4px;
-  padding-bottom: 4px;  
+  padding-bottom: 4px;
 }
 .result-table {
   display: grid;
