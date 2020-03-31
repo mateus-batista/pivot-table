@@ -12,6 +12,7 @@ interface DraggableProps<T> {
   origin: number;
   value: string;
   filterSet: Set<string>;
+  previousFilter: Set<string>;
   onDragEnd: () => void;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
@@ -19,7 +20,7 @@ interface DraggableProps<T> {
 function updateFilter(filter: string) {}
 
 export function Draggable<T>(props: DraggableProps<T>) {
-  const [filter, setFilter] = useState<Set<string>>(new Set([]));
+  const [filter, setFilter] = useState<Set<string>>(props.previousFilter || new Set([]));
   const [{ isDragging }, drag] = useDrag({
     item: { type: props.type, id: props.id, origin: props.origin },
     end: (_item, monitor) => {

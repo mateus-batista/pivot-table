@@ -26,6 +26,7 @@ export function Board<T>(props: BoardProps<T>) {
   };
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     ignoredFilter.set(key, filtro);
+    return ignoredFilter;
   };
 
   return (
@@ -33,6 +34,7 @@ export function Board<T>(props: BoardProps<T>) {
       <Dropable<T>
         position={"table-topleft"}
         titulo={"filtros"}
+        filtroLocal={ignoredFilter}
         type={ItemTypes.FILTER}
         keyMapping={keyMapping}
         keys={keys}
@@ -43,6 +45,7 @@ export function Board<T>(props: BoardProps<T>) {
       <Dropable<T>
         position={"table-bottomleft"}
         titulo={"linhas"}
+        filtroLocal={ignoredFilter}
         handleUpdate={handleUpdateRowKeys}
         handleFilterUpdate={handleFilterUpdate}
         type={ItemTypes.FILTER}
@@ -53,6 +56,7 @@ export function Board<T>(props: BoardProps<T>) {
       <Dropable<T>
         id={2}
         titulo={"colunas"}
+        filtroLocal={ignoredFilter}
         keyMapping={keyMapping}
         keys={keys}
         position={"table-topright"}

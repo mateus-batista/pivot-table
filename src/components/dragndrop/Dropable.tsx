@@ -11,6 +11,7 @@ interface DropableProps<T> {
   keyMapping: Map<keyof T, string>;
   initialState?: Array<keyof T>;
   keys: Map<keyof T, Set<string>>;
+  filtroLocal: Map<keyof T, Set<string>>;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
   handleUpdate?: (values: Array<keyof T>) => void;
 }
@@ -72,6 +73,7 @@ export function Dropable<T>(props: DropableProps<T>) {
           value={keyMapping.get(key) as string}
           origin={id}
           filterSet={props.keys.get(key) as Set<string>}
+          previousFilter={props.filtroLocal.get(key) as Set<string>}
           handleFilterUpdate={handleFilterUpdate}
           onDragEnd={() => deleteByKey(key)}
         />
