@@ -3,3 +3,6 @@
   padding: 2px 4px;
   margin: 1px 1px 1px 1px;
 }
+.selected {
+  background-color: #888888;
+}

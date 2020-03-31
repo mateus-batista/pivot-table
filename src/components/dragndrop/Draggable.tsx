@@ -13,11 +13,13 @@ interface DraggableProps<T> {
   value: string;
   filterSet: Set<string>;
   onDragEnd: () => void;
+  handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
 
 function updateFilter(filter: string) {}
 
 export function Draggable<T>(props: DraggableProps<T>) {
+  const [filter, setFilter] = useState<Set<string>>(new Set([]));
   const [{ isDragging }, drag] = useDrag({
     item: { type: props.type, id: props.id, origin: props.origin },
     end: (_item, monitor) => {
@@ -37,15 +39,21 @@ export function Draggable<T>(props: DraggableProps<T>) {
     setOpen(false);
     buttonRef.current.focus();
   };
-  const handleSelect = (x: string) => {
+  const handleSelect = (content: string, id: string) => {
     return function e() {
-      console.log(x);
+      var element = document.getElementById(id);
+      element && element.classList.toggle("selected");
+      filter.has(content) ? filter.delete(content) : filter.add(content);
+      setFilter(filter);
+      props.handleFilterUpdate(props.id as keyof T, filter);
     };
   };
   const filterList: ReactElement[] = [];
 
   props.filterSet.forEach(element => {
-    filterList.push(<DropdownItem onClick={handleSelect(element)}>{element}</DropdownItem>);
+    var id = props.id + element;
+    var span: ReactElement = <span id={id}>{element}</span>;
+    filterList.push(<DropdownItem onClick={handleSelect(element, id)}>{span}</DropdownItem>);
   });
 
   return (
