@@ -52,7 +52,12 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   props.filterSet.forEach(element => {
     var id = props.id + element;
-    var span: ReactElement = <span id={id}>{element}</span>;
+    var selected = filter.has(element) ? "" : "selected";
+    var span: ReactElement = (
+      <span id={id} className={selected}>
+        {element}
+      </span>
+    );
     filterList.push(<DropdownItem onClick={handleSelect(element, id)}>{span}</DropdownItem>);
   });
 
