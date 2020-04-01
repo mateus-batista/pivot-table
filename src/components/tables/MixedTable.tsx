@@ -1,17 +1,18 @@
 import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
-import { Countable, CountableKeys } from "../../types/Countable";
+import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
+import { GroupResult } from "../../classes/GroupResult";
 
 export type MixedTableProps<T> = {
   rowKeys: Array<keyof T>;
   columnKeys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
-  rowData: Dictionary<T, keyof T> & Countable;
-  columnData: Dictionary<T, keyof T> & Countable;
+  rowData: Dictionary<T, keyof T> & TreeRoot;
+  columnData: Dictionary<T, keyof T> & TreeRoot;
 };
 
 type GetRowInputProps<T> = {
-  data: any & Countable;
+  data: any & TreeRoot;
   rows: ReactElement[];
   keys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
@@ -35,7 +36,7 @@ type GetRowReturnProps<T> = {
 };
 
 type GetColumnInputProps<T> = {
-  data: any & Countable;
+  data: any & TreeRoot;
   columns: ReactElement[];
   keys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
@@ -92,7 +93,7 @@ export function MixedTable<T>(props: MixedTableProps<T>) {
         gridArea: `${totaisColunasRowNumber} / ${columnSpan} / ${totaisColunasRowNumber + 1} / ${columnSpan + 1}`
       }}
     >
-      <b>{columnData.count}</b>
+      <b>{rowData.value && rowData.value.toFixed(2)}</b>
     </div>
   );
   table.push(
@@ -110,7 +111,7 @@ export function MixedTable<T>(props: MixedTableProps<T>) {
         key={`${r}/${columnSpan}/${r + 1}/${columnSpan + 1}`}
         style={{ gridArea: `${r} / ${columnSpan} / ${r + 1} / ${columnSpan + 1}` }}
       >
-        <b>{value}</b>
+        <b>{value.toFixed(2)}</b>
       </div>
     );
   });
@@ -143,7 +144,7 @@ function getRow<T>({
   const linha = rowKeys[0];
 
   if (data.key === columnRootKey) {
-    resultMap.set(rowPath, data.count);
+    resultMap.set(rowPath, data.value);
   }
 
   if (!linha) {
@@ -161,7 +162,7 @@ function getRow<T>({
   let columnSpan = 0;
   rowKeys = [...rowKeys].splice(1, rowKeys.length);
   Object.keys(data)
-    .filter(k => !CountableKeys.includes(k))
+    .filter(k => !TreeRootKeys.includes(k))
     .forEach(key => {
       const { elements: children, rowSpan: childrenRowSpan, columnSpan: childrenColumnSpan } = getRow({
         data: data[key],
@@ -247,15 +248,15 @@ function getColumn<T>({
   rowPath = "",
   pathPositions = new Set<number>()
 }: GetColumnInputProps<T>): GetColumnReturnProps<T> {
-  if (data instanceof Array) {
+  if (data instanceof GroupResult) {
     const r = rowPositionMap.get(rowPath) || 0;
     pathPositions.add(r);
     rows.push(
       <div
-        key={`${r}/${startColumn}/${r + 1}/${startColumn + 1}${data.length}`}
+        key={`${r}/${startColumn}/${r + 1}/${startColumn + 1}${data.value}`}
         style={{ gridArea: `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}` }}
       >
-        {data.length}
+        {data.value.toFixed(2)}
       </div>
     );
     return { elements: rows, columnSpan: startColumn + 1, headerSection };
@@ -265,7 +266,7 @@ function getColumn<T>({
   const rootKey = columnKeys.includes(data.key);
   columnKeys = [...columnKeys].splice(1, columnKeys.length);
   Object.keys(data)
-    .filter(k => !CountableKeys.includes(k))
+    .filter(k => !TreeRootKeys.includes(k))
     .forEach(key => {
       const lastChild = columnKeys.length === 0;
       const { elements: children, columnSpan: childColumnSpan } = getColumn({
@@ -330,7 +331,7 @@ function getColumn<T>({
           alignItems: "center"
         }}
       >
-        <b>{data.count}</b>
+        <b>{data.value.toFixed(2)}</b>
       </div>
     );
     for (let i = startRow + 1; i < r; i++) {

@@ -1,15 +1,16 @@
 import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
-import { Countable, CountableKeys } from "../../types/Countable";
+import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
+import { GroupResult } from "../../classes/GroupResult";
 
 export type VerticalTableProps<T> = {
   keys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
-  data: Dictionary<T, keyof T> & Countable;
+  data: Dictionary<T, keyof T> & TreeRoot;
 };
 
 type GetColumnInputProps<T> = {
-  data: any & Countable;
+  data: any & TreeRoot;
   rows: ReactElement[];
   keys: Array<keyof T>;
   keysMapping: Map<keyof T, string>;
@@ -49,13 +50,13 @@ function getColumn<T>({
   startRow = 1,
   startColumn = 2
 }: GetColumnInputProps<T>): GetColumnReturnProps<T> {
-  if (data instanceof Array) {
+  if (data instanceof GroupResult) {
     rows.push(
       <div
         key={`${startRow}/${startColumn}/${startRow + 1}/${startColumn + 1}`}
         style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}
       >
-        {data.length}
+        {data.value.toFixed(2)}
       </div>
     );
     headerSection.set(
@@ -71,7 +72,7 @@ function getColumn<T>({
   let rowSpan = 0;
 
   Object.keys(data)
-    .filter(k => !CountableKeys.includes(k))
+    .filter(k => !TreeRootKeys.includes(k))
     .forEach(key => {
       const { elements: children, columnSpan: childColumnSpan, rowSpan: childRowSpan } = getColumn({
         data: data[key],
@@ -132,7 +133,7 @@ function getColumn<T>({
           gridArea: `${rowSpan - 1} / ${columnSpan} / ${rowSpan} / ${columnSpan + 1}`
         }}
       >
-        <b>{data.count}</b>
+        <b>{data.value.toFixed(2)}</b>
       </div>
     );
   }

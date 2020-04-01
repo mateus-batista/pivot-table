@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "../css/Tabela.css";
-import { Countable, CountableKeys } from "../types/Countable";
+import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Board } from "./filter/Board";
 import { HorizontalTable } from "./tables/HorizontalTable";
 import { MixedTable } from "./tables/MixedTable";
 import { VerticalTable } from "./tables/VerticalTable";
+import { GroupResult } from "../classes/GroupResult";
 
 export type PivotTableProps<T> = {
   data: T[];
@@ -24,9 +25,20 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
 
-  const [defaultTree, setDefaultTree] = useState<Dictionary<T, keyof T> & Countable>();
+  const [defaultTree, setDefaultTree] = useState<Dictionary<T, keyof T> & TreeRoot>();
 
-  const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & Countable>();
+  const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & TreeRoot>();
+
+  const aggregatorKey = "duracao" as keyof T;
+  function accumulator(accumulator: number, curr: T | number): number {
+    let value: any;
+    if (typeof curr === "number") {
+      value = curr;
+    } else {
+      value = curr[aggregatorKey];
+    }
+    return (accumulator + value) / 2;
+  }
 
   useEffect(() => {
     const uniqueKeysValues = new Map<keyof T, Set<string>>();
@@ -51,9 +63,9 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
   useEffect(() => {
     const inicio = new Date().getTime();
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues, accumulator));
     }
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, accumulator));
 
     console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
   }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
@@ -109,28 +121,36 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 function group<T extends any, K extends keyof T>(
   arr: T[],
   keys: Array<K>,
-  filterKeys?: Map<K, Set<String>>
-): any & Countable {
+  filterKeys?: Map<K, Set<String>>,
+  accumulator?: (accumulator: number, curr: T | number) => number
+): any & TreeRoot {
   let key = keys[0];
 
   if (!key) {
-    return arr;
+    if (accumulator) {
+      return new GroupResult(arr.reduce(accumulator, 0));
+    }
+    return new GroupResult(arr.length);
   }
   const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
 
-  const obj: T & Countable = groupByKey(arr, key, valuesToIgnore);
+  const obj: T & TreeRoot = groupByKey(arr, key, valuesToIgnore);
 
   obj.key = key;
 
   let count = 0;
   Object.keys(obj)
-    .filter(k => !CountableKeys.includes(k))
+    .filter(k => !TreeRootKeys.includes(k))
     .forEach(k => {
       const arr = obj[k];
-      count += arr.length;
-      obj[k] = group(arr, keys.slice(1, keys.length));
+      obj[k] = group(arr, keys.slice(1, keys.length), filterKeys, accumulator);
+      if (accumulator) {
+        count = accumulator(count, obj[k].value);
+      } else {
+        count += obj[k].value;
+      }
     });
-  obj.count = count;
+  obj.value = count;
 
   return obj;
 }
