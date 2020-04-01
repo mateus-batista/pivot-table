@@ -4,5 +4,16 @@
   margin: 1px 1px 1px 1px;
 }
 .selected {
-  background-color: #888888;
+  text-decoration: line-through;
+}
+.dropdown {
+  height: 120px;
+  max-width: 300px;
+  overflow: auto;
+}
+.dropdown > .item {
+  width: 100%;
+  cursor: pointer;
+  border-bottom: 1px solid black;
+  padding: 2px;
 }

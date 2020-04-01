@@ -36,12 +36,11 @@ export function Dropable<T>(props: DropableProps<T>) {
         var temp = [...keys, item.id];
         setKeys(temp);
         handleUpdate && handleUpdate(temp);
-        return { id: id };
+        return { result: id };
       }
-      return { id: -1 };
+      return { result: -1 };
     },
     collect: monitor => ({
-      canDrop: !!monitor.canDrop(),
       isOver: monitor.isOver() ? monitor.getItem().origin !== id : monitor.isOver()
     })
   });
@@ -55,8 +54,6 @@ export function Dropable<T>(props: DropableProps<T>) {
     setKeys(temp);
     handleUpdate && handleUpdate(temp);
   }
-
-  const draglist: ReactElement[] = [];
 
   return (
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>

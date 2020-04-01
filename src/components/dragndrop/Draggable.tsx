@@ -25,7 +25,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
     item: { type: props.type, id: props.id, origin: props.origin },
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
-      if (dropResult != null && dropResult.id !== -1) {
+      if (dropResult != null && dropResult.result !== -1) {
         props.onDragEnd();
       }
     },
@@ -36,16 +36,12 @@ export function Draggable<T>(props: DraggableProps<T>) {
   const buttonRef: any = useRef<HTMLButtonElement>();
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    buttonRef.current.focus();
-  };
+  const handleClose = () => setOpen(false);
   const handleSelect = (content: string, id: string) => {
     return function e() {
       var element = document.getElementById(id);
       element && element.classList.toggle("selected");
       filter.has(content) ? filter.delete(content) : filter.add(content);
-      setFilter(filter);
       props.handleFilterUpdate(props.id as keyof T, filter);
     };
   };
@@ -53,13 +49,13 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   props.filterSet.forEach(element => {
     var id = props.id + element;
-    var selected = filter.has(element) ? "" : "selected";
-    var span: ReactElement = (
-      <span id={id} className={selected}>
-        {element}
-      </span>
+    var selected = filter.has(element) ? "selected" : "";
+    var item: ReactElement = (
+      <div id={id} className={selected + " item"} onClick={handleSelect(element, id)}>
+        <span>{element}</span>
+      </div>
     );
-    filterList.push(<DropdownItem onClick={handleSelect(element, id)}>{span}</DropdownItem>);
+    filterList.push(item);
   });
 
   return (
@@ -81,7 +77,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
         >
-          {filterList}
+          <div className={"dropdown"}>{filterList}</div>
         </Dropdown>
       </>
     </div>
