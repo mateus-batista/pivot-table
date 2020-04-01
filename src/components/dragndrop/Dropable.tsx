@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useState, useRef } from "react";
 import { useDrop } from "react-dnd";
 import { Draggable } from "./Draggable";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -6,10 +6,13 @@ import { ItemTypes } from "../../types/ItemTypes";
 interface DropableProps<T> {
   id: number;
   type: ItemTypes;
+  titulo: string;
   position: string;
   keyMapping: Map<keyof T, string>;
   initialState?: Array<keyof T>;
-  children?: ReactElement;
+  keys: Map<keyof T, Set<string>>;
+  filtroLocal: Map<keyof T, Set<string>>;
+  handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
   handleUpdate?: (values: Array<keyof T>) => void;
 }
 export interface DragItem<T> {
@@ -23,6 +26,9 @@ export function Dropable<T>(props: DropableProps<T>) {
 
   const [keys, setKeys] = useState<Array<keyof T>>(initialState || []);
 
+  const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
+    props.handleFilterUpdate(key, filtro);
+  };
   const [{ isOver }, drag] = useDrop({
     accept: type,
     drop(item: DragItem<T>) {
@@ -50,13 +56,27 @@ export function Dropable<T>(props: DropableProps<T>) {
     handleUpdate && handleUpdate(temp);
   }
 
+  const draglist: ReactElement[] = [];
+
   return (
     <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
-      {props.children}
+      <div>
+        <span>{props.titulo}</span>
+        <hr />
+      </div>
       {keys.map(key => (
-        <Draggable<T> key={key as string} type={type} id={key} origin={id} onDragEnd={() => deleteByKey(key)}>
-          <div id={id + "-" + key}>{keyMapping.get(key)}</div>
-        </Draggable>
+        <Draggable<T>
+          key={key as string}
+          type={type}
+          className={"dnd-box"}
+          id={key}
+          value={keyMapping.get(key) as string}
+          origin={id}
+          filterSet={props.keys.get(key) as Set<string>}
+          previousFilter={props.filtroLocal.get(key) as Set<string>}
+          handleFilterUpdate={handleFilterUpdate}
+          onDragEnd={() => deleteByKey(key)}
+        />
       ))}
     </div>
   );
