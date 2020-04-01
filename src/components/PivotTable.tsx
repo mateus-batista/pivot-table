@@ -58,9 +58,9 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
   }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
 
-  const handleSubmit = (values: [Array<keyof T>, Array<keyof T>]) => {
+  const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => {
     const [rowKeys, columnKeys] = values;
-
+    setIgnoredDataKeyValue(ignoredFilter);
     setRowKeys(rowKeys);
     setColumnKeys(columnKeys);
     setDefaultTree(undefined);

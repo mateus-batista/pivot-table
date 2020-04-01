@@ -1,6 +1,8 @@
 .dnd-box {
   display: inline-block;
   padding: 2px 4px;
-  border: 3px dotted blue;
-  margin: 5px 5px 5px 5px;
+  margin: 1px 1px 1px 1px;
+}
+.selected {
+  background-color: #888888;
 }

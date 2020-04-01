@@ -7,15 +7,16 @@ import { Dropable } from "../dragndrop/Dropable";
 interface BoardProps<T> {
   keys: Map<keyof T, Set<string>>;
   keyMapping: Map<keyof T, string>;
-  handleSubmit: (values: [Array<keyof T>, Array<keyof T>]) => void;
+  handleSubmit: (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => void;
 }
 
 export function Board<T>(props: BoardProps<T>) {
   const { keys, keyMapping, handleSubmit } = props;
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
+  const [ignoredFilter, setIgnoredFilter] = useState<Map<keyof T, Set<string>>>(new Map<keyof T, Set<string>>());
   const onClick = (event: any) => {
-    handleSubmit([rowKeys, columnKeys]);
+    handleSubmit([rowKeys, columnKeys], ignoredFilter);
   };
   const handleUpdateRowKeys = (rowKeys: Array<keyof T>) => {
     setRowKeys(rowKeys);
@@ -23,45 +24,46 @@ export function Board<T>(props: BoardProps<T>) {
   const handleUpdateColumnKeys = (columnKeys: Array<keyof T>) => {
     setColumnKeys(columnKeys);
   };
+  const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
+    ignoredFilter.set(key, filtro);
+    return ignoredFilter;
+  };
 
   return (
     <DndProvider backend={Backend}>
       <Dropable<T>
         position={"table-topleft"}
+        titulo={"filtros"}
+        filtroLocal={ignoredFilter}
         type={ItemTypes.FILTER}
         keyMapping={keyMapping}
+        keys={keys}
         initialState={Array.from(keys.keys())}
+        handleFilterUpdate={handleFilterUpdate}
         id={0}
-      >
-        <div>
-          <span>Filtros</span>
-          <hr />
-        </div>
-      </Dropable>
+      />
       <Dropable<T>
         position={"table-bottomleft"}
+        titulo={"linhas"}
+        filtroLocal={ignoredFilter}
         handleUpdate={handleUpdateRowKeys}
+        handleFilterUpdate={handleFilterUpdate}
         type={ItemTypes.FILTER}
         keyMapping={keyMapping}
+        keys={keys}
         id={1}
-      >
-        <div>
-          <span>Linhas</span>
-          <hr />
-        </div>
-      </Dropable>
+      />
       <Dropable<T>
         id={2}
+        titulo={"colunas"}
+        filtroLocal={ignoredFilter}
         keyMapping={keyMapping}
+        keys={keys}
         position={"table-topright"}
         handleUpdate={handleUpdateColumnKeys}
+        handleFilterUpdate={handleFilterUpdate}
         type={ItemTypes.FILTER}
-      >
-        <div>
-          <span>Colunas</span>
-          <hr />
-        </div>
-      </Dropable>
+      />
       <button onClick={onClick}>Aplicar</button>
     </DndProvider>
   );
