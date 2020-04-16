@@ -53,6 +53,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     if (rowKeys.length > 0 && columnKeys.length > 0) {
       setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
     }
+    group2(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues);
     setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
 
     console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
@@ -133,6 +134,36 @@ function group<T extends any, K extends keyof T>(
   obj.count = count;
 
   return obj;
+}
+
+function group2<T extends any, K extends keyof T>(
+  arr: T[],
+  keys: Array<K>,
+  filterKeys?: Map<K, Set<String>>
+): any & Countable {
+  let depth = 0;
+  const x: Map<T & Countable, Array<K>> = new Map<T & Countable, Array<K>>();
+  const key = keys[0];
+  const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
+  x.set(groupByKey(arr, key, valuesToIgnore), keys.slice(1, keys.length));
+  for (let index = 0; index < keys.length; index++) {
+    const key = keys[index];
+    const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
+    const obj: T & Countable = groupByKey(arr, key, valuesToIgnore);
+    console.log(obj);
+    obj.key = key;
+    let count = 0;
+    Object.keys(obj)
+      .filter(k => !CountableKeys.includes(k))
+      .forEach(k => {
+        const arr = obj[k];
+        count += arr.length;
+        x.set(obj, keys.slice(1, keys.length));
+        //obj[k] = group(arr, keys.slice(1, keys.length));
+      });
+    obj.count = count;
+    depth = depth + 1;
+  }
 }
 
 function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore: Set<T[K]> | null) {
