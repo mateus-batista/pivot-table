@@ -29,24 +29,11 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & TreeRoot>();
 
-  const aggregatorKey = "duracao" as keyof T;
-  function accumulator(accumulator: number, curr: T | number): number {
-    let value: any;
-    if (typeof curr === "number") {
-      value = curr;
-    } else {
-      value = curr[aggregatorKey];
-    }
-    return (accumulator + value) / 2;
-  }
-
   useEffect(() => {
     const uniqueKeysValues = new Map<keyof T, Set<string>>();
 
-    const inicio = new Date().getTime();
-
     data.forEach((element: any) => {
-      Object.keys(element).forEach(key => {
+      Object.keys(element).forEach((key) => {
         let set = uniqueKeysValues.get(key as keyof T);
         if (!set) {
           set = new Set<string>();
@@ -55,19 +42,14 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
         set.add(element[key]);
       });
     });
-
-    console.log("key value agrupados em: ", (new Date().getTime() - inicio) / 1000);
     setDataKeyValues(uniqueKeysValues);
   }, [data]);
 
   useEffect(() => {
-    const inicio = new Date().getTime();
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues, accumulator));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
     }
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, accumulator));
-
-    console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
   }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => {
@@ -79,9 +61,6 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setComplementaryTree(undefined);
   };
 
-  console.log("data", data);
-  console.log("defaultTree", defaultTree);
-  console.log("dataKeyValues", dataKeyValues);
   if (dataKeyValues) {
     return (
       <>
@@ -102,7 +81,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
               <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
             ) : (
               <div>
-                <b>{data.length}</b>
+                <b>Total: {data.length}</b>
               </div>
             )}
           </div>
@@ -140,8 +119,8 @@ function group<T extends any, K extends keyof T>(
 
   let count = 0;
   Object.keys(obj)
-    .filter(k => !TreeRootKeys.includes(k))
-    .forEach(k => {
+    .filter((k) => !TreeRootKeys.includes(k))
+    .forEach((k) => {
       const arr = obj[k];
       obj[k] = group(arr, keys.slice(1, keys.length), filterKeys, accumulator);
       if (accumulator) {

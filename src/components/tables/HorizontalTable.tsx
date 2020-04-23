@@ -1,7 +1,7 @@
-import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
-import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { GroupResult } from "../../classes/GroupResult";
+import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
+import { Dictionary } from "../PivotTable";
 
 export type HorizontalTableProps<T> = {
   keys: Array<keyof T>;
@@ -12,9 +12,6 @@ export type HorizontalTableProps<T> = {
 type GetRowInputProps<T> = {
   data: any & TreeRoot;
   rows: ReactElement[];
-  keys: Array<keyof T>;
-  keysMapping: Map<keyof T, string>;
-  headerSection?: Map<string, ReactElement>;
   startRow?: number;
   startColumn?: number;
 };
@@ -22,17 +19,15 @@ type GetRowReturnProps<T> = {
   elements: ReactElement[];
   rowSpan: number;
   columnSpan: number;
-  headerSection: Map<string, ReactElement>;
 };
 
 export function HorizontalTable<T>(props: HorizontalTableProps<T>) {
   const { data, keysMapping } = props;
-
   const keys = [...props.keys];
+  const { elements, rowSpan, columnSpan } = getRow({ data, rows: [] });
 
-  const { elements, headerSection } = getRow({ data, rows: [], keys, keysMapping });
+  elements.push(...getHeader(data, keys, keysMapping, rowSpan, columnSpan));
 
-  elements.push(...Array.from(headerSection.values()));
   return (
     <>
       <div className="table result-table">{elements}</div>
@@ -40,38 +35,18 @@ export function HorizontalTable<T>(props: HorizontalTableProps<T>) {
   );
 }
 
-function getRow<T>({
-  data,
-  rows,
-  keys,
-  keysMapping,
-  headerSection = new Map(),
-  startRow = 2,
-  startColumn = 1
-}: GetRowInputProps<T>): GetRowReturnProps<T> {
+function getRow<T>({ data, rows, startRow = 2, startColumn = 1 }: GetRowInputProps<T>): GetRowReturnProps<T> {
   if (data instanceof GroupResult) {
+    const gridArea = `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}`;
     rows.push(
-      <div
-        key={`${startRow}/${startColumn}/${startRow + 1}/${startColumn + 1}`}
-        style={{ gridArea: `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}` }}
-      >
-        {data.value.toFixed(2)}
-      </div>
-    );
-    headerSection.set(
-      "totais",
-      <div
-        key={`1/${startColumn}/2/${startColumn + 1}`}
-        style={{ gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}` }}
-      >
-        <b>Totais</b>
+      <div key={gridArea} style={{ gridArea: gridArea }}>
+        {data.value}
       </div>
     );
     return {
       elements: rows,
       rowSpan: startRow + 1,
       columnSpan: startColumn + 1,
-      headerSection: headerSection
     };
   }
 
@@ -79,39 +54,21 @@ function getRow<T>({
   let columnSpan = 0;
 
   Object.keys(data)
-    .filter(k => !TreeRootKeys.includes(k))
-    .forEach(key => {
+    .filter((k) => !TreeRootKeys.includes(k))
+    .forEach((key) => {
       const { elements: children, rowSpan: childrenRowSpan, columnSpan: childrenColumnSpan } = getRow({
         data: data[key],
         rows: [],
-        keys,
-        keysMapping,
-        headerSection,
         startRow,
-        startColumn: startColumn + 1
+        startColumn: startColumn + 1,
       });
       rowSpan = childrenRowSpan;
       columnSpan = childrenColumnSpan;
 
+      const gridArea = `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`;
       const root = (
-        <div
-          key={`${startRow}/${startColumn}/${childrenRowSpan}/${startColumn + 1}`}
-          style={{
-            gridArea: `${startRow} / ${startColumn} / ${childrenRowSpan} / ${startColumn + 1}`
-          }}
-        >
+        <div key={gridArea} style={{ gridArea: gridArea }}>
           <b>{key}</b>
-        </div>
-      );
-      headerSection.set(
-        data.key,
-        <div
-          key={`1/${startColumn}/2/${startColumn + 1}`}
-          style={{
-            gridArea: `1 / ${startColumn} / 2 / ${startColumn + 1}`
-          }}
-        >
-          <b>{keysMapping.get(data.key)}</b>
         </div>
       );
       startRow = childrenRowSpan;
@@ -120,30 +77,42 @@ function getRow<T>({
       rows.push(...children);
     });
 
-  if (data.key === keys[0]) {
-    headerSection.set(
-      "totalLabel",
-      <div
-        key={`${rowSpan} / 1 / ${rowSpan + 1} / ${columnSpan - 1}`}
-        style={{
-          gridArea: `${rowSpan} / 1 / ${rowSpan + 1} / ${columnSpan - 1}`
-        }}
-      >
-        <b>Total</b>
-      </div>
-    );
-    headerSection.set(
-      "totalValue",
-      <div
-        key={`${rowSpan} / ${columnSpan - 1} / ${rowSpan + 1} / ${columnSpan}`}
-        style={{
-          gridArea: `${rowSpan} / ${columnSpan - 1} / ${rowSpan + 1} / ${columnSpan}`
-        }}
-      >
-        <b>{data.value.toFixed(2)}</b>
-      </div>
-    );
-  }
+  return { elements: rows, rowSpan, columnSpan };
+}
 
-  return { elements: rows, rowSpan: rowSpan, columnSpan: columnSpan, headerSection: headerSection };
+function getHeader<T>(
+  data: any & TreeRoot,
+  keys: Array<keyof T>,
+  keysMapping: Map<keyof T, string>,
+  rowSpan: number,
+  columnSpan: number
+) {
+  const headers = keys.map((k, i) => {
+    const gridArea = `1 / ${i + 1} / 2 / ${i + 2}`;
+    return (
+      <div key={gridArea} style={{ gridArea: gridArea }}>
+        <b>{keysMapping.get(k)}</b>
+      </div>
+    );
+  });
+  const totalGridArea = `${rowSpan} / 1 / ${rowSpan + 1} / ${columnSpan - 1}`;
+  headers.push(
+    <div key={totalGridArea} style={{ gridArea: totalGridArea }}>
+      <b>Total</b>
+    </div>
+  );
+  const totaisGridArea = `1 / ${columnSpan - 1} / 2 / ${columnSpan}`;
+  headers.push(
+    <div key={totaisGridArea} style={{ gridArea: totaisGridArea }}>
+      <b>Total</b>
+    </div>
+  );
+  const totalValueGridArea = `${rowSpan} / ${columnSpan - 1} / ${rowSpan + 1} / ${columnSpan}`;
+  headers.push(
+    <div key={totalValueGridArea} style={{ gridArea: totalValueGridArea }}>
+      <b>{data.value}</b>
+    </div>
+  );
+
+  return headers;
 }
