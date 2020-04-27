@@ -27,6 +27,12 @@ export function TableWrapper(props: any) {
           height: 100%;
           padding: 0.5rem 1rem;
         }
+        div[data-endrow] {
+          border-bottom: 1px solid ${theme.pallete.divider};
+        }
+        div[data-endcolumn] {
+          border-right: 1px solid ${theme.pallete.divider};
+        }
         ${styles}
       `}
     >

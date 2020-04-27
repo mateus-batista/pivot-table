@@ -164,10 +164,12 @@ function getRowHeader<T>(
       </div>
     );
   });
+  const emptySpanGridArea = `${startHeader} / ${keys.length + 1} / ${startHeader + 1} / ${keys.length + 2}`;
+  header.push(<span key={emptySpanGridArea} style={{ gridArea: emptySpanGridArea }}></span>);
   const gridArea = `${rowSpan} / 1 / ${rowSpan + 1} / ${columnSpan}`;
   header.push(
-    <div key={gridArea} style={{ gridArea: gridArea }}>
-      <b>Totais</b>
+    <div data-endrow key={gridArea} style={{ gridArea: gridArea }}>
+      <b>TOTAIS</b>
     </div>
   );
 
@@ -255,12 +257,10 @@ function getColumn<T>({
     const gridArea = `${r} / ${startColumn} / ${r + 1} / ${startColumn + 1}`;
     rows.push(
       <div
+        data-endrow
         key={gridArea}
         style={{
           gridArea: gridArea,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
         }}
       >
         <b>{data.value}</b>
@@ -309,14 +309,14 @@ function getColumnHeader<T>({
     columnSpan + 1
   }`;
   header.push(
-    <div key={totaisValueGridArea} style={{ gridArea: totaisValueGridArea }}>
+    <div data-endcolumn data-endrow key={totaisValueGridArea} style={{ gridArea: totaisValueGridArea }}>
       <b>{rowData.value}</b>
     </div>
   );
   const totaisLabelGridArea = `1 / ${columnSpan} / ${columnKeys.length + 2} / ${columnSpan + 1}`;
   header.push(
-    <div key={totaisLabelGridArea} style={{ gridArea: totaisLabelGridArea }}>
-      <b>Totais</b>
+    <div data-endcolumn key={totaisLabelGridArea} style={{ gridArea: totaisLabelGridArea }}>
+      <b>TOTAIS</b>
     </div>
   );
 
@@ -324,7 +324,7 @@ function getColumnHeader<T>({
     const r = rowMap.get(key) || 0;
     const gridArea = `${r} / ${columnSpan} / ${r + 1} / ${columnSpan + 1}`;
     header.push(
-      <div key={gridArea} style={{ gridArea: gridArea }}>
+      <div data-endcolumn key={gridArea} style={{ gridArea: gridArea }}>
         <b>{value}</b>
       </div>
     );
