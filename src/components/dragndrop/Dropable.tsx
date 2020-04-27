@@ -6,8 +6,6 @@ import { ItemTypes } from "../../types/ItemTypes";
 interface DropableProps<T> {
   id: number;
   type: ItemTypes;
-  titulo: string;
-  position: string;
   keyMapping: Map<keyof T, string>;
   initialState?: Array<keyof T>;
   keys: Map<keyof T, Set<string>>;
@@ -40,10 +38,10 @@ export function Dropable<T>(props: DropableProps<T>) {
       }
       return { id: -1 };
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       canDrop: !!monitor.canDrop(),
-      isOver: monitor.isOver() ? monitor.getItem().origin !== id : monitor.isOver()
-    })
+      isOver: monitor.isOver() ? monitor.getItem().origin !== id : monitor.isOver(),
+    }),
   });
 
   function deleteByKey(id: keyof T) {
@@ -59,12 +57,8 @@ export function Dropable<T>(props: DropableProps<T>) {
   const draglist: ReactElement[] = [];
 
   return (
-    <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF" }} className={"border " + props.position}>
-      <div>
-        <span>{props.titulo}</span>
-        <hr />
-      </div>
-      {keys.map(key => (
+    <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF", minHeight: "inherit" }}>
+      {keys.map((key) => (
         <Draggable<T>
           key={key as string}
           type={type}

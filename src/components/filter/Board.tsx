@@ -1,9 +1,12 @@
+import { Button, Cell, Grid, VFlow } from "bold-ui";
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
 import "../../css/Tabela.css";
 import { ItemTypes } from "../../types/ItemTypes";
+import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
+import { css } from "@emotion/core";
 interface BoardProps<T> {
   keys: Map<keyof T, Set<string>>;
   keyMapping: Map<keyof T, string>;
@@ -31,40 +34,60 @@ export function Board<T>(props: BoardProps<T>) {
 
   return (
     <DndProvider backend={Backend}>
-      <Dropable<T>
-        position={"table-topleft"}
-        titulo={"filtros"}
-        filtroLocal={ignoredFilter}
-        type={ItemTypes.FILTER}
-        keyMapping={keyMapping}
-        keys={keys}
-        initialState={Array.from(keys.keys())}
-        handleFilterUpdate={handleFilterUpdate}
-        id={0}
-      />
-      <Dropable<T>
-        position={"table-bottomleft"}
-        titulo={"linhas"}
-        filtroLocal={ignoredFilter}
-        handleUpdate={handleUpdateRowKeys}
-        handleFilterUpdate={handleFilterUpdate}
-        type={ItemTypes.FILTER}
-        keyMapping={keyMapping}
-        keys={keys}
-        id={1}
-      />
-      <Dropable<T>
-        id={2}
-        titulo={"colunas"}
-        filtroLocal={ignoredFilter}
-        keyMapping={keyMapping}
-        keys={keys}
-        position={"table-topright"}
-        handleUpdate={handleUpdateColumnKeys}
-        handleFilterUpdate={handleFilterUpdate}
-        type={ItemTypes.FILTER}
-      />
-      <button onClick={onClick}>Aplicar</button>
+      <Grid>
+        <Cell xs={4}>
+          <Box label="Campos disponíveis">
+            <Dropable<T>
+              filtroLocal={ignoredFilter}
+              type={ItemTypes.FILTER}
+              keyMapping={keyMapping}
+              keys={keys}
+              initialState={Array.from(keys.keys())}
+              handleFilterUpdate={handleFilterUpdate}
+              id={0}
+            />
+          </Box>
+        </Cell>
+        <Cell xs={8}>
+          <VFlow>
+            <Box
+              label="Linhas"
+              styles={css`
+                padding: 1px;
+              `}
+            >
+              <Dropable<T>
+                filtroLocal={ignoredFilter}
+                handleUpdate={handleUpdateRowKeys}
+                handleFilterUpdate={handleFilterUpdate}
+                type={ItemTypes.FILTER}
+                keyMapping={keyMapping}
+                keys={keys}
+                id={1}
+              />
+            </Box>
+            <Box
+              label="Colunas"
+              styles={css`
+                padding: 1px;
+              `}
+            >
+              <Dropable<T>
+                id={2}
+                filtroLocal={ignoredFilter}
+                keyMapping={keyMapping}
+                keys={keys}
+                handleUpdate={handleUpdateColumnKeys}
+                handleFilterUpdate={handleFilterUpdate}
+                type={ItemTypes.FILTER}
+              />
+            </Box>
+            <Button kind="primary" size="small" onClick={onClick}>
+              Gerar tabela
+            </Button>
+          </VFlow>
+        </Cell>
+      </Grid>
     </DndProvider>
   );
 }

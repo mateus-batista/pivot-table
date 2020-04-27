@@ -2,6 +2,7 @@ import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { GroupResult } from "../../classes/GroupResult";
+import { HeaderWrapper, TableWrapper } from "./ElementWrappers";
 
 export type VerticalTableProps<T> = {
   keys: Array<keyof T>;
@@ -29,11 +30,7 @@ export function VerticalTable<T>(props: VerticalTableProps<T>) {
 
   elements.push(...getHeader(data, keys, keysMapping, columnSpan, rowSpan));
 
-  return (
-    <>
-      <div className="table result-table">{elements}</div>
-    </>
-  );
+  return <TableWrapper>{elements}</TableWrapper>;
 }
 
 function getColumn<T>({ data, rows, startRow = 1, startColumn = 2 }: GetColumnInputProps<T>): GetColumnReturnProps<T> {
@@ -88,7 +85,7 @@ function getHeader<T>(
     const gridArea = `${i + 1} / 1 / ${i + 2} / 2`;
     return (
       <div key={gridArea} style={{ gridArea: gridArea }}>
-        <b>{keysMapping.get(k)}</b>
+        <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
       </div>
     );
   });

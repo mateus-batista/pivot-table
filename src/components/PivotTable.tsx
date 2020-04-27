@@ -6,6 +6,8 @@ import { HorizontalTable } from "./tables/HorizontalTable";
 import { MixedTable } from "./tables/MixedTable";
 import { VerticalTable } from "./tables/VerticalTable";
 import { GroupResult } from "../classes/GroupResult";
+import { Aggregators } from "./filter/Aggregators";
+import { VFlow, HFlow, Cell, Grid } from "bold-ui";
 
 export type PivotTableProps<T> = {
   data: T[];
@@ -29,6 +31,15 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & TreeRoot>();
 
+  const [aggregator, setAggregator] = useState<any>();
+
+  const [aggregatorKey, setAggregatorKey] = useState<keyof T>();
+
+  const handkeAggregatorKey = (key: keyof T) => setAggregatorKey(key);
+  const handleAggregator = (fun: ((values: number[]) => number) | undefined) => {
+    setAggregator(() => fun);
+  };
+
   useEffect(() => {
     const uniqueKeysValues = new Map<keyof T, Set<string>>();
 
@@ -47,10 +58,10 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   useEffect(() => {
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
     }
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
-  }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
+  }, [data, rowKeys, columnKeys, ignoredDataKeyValues, aggregator, aggregatorKey]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => {
     const [rowKeys, columnKeys] = values;
@@ -61,32 +72,43 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setComplementaryTree(undefined);
   };
 
+  console.log("default tree", defaultTree);
+
   if (dataKeyValues) {
     return (
-      <>
-        <div className={"filter-table table"}>
-          <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
-          <div className="table-bottomright">
-            {defaultTree && complemetaryTree ? (
-              <MixedTable
-                rowData={defaultTree}
-                columnData={complemetaryTree}
-                columnKeys={columnKeys}
-                rowKeys={rowKeys}
-                keysMapping={keyMapping}
-              />
-            ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
-              <HorizontalTable data={defaultTree} keys={rowKeys} keysMapping={keyMapping} />
-            ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
-              <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
-            ) : (
-              <div>
-                <b>Total: {data.length}</b>
-              </div>
-            )}
+      <VFlow>
+        <Grid>
+          <Cell xs={4}>
+            <Aggregators
+              sample={data[0]}
+              keyMapping={keyMapping}
+              handleAggregatorChange={handleAggregator}
+              handleAggregatorKeyChange={handkeAggregatorKey}
+            />
+          </Cell>
+          <Cell xs={8}>
+            <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
+          </Cell>
+        </Grid>
+
+        {defaultTree && complemetaryTree ? (
+          <MixedTable
+            rowData={defaultTree}
+            columnData={complemetaryTree}
+            columnKeys={columnKeys}
+            rowKeys={rowKeys}
+            keysMapping={keyMapping}
+          />
+        ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
+          <HorizontalTable data={defaultTree} keys={rowKeys} keysMapping={keyMapping} />
+        ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
+          <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
+        ) : (
+          <div>
+            <b>Total: {data.length}</b>
           </div>
-        </div>
-      </>
+        )}
+      </VFlow>
     );
   } else {
     return (
@@ -101,44 +123,46 @@ function group<T extends any, K extends keyof T>(
   arr: T[],
   keys: Array<K>,
   filterKeys?: Map<K, Set<String>>,
-  accumulator?: (accumulator: number, curr: T | number) => number
+  aggregator?: (values: number[]) => number,
+  aggregatorKey?: keyof T
 ): any & TreeRoot {
   let key = keys[0];
 
   if (!key) {
-    if (accumulator) {
-      return new GroupResult(arr.reduce(accumulator, 0));
+    if (aggregator && aggregatorKey) {
+      return new GroupResult(aggregator(arr.map((v) => v[aggregatorKey])));
     }
     return new GroupResult(arr.length);
   }
-  const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
+  const valuesToIgnore = filterKeys?.get(key);
 
   const obj: T & TreeRoot = groupByKey(arr, key, valuesToIgnore);
 
   obj.key = key;
 
-  let count = 0;
+  let count: number[] = [];
   Object.keys(obj)
     .filter((k) => !TreeRootKeys.includes(k))
     .forEach((k) => {
       const arr = obj[k];
-      obj[k] = group(arr, keys.slice(1, keys.length), filterKeys, accumulator);
-      if (accumulator) {
-        count = accumulator(count, obj[k].value);
-      } else {
-        count += obj[k].value;
-      }
+      obj[k] = group(arr, keys.slice(1, keys.length), filterKeys, aggregator, aggregatorKey);
+      count.push(obj[k].value);
     });
-  obj.value = count;
+
+  if (aggregator && aggregatorKey) {
+    obj.value = aggregator(count);
+  } else {
+    obj.value = count.reduce((prev, curr) => prev + curr);
+  }
 
   return obj;
 }
 
-function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore: Set<T[K]> | null) {
+function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore?: Set<T[K]>) {
   return arr.reduce((result, curr) => {
     const keyValue = curr[key];
 
-    if (valuesToIgnore != null && valuesToIgnore.has(keyValue)) {
+    if (valuesToIgnore?.has(keyValue)) {
       return result;
     }
 

@@ -2,6 +2,7 @@ import { Dictionary } from "../PivotTable";
 import React, { ReactElement } from "react";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { GroupResult } from "../../classes/GroupResult";
+import { TableWrapper, HeaderWrapper } from "./ElementWrappers";
 
 export type MixedTableProps<T> = {
   rowKeys: Array<keyof T>;
@@ -71,13 +72,7 @@ export function MixedTable<T>(props: MixedTableProps<T>) {
     })
   );
   table.push(...getRowHeader(rowKeys, keysMapping, countColunas + 1, rowSpan, rowColumnSpan));
-  return (
-    <>
-      <div key="table" className="table result-table">
-        {table}
-      </div>
-    </>
-  );
+  return <TableWrapper>{table}</TableWrapper>;
 }
 
 function getRow<T>({
@@ -165,7 +160,7 @@ function getRowHeader<T>(
     const gridArea = `${startHeader} / ${i + 1} / ${startHeader + 1} / ${i + 2}`;
     return (
       <div key={gridArea} style={{ gridArea: gridArea }}>
-        <b>{keysMapping.get(k)}</b>
+        <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
       </div>
     );
   });
@@ -274,7 +269,7 @@ function getColumn<T>({
     for (let i = startRow + 1; i < r; i++) {
       if (!pathPositions.has(i)) {
         const gridArea = `${i} / ${startColumn} / ${i + 1} / ${startColumn + 1}`;
-        rows.push(<span key={gridArea} style={{ gridArea: gridArea }}></span>);
+        rows.push(<span key={gridArea + "*"} style={{ gridArea: gridArea }}></span>);
       }
     }
   }
@@ -305,7 +300,7 @@ function getColumnHeader<T>({
     const gridArea = `${i + 1} / ${startHeader} / ${i + 2} / ${startHeader + 1}`;
     return (
       <div key={gridArea} style={{ gridArea: gridArea }}>
-        <b>{keysMapping.get(k)}</b>
+        <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
       </div>
     );
   });
