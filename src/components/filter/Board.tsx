@@ -32,6 +32,10 @@ export function Board<T>(props: BoardProps<T>) {
     return ignoredFilter;
   };
 
+  const style = css`
+    padding: 1px;
+  `;
+
   return (
     <DndProvider backend={Backend}>
       <Grid>
@@ -50,12 +54,7 @@ export function Board<T>(props: BoardProps<T>) {
         </Cell>
         <Cell xs={8}>
           <VFlow>
-            <Box
-              label="Linhas"
-              styles={css`
-                padding: 1px;
-              `}
-            >
+            <Box label="Linhas" styles={style}>
               <Dropable<T>
                 filtroLocal={ignoredFilter}
                 handleUpdate={handleUpdateRowKeys}
@@ -66,12 +65,7 @@ export function Board<T>(props: BoardProps<T>) {
                 id={1}
               />
             </Box>
-            <Box
-              label="Colunas"
-              styles={css`
-                padding: 1px;
-              `}
-            >
+            <Box label="Colunas" styles={style}>
               <Dropable<T>
                 id={2}
                 filtroLocal={ignoredFilter}

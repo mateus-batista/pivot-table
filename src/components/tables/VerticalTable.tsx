@@ -37,7 +37,7 @@ function getColumn<T>({ data, rows, startRow = 1, startColumn = 2 }: GetColumnIn
   if (data instanceof GroupResult) {
     const gridArea = `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}`;
     rows.push(
-      <div key={gridArea} style={{ gridArea: gridArea }}>
+      <div data-endrow key={gridArea} style={{ gridArea: gridArea }}>
         {data.value}
       </div>
     );
@@ -91,20 +91,20 @@ function getHeader<T>(
   });
   const totalValueGridArea = `${rowSpan - 1} / ${columnSpan} / ${rowSpan} / ${columnSpan + 1}`;
   headers.push(
-    <div key={totalValueGridArea} style={{ gridArea: totalValueGridArea }}>
+    <div data-endcolumn data-endrow key={totalValueGridArea} style={{ gridArea: totalValueGridArea }}>
       <b>{data.value}</b>
     </div>
   );
   const totalLabelGridArea = `1 / ${columnSpan} / ${rowSpan - 1} / ${columnSpan + 1}`;
   headers.push(
-    <div key={totalLabelGridArea} style={{ gridArea: totalLabelGridArea }}>
-      <b>Total</b>
+    <div data-endcolumn key={totalLabelGridArea} style={{ gridArea: totalLabelGridArea }}>
+      <b>TOTAL</b>
     </div>
   );
   const totaisLabelGridArea = `${rowSpan - 1} / 1 / ${rowSpan} / 2 `;
   headers.push(
-    <div key={totaisLabelGridArea} style={{ gridArea: totaisLabelGridArea }}>
-      <b>Totais</b>
+    <div data-endrow key={totaisLabelGridArea} style={{ gridArea: totaisLabelGridArea }}>
+      <b>TOTAIS</b>
     </div>
   );
 

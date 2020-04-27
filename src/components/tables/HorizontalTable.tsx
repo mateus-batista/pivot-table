@@ -1,7 +1,4 @@
 import React, { ReactElement } from "react";
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import { useTheme, Theme } from "bold-ui";
 import { GroupResult } from "../../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { Dictionary } from "../PivotTable";
@@ -16,7 +13,6 @@ export type HorizontalTableProps<T> = {
 type GetRowInputProps<T> = {
   data: any & TreeRoot;
   rows: ReactElement[];
-  theme: Theme;
   startRow?: number;
   startColumn?: number;
 };
@@ -27,27 +23,20 @@ type GetRowReturnProps<T> = {
 };
 
 export function HorizontalTable<T>(props: HorizontalTableProps<T>) {
-  const theme = useTheme();
   const { data, keysMapping } = props;
   const keys = [...props.keys];
-  const { elements, rowSpan, columnSpan } = getRow({ data, rows: [], theme });
+  const { elements, rowSpan, columnSpan } = getRow({ data, rows: [] });
 
-  elements.push(...getHeader(data, keys, keysMapping, rowSpan, columnSpan, theme));
+  elements.push(...getHeader(data, keys, keysMapping, rowSpan, columnSpan));
 
   return <TableWrapper>{elements}</TableWrapper>;
 }
 
-function getRow<T>({ data, rows, startRow = 2, startColumn = 1, theme }: GetRowInputProps<T>): GetRowReturnProps<T> {
+function getRow<T>({ data, rows, startRow = 2, startColumn = 1 }: GetRowInputProps<T>): GetRowReturnProps<T> {
   if (data instanceof GroupResult) {
     const gridArea = `${startRow} / ${startColumn} / ${startRow + 1} / ${startColumn + 1}`;
     rows.push(
-      <div
-        key={gridArea}
-        style={{ gridArea: gridArea }}
-        css={css`
-          border-right: 1px solid ${theme.pallete.divider};
-        `}
-      >
+      <div data-endcolumn key={gridArea} style={{ gridArea: gridArea }}>
         {data.value}
       </div>
     );
@@ -69,7 +58,6 @@ function getRow<T>({ data, rows, startRow = 2, startColumn = 1, theme }: GetRowI
         rows: [],
         startRow,
         startColumn: startColumn + 1,
-        theme,
       });
       rowSpan = childrenRowSpan;
       columnSpan = childrenColumnSpan;
@@ -94,8 +82,7 @@ function getHeader<T>(
   keys: Array<keyof T>,
   keysMapping: Map<keyof T, string>,
   rowSpan: number,
-  columnSpan: number,
-  theme: Theme
+  columnSpan: number
 ) {
   const headers = keys.map((k, i) => {
     const gridArea = `1 / ${i + 1} / 2 / ${i + 2}`;
@@ -107,38 +94,19 @@ function getHeader<T>(
   });
   const totalGridArea = `${rowSpan} / 1 / ${rowSpan + 1} / ${columnSpan - 1}`;
   headers.push(
-    <div
-      key={totalGridArea}
-      style={{ gridArea: totalGridArea }}
-      css={css`
-        border-bottom: 1px solid ${theme.pallete.divider};
-      `}
-    >
+    <div data-endrow key={totalGridArea} style={{ gridArea: totalGridArea }}>
       <b>TOTAL</b>
     </div>
   );
   const totaisGridArea = `1 / ${columnSpan - 1} / 2 / ${columnSpan}`;
   headers.push(
-    <div
-      key={totaisGridArea}
-      style={{ gridArea: totaisGridArea }}
-      css={css`
-        border-right: 1px solid ${theme.pallete.divider};
-      `}
-    >
+    <div data-endcolumn key={totaisGridArea} style={{ gridArea: totaisGridArea }}>
       <b>TOTAL</b>
     </div>
   );
   const totalValueGridArea = `${rowSpan} / ${columnSpan - 1} / ${rowSpan + 1} / ${columnSpan}`;
   headers.push(
-    <div
-      key={totalValueGridArea}
-      style={{ gridArea: totalValueGridArea }}
-      css={css`
-        border-bottom: 1px solid ${theme.pallete.divider};
-        border-right: 1px solid ${theme.pallete.divider};
-      `}
-    >
+    <div data-endrow data-endcolumn key={totalValueGridArea} style={{ gridArea: totalValueGridArea }}>
       <b>{data.value}</b>
     </div>
   );
