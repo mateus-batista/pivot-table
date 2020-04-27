@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "../css/Tabela.css";
-import { Countable, CountableKeys } from "../types/Countable";
+import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Board } from "./filter/Board";
 import { HorizontalTable } from "./tables/HorizontalTable";
 import { MixedTable } from "./tables/MixedTable";
 import { VerticalTable } from "./tables/VerticalTable";
+import { GroupResult } from "../classes/GroupResult";
+import { Aggregators } from "./filter/Aggregators";
+import { VFlow, HFlow, Cell, Grid } from "bold-ui";
 
 export type PivotTableProps<T> = {
   data: T[];
@@ -24,17 +27,24 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
 
-  const [defaultTree, setDefaultTree] = useState<Dictionary<T, keyof T> & Countable>();
+  const [defaultTree, setDefaultTree] = useState<Dictionary<T, keyof T> & TreeRoot>();
 
-  const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & Countable>();
+  const [complemetaryTree, setComplementaryTree] = useState<Dictionary<T, keyof T> & TreeRoot>();
+
+  const [aggregator, setAggregator] = useState<any>();
+
+  const [aggregatorKey, setAggregatorKey] = useState<keyof T>();
+
+  const handkeAggregatorKey = (key: keyof T) => setAggregatorKey(key);
+  const handleAggregator = (fun: ((values: number[]) => number) | undefined) => {
+    setAggregator(() => fun);
+  };
 
   useEffect(() => {
     const uniqueKeysValues = new Map<keyof T, Set<string>>();
 
-    const inicio = new Date().getTime();
-
     data.forEach((element: any) => {
-      Object.keys(element).forEach(key => {
+      Object.keys(element).forEach((key) => {
         let set = uniqueKeysValues.get(key as keyof T);
         if (!set) {
           set = new Set<string>();
@@ -43,21 +53,15 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
         set.add(element[key]);
       });
     });
-
-    console.log("key value agrupados em: ", (new Date().getTime() - inicio) / 1000);
     setDataKeyValues(uniqueKeysValues);
   }, [data]);
 
   useEffect(() => {
-    const inicio = new Date().getTime();
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
     }
-    group2(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues);
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues));
-
-    console.log("dados agrupados em: ", (new Date().getTime() - inicio) / 1000);
-  }, [data, rowKeys, columnKeys, ignoredDataKeyValues]);
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
+  }, [data, rowKeys, columnKeys, ignoredDataKeyValues, aggregator, aggregatorKey]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => {
     const [rowKeys, columnKeys] = values;
@@ -68,35 +72,43 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setComplementaryTree(undefined);
   };
 
-  console.log("data", data);
-  console.log("defaultTree", defaultTree);
-  console.log("dataKeyValues", dataKeyValues);
+  console.log("default tree", defaultTree);
+
   if (dataKeyValues) {
     return (
-      <>
-        <div className={"filter-table table"}>
-          <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
-          <div className="table-bottomright">
-            {defaultTree && complemetaryTree ? (
-              <MixedTable
-                rowData={defaultTree}
-                columnData={complemetaryTree}
-                columnKeys={columnKeys}
-                rowKeys={rowKeys}
-                keysMapping={keyMapping}
-              />
-            ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
-              <HorizontalTable data={defaultTree} keys={rowKeys} keysMapping={keyMapping} />
-            ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
-              <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
-            ) : (
-              <div>
-                <b>{data.length}</b>
-              </div>
-            )}
+      <VFlow>
+        <Grid>
+          <Cell xs={4}>
+            <Aggregators
+              sample={data[0]}
+              keyMapping={keyMapping}
+              handleAggregatorChange={handleAggregator}
+              handleAggregatorKeyChange={handkeAggregatorKey}
+            />
+          </Cell>
+          <Cell xs={8}>
+            <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
+          </Cell>
+        </Grid>
+
+        {defaultTree && complemetaryTree ? (
+          <MixedTable
+            rowData={defaultTree}
+            columnData={complemetaryTree}
+            columnKeys={columnKeys}
+            rowKeys={rowKeys}
+            keysMapping={keyMapping}
+          />
+        ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
+          <HorizontalTable data={defaultTree} keys={rowKeys} keysMapping={keyMapping} />
+        ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
+          <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
+        ) : (
+          <div>
+            <b>Total: {data.length}</b>
           </div>
-        </div>
-      </>
+        )}
+      </VFlow>
     );
   } else {
     return (
@@ -110,67 +122,47 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 function group<T extends any, K extends keyof T>(
   arr: T[],
   keys: Array<K>,
-  filterKeys?: Map<K, Set<String>>
-): any & Countable {
+  filterKeys?: Map<K, Set<String>>,
+  aggregator?: (values: number[]) => number,
+  aggregatorKey?: keyof T
+): any & TreeRoot {
   let key = keys[0];
 
   if (!key) {
-    return arr;
+    if (aggregator && aggregatorKey) {
+      return new GroupResult(aggregator(arr.map((v) => v[aggregatorKey])));
+    }
+    return new GroupResult(arr.length);
   }
-  const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
+  const valuesToIgnore = filterKeys?.get(key);
 
-  const obj: T & Countable = groupByKey(arr, key, valuesToIgnore);
+  const obj: T & TreeRoot = groupByKey(arr, key, valuesToIgnore);
 
   obj.key = key;
 
-  let count = 0;
+  let count: number[] = [];
   Object.keys(obj)
-    .filter(k => !CountableKeys.includes(k))
-    .forEach(k => {
+    .filter((k) => !TreeRootKeys.includes(k))
+    .forEach((k) => {
       const arr = obj[k];
-      count += arr.length;
-      obj[k] = group(arr, keys.slice(1, keys.length));
+      obj[k] = group(arr, keys.slice(1, keys.length), filterKeys, aggregator, aggregatorKey);
+      count.push(obj[k].value);
     });
-  obj.count = count;
+
+  if (aggregator && aggregatorKey) {
+    obj.value = aggregator(count);
+  } else {
+    obj.value = count.reduce((prev, curr) => prev + curr);
+  }
 
   return obj;
 }
 
-function group2<T extends any, K extends keyof T>(
-  arr: T[],
-  keys: Array<K>,
-  filterKeys?: Map<K, Set<String>>
-): any & Countable {
-  let depth = 0;
-  const x: Map<T & Countable, Array<K>> = new Map<T & Countable, Array<K>>();
-  const key = keys[0];
-  const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
-  x.set(groupByKey(arr, key, valuesToIgnore), keys.slice(1, keys.length));
-  for (let index = 0; index < keys.length; index++) {
-    const key = keys[index];
-    const valuesToIgnore = filterKeys ? filterKeys.get(key) || null : null;
-    const obj: T & Countable = groupByKey(arr, key, valuesToIgnore);
-    console.log(obj);
-    obj.key = key;
-    let count = 0;
-    Object.keys(obj)
-      .filter(k => !CountableKeys.includes(k))
-      .forEach(k => {
-        const arr = obj[k];
-        count += arr.length;
-        x.set(obj, keys.slice(1, keys.length));
-        //obj[k] = group(arr, keys.slice(1, keys.length));
-      });
-    obj.count = count;
-    depth = depth + 1;
-  }
-}
-
-function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore: Set<T[K]> | null) {
+function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore?: Set<T[K]>) {
   return arr.reduce((result, curr) => {
     const keyValue = curr[key];
 
-    if (valuesToIgnore != null && valuesToIgnore.has(keyValue)) {
+    if (valuesToIgnore?.has(keyValue)) {
       return result;
     }
 

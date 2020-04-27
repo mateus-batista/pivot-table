@@ -1,18 +1,12 @@
+import { ThemeProvider, useTheme } from "bold-ui";
 import React from "react";
-import { PivotTable } from "./components/PivotTable";
-import { PivotTableRef } from "./components/PivotTableRef";
-import {
-  atendimentos,
-  AtendimentoProfissonalKeyMapping,
-  AtendimentoProfissional
-} from "./types/AtendimentoProfissional";
-
+import { Home } from "./components/Home";
 const App: React.FC = () => {
+  const theme = useTheme();
   return (
-    <>
-      <PivotTable<AtendimentoProfissional> data={atendimentos} keyMapping={AtendimentoProfissonalKeyMapping} />
-      <PivotTableRef />
-    </>
+    <ThemeProvider theme={theme}>
+      <Home />
+    </ThemeProvider>
   );
 };
 
