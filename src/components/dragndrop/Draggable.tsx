@@ -1,13 +1,14 @@
+/** @jsx jsx */
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import "../../css/Dnd.css";
 import { ItemTypes } from "../../types/ItemTypes";
 
-import { Button, Dropdown, DropdownItem } from "bold-ui";
+import { Button, Dropdown, DropdownItem, Icon } from "bold-ui";
+import { jsx, css } from "@emotion/core";
 
 interface DraggableProps<T> {
   id: keyof T;
-  className: string;
   type: ItemTypes;
   origin: number;
   value: string;
@@ -29,9 +30,9 @@ export function Draggable<T>(props: DraggableProps<T>) {
         props.onDragEnd();
       }
     },
-    collect: monitor => ({
-      isDragging: !!monitor.isDragging()
-    })
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
   });
   const buttonRef: any = useRef<HTMLButtonElement>();
   const [open, setOpen] = useState(false);
@@ -47,7 +48,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
   };
   const filterList: ReactElement[] = [];
 
-  props.filterSet.forEach(element => {
+  props.filterSet.forEach((element) => {
     var id = props.id + element;
     var selected = filter.has(element) ? "selected" : "";
     var item: ReactElement = (
@@ -58,16 +59,30 @@ export function Draggable<T>(props: DraggableProps<T>) {
     filterList.push(item);
   });
 
+  const style = css`
+    border: 1px solid black;
+    border-radius: 2px;
+    color: #24252e;
+    padding-left: 0px;
+    font-size: 13px;
+  `;
+  const dndBoxCss = css`
+    display: inline-block;
+    padding: 2px 4px;
+    margin: 1px 1px 1px 1px;
+  `;
+
   return (
     <div
       ref={drag}
       style={{
-        opacity: isDragging ? 0.5 : 1
+        opacity: isDragging ? 0.5 : 1,
       }}
-      className={props.className}
+      css={dndBoxCss}
     >
-      <>
-        <Button innerRef={buttonRef} onClick={handleClick} size="small" kind="primary" skin="outline">
+      <React.Fragment>
+        <Button style={style} innerRef={buttonRef} onClick={handleClick} size="small" kind="primary" skin="outline">
+          <Icon icon="dots" />
           {props.value}
         </Button>
         <Dropdown
@@ -79,7 +94,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
         >
           <div className={"dropdown"}>{filterList}</div>
         </Dropdown>
-      </>
+      </React.Fragment>
     </div>
   );
 }

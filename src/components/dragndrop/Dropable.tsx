@@ -1,7 +1,9 @@
-import React, { ReactElement, useState, useRef } from "react";
+/** @jsx jsx */
+import React, { useState } from "react";
 import { useDrop } from "react-dnd";
 import { Draggable } from "./Draggable";
 import { ItemTypes } from "../../types/ItemTypes";
+import { jsx, css } from "@emotion/core";
 
 interface DropableProps<T> {
   id: number;
@@ -27,7 +29,7 @@ export function Dropable<T>(props: DropableProps<T>) {
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     props.handleFilterUpdate(key, filtro);
   };
-  const [{ isOver }, drag] = useDrop({
+  const [{ isOver, isDragging }, drag] = useDrop({
     accept: type,
     drop(item: DragItem<T>) {
       if (!keys.includes(item.id)) {
@@ -41,6 +43,7 @@ export function Dropable<T>(props: DropableProps<T>) {
     collect: (monitor) => ({
       canDrop: !!monitor.canDrop(),
       isOver: monitor.isOver() ? monitor.getItem().origin !== id : monitor.isOver(),
+      isDragging: monitor.getItem() !== null,
     }),
   });
 
@@ -53,23 +56,45 @@ export function Dropable<T>(props: DropableProps<T>) {
     setKeys(temp);
     handleUpdate && handleUpdate(temp);
   }
+  const textSpanCss = css`
+    display: block;
+    text-align: center;
+    padding-top: 11px;
+    padding-bottom: 10px;
+  `;
+  const hoverBorderCss = css`
+    min-height: inherit;
+    border: 2px dotted black;
+    padding: 2px;
+  `;
+  const boxCss = css`
+    min-height: inherit;
+    padding: 2px;
+  `;
+  const filtros = keys.map((key) => (
+    <Draggable<T>
+      key={key as string}
+      type={type}
+      id={key}
+      value={keyMapping.get(key) as string}
+      origin={id}
+      filterSet={props.keys.get(key) as Set<string>}
+      previousFilter={props.filtroLocal.get(key) as Set<string>}
+      handleFilterUpdate={handleFilterUpdate}
+      onDragEnd={() => deleteByKey(key)}
+    />
+  ));
+
+  const hoverSpan = <div css={textSpanCss}>Solte aqui o item para inserir na tabela</div>;
+  const placeholderSpan = <div css={textSpanCss}>Arraste os itens para inserir na tabela</div>;
 
   return (
-    <div ref={drag} style={{ backgroundColor: isOver ? "#888888" : "#FFFFFF", minHeight: "inherit" }}>
-      {keys.map((key) => (
-        <Draggable<T>
-          key={key as string}
-          type={type}
-          className={"dnd-box"}
-          id={key}
-          value={keyMapping.get(key) as string}
-          origin={id}
-          filterSet={props.keys.get(key) as Set<string>}
-          previousFilter={props.filtroLocal.get(key) as Set<string>}
-          handleFilterUpdate={handleFilterUpdate}
-          onDragEnd={() => deleteByKey(key)}
-        />
-      ))}
+    <div ref={drag} css={boxCss}>
+      {isOver ? (
+        <div css={hoverBorderCss}>{keys.length < 1 ? hoverSpan : filtros}</div>
+      ) : (
+        <div css={boxCss}>{keys.length < 1 ? placeholderSpan : filtros}</div>
+      )}
     </div>
   );
 }

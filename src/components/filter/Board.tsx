@@ -33,14 +33,14 @@ export function Board<T>(props: BoardProps<T>) {
   };
 
   const style = css`
-    padding: 1px;
+    padding: 4px;
   `;
 
   return (
     <DndProvider backend={Backend}>
       <Grid>
         <Cell xs={4}>
-          <Box label="Campos disponíveis">
+          <Box label="Campos disponíveis" styles={style}>
             <Dropable<T>
               filtroLocal={ignoredFilter}
               type={ItemTypes.FILTER}
