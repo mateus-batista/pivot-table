@@ -17,7 +17,7 @@ export function Home(props: any) {
     return (
       <>
         <PivotTable<AtendimentoProfissional> data={data} keyMapping={AtendimentoProfissonalKeyMapping} />
-        {/* <PivotTableRef /> */}
+        <PivotTableRef />
       </>
     );
   } else {

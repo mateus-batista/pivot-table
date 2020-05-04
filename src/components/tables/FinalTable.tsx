@@ -2,6 +2,7 @@ import React from "react";
 import { GroupResult } from "../../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { Dictionary } from "../PivotTable";
+import { TableWrapper, HeaderWrapper } from "./ElementWrappers";
 
 export type FinalTableProps<T> = {
   keysMapping: Map<keyof T, string>;
@@ -11,6 +12,8 @@ export type FinalTableProps<T> = {
   columnData?: Dictionary<T, keyof T> & TreeRoot;
 };
 
+const RESULT_PATH_KEY = "RESULT";
+
 export function FinalTable<T>(props: FinalTableProps<T>) {
   const { rowKeys, columnKeys, rowData, columnData, keysMapping } = props;
 
@@ -19,6 +22,7 @@ export function FinalTable<T>(props: FinalTableProps<T>) {
 
   if (rowData && rowKeys && columnData && columnKeys) {
     rowResult = getResult(rowData, "column", rowKeys);
+    console.log(rowResult);
     const [hDivs, mixedTotals, totalRowNumber] = getHorizontal(
       rowResult,
       rowKeys,
@@ -52,11 +56,7 @@ export function FinalTable<T>(props: FinalTableProps<T>) {
     columnResult = getResult(columnData, "row");
     divs.push(getVertical(columnResult, columnKeys, columnData, keysMapping));
   }
-  return (
-    <>
-      <div className="table result-table">{divs}</div>
-    </>
-  );
+  return <TableWrapper>{divs}</TableWrapper>;
 }
 
 function getHorizontal<T>(
@@ -90,14 +90,19 @@ function getHorizontal<T>(
     const endRow = startRow + rowSpan;
     maxEndRow = endRow > maxEndRow ? endRow : maxEndRow;
     maxEndColumn = endColumn > maxEndColumn ? startColumn : maxEndColumn;
-    divs.push(<div style={{ gridArea: `${startRow} / ${startColumn} / ${endRow} / ${endColumn} ` }}>{value}</div>);
+    const gridArea = `${startRow} / ${startColumn} / ${endRow} / ${endColumn} `;
+    divs.push(
+      <div key={gridArea} data-endcolumn={!r.key && !mixedTable} style={{ gridArea: gridArea }}>
+        {r.key ? <b>{value}</b> : value}
+      </div>
+    );
   }
   divs.push(
     keys.map((k, i) => {
       const gridArea = `${headerSpace} / ${i + 1} / ${headerSpace + 1} / ${i + 2} `;
       return (
         <div key={gridArea} style={{ gridArea: gridArea }}>
-          {keysMapping.get(k)}
+          <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
         </div>
       );
     })
@@ -107,21 +112,21 @@ function getHorizontal<T>(
     const totalGridArea = `${maxEndRow} / 1 / ${maxEndRow + 1} / ${maxEndColumn} `;
     const totalValueGridArea = `${maxEndRow} / ${maxEndColumn} / ${maxEndRow + 1} / ${maxEndColumn + 1} `;
     divs.push(
-      <div key={totaisGridArea} style={{ gridArea: totaisGridArea }}>
-        Totais
+      <div key={totaisGridArea} data-endcolumn={true} style={{ gridArea: totaisGridArea }}>
+        <b>TOTAIS</b>
       </div>,
-      <div key={totalGridArea} style={{ gridArea: totalGridArea }}>
-        Total
+      <div key={totalGridArea} data-endrow={true} style={{ gridArea: totalGridArea }}>
+        <b>TOTAL</b>
       </div>,
-      <div key={totalValueGridArea} style={{ gridArea: totalValueGridArea }}>
-        {data.value}
+      <div key={totalValueGridArea} data-endrow={true} data-endcolumn={true} style={{ gridArea: totalValueGridArea }}>
+        <b>{data.value}</b>
       </div>
     );
   } else {
     const gridArea = `${maxEndRow} / 1 / ${maxEndRow + 1} / ${keys.length + 2} `;
     divs.push(
-      <div key={gridArea} style={{ gridArea: gridArea }}>
-        TOTAIS
+      <div key={gridArea} data-endrow={true} style={{ gridArea: gridArea }}>
+        <b>TOTAIS</b>
       </div>
     );
   }
@@ -156,10 +161,10 @@ function getVertical<T>(
     if (mixedTable && r.key === mixedTableTotalKey) {
       mixedTableColumnTotals.set(startColumn, r.value);
     }
-    if (mixedTable && !keys.includes(r.key) && r.path.indexOf("result") === -1) {
+    if (mixedTable && !keys.includes(r.key) && r.path.indexOf(RESULT_PATH_KEY) === -1) {
       continue;
     }
-    if (mixedTable && mixedTableRowResult && r.path.indexOf("result") !== -1) {
+    if (mixedTable && mixedTableRowResult && r.path.indexOf(RESULT_PATH_KEY) !== -1) {
       const rows = mixedTableRowResult.filter((rx) => r.path.indexOf(rx.path) !== -1);
       startRow = getIni(rows[rows.length - 1].ini) + keys.length + 1;
       startColumn = getIni(r.ini.iniPai) + columnHeaderSpace;
@@ -171,52 +176,76 @@ function getVertical<T>(
     maxEndRow = endRow > maxEndRow ? endRow : maxEndRow;
     maxEndColumn = endColumn > maxEndColumn ? startColumn : maxEndColumn;
     const gridArea = `${startRow} / ${startColumn} / ${endRow} / ${endColumn}`;
-    divs.push(<div style={{ gridArea: gridArea }}>{value}</div>);
+    divs.push(
+      <div key={gridArea} data-endrow={!r.key && !mixedTable} style={{ gridArea: gridArea }}>
+        {r.key ? <b>{value}</b> : value}
+      </div>
+    );
     cellPositions.add(gridArea);
   }
   divs.push(
-    ...keys.map((k, i) => (
-      <div style={{ gridArea: `${i + 1} / ${columnHeaderSpace} / ${i + 2} / ${columnHeaderSpace + 1} ` }}>
-        {keysMapping.get(k)}
-      </div>
-    ))
+    ...keys.map((k, i) => {
+      const gridArea = `${i + 1} / ${columnHeaderSpace} / ${i + 2} / ${columnHeaderSpace + 1} `;
+      return (
+        <div key={gridArea} style={{ gridArea: gridArea }}>
+          <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
+        </div>
+      );
+    })
   );
   if (!mixedTable) {
+    const totaisGridArea = `${maxEndRow - 1} / 1 / ${maxEndRow} / 2`;
+    const totalGridArea = `1 / ${maxEndColumn + 1} / ${maxEndRow - 1} / ${maxEndColumn + 2}`;
+    const totalValueGridArea = `${maxEndRow - 1} / ${maxEndColumn + 1} / ${maxEndRow} / ${maxEndColumn + 2}`;
     divs.push(
-      <div style={{ gridArea: `${maxEndRow - 1} / 1 / ${maxEndRow} / 2 ` }}>Totais</div>,
-      <div style={{ gridArea: `1 / ${maxEndColumn + 1} / ${maxEndRow - 1} / ${maxEndColumn + 2} ` }}>Total</div>,
-      <div style={{ gridArea: `${maxEndRow - 1} / ${maxEndColumn + 1} / ${maxEndRow} / ${maxEndColumn + 2} ` }}>
-        {data.value}
+      <div key={totaisGridArea} data-endrow={true} style={{ gridArea: totaisGridArea }}>
+        <b>TOTAIS</b>
+      </div>,
+      <div key={totalGridArea} data-endcolumn={true} style={{ gridArea: totalGridArea }}>
+        <b>TOTAL</b>
+      </div>,
+      <div key={totalValueGridArea} data-endrow={true} data-endcolumn={true} style={{ gridArea: totalValueGridArea }}>
+        <b>{data.value}</b>
       </div>
     );
   } else {
+    const keysGapCellGridArea = `${keys.length + 1} / ${columnHeaderSpace} / ${keys.length + 2} / ${
+      columnHeaderSpace + 1
+    }`;
+    divs.push(<div key={keysGapCellGridArea} style={{ gridArea: keysGapCellGridArea }}></div>);
     const totalRowNumber = mixedTableTotalRowNumber || 0;
     mixedTableColumnTotals.forEach((value, key) => {
+      const gridArea = `${totalRowNumber} / ${key} / ${totalRowNumber + 1} / ${key + 1}`;
       divs.push(
-        <div style={{ gridArea: `${totalRowNumber} / ${key} / ${totalRowNumber + 1} / ${key + 1} ` }}>{value}</div>
+        <div key={gridArea} data-endrow={true} style={{ gridArea: gridArea }}>
+          <b>{value}</b>
+        </div>
       );
     });
     rowTotals?.forEach((value, key) => {
       const rowNumber = mixedTableStartRowCache.get(key) || 0;
+      const gridArea = `${rowNumber} / ${maxEndColumn + 1} / ${rowNumber + 1} / ${maxEndColumn + 2}`;
       divs.push(
-        <div style={{ gridArea: `${rowNumber} / ${maxEndColumn + 1} / ${rowNumber + 1} / ${maxEndColumn + 2} ` }}>
-          {value}
+        <div key={gridArea} data-endcolumn={true} style={{ gridArea: gridArea }}>
+          <b>{value}</b>
         </div>
       );
     });
+    const totaisGridArea = `1 / ${maxEndColumn + 1} / ${keys.length + 2} / ${maxEndColumn + 2}`;
+    const totaisValueGridArea = `${totalRowNumber} / ${maxEndColumn + 1} / ${totalRowNumber + 1} / ${maxEndColumn + 2}`;
     divs.push(
-      <div style={{ gridArea: `1 / ${maxEndColumn + 1} / ${keys.length + 2} / ${maxEndColumn + 2} ` }}>TOTAIS</div>,
-      <div
-        style={{ gridArea: `${totalRowNumber} / ${maxEndColumn + 1} / ${totalRowNumber + 1} / ${maxEndColumn + 2} ` }}
-      >
-        {data.value}
+      <div key={totaisGridArea} data-endcolumn={true} style={{ gridArea: totaisGridArea }}>
+        <b>TOTAIS</b>
+      </div>,
+      <div key={totaisValueGridArea} data-endrow={true} data-endcolumn={true} style={{ gridArea: totaisValueGridArea }}>
+        <b>{data.value}</b>
       </div>
     );
     for (let column = columnHeaderSpace + 1; column < maxEndColumn + 1; column++) {
       for (let row = keys.length + 2; row < totalRowNumber; row++) {
         const gridArea = `${row} / ${column} / ${row + 1} / ${column + 1}`;
         if (!cellPositions.has(gridArea)) {
-          divs.push(<div style={{ gridArea: gridArea }}></div>);
+          divs.push(<div key={gridArea} style={{ gridArea: gridArea }}></div>);
         }
       }
     }
@@ -244,7 +273,7 @@ function getResult<T>(
       const increaseSpan = !onlyIncreaseSpanOnKeys || onlyIncreaseSpanOnKeys.includes(obj.data.key);
       Object.keys(obj.data)
         .filter((k) => !TreeRootKeys.includes(k))
-        .forEach((key, idx) => {
+        .forEach((key) => {
           let span = { value: 1 };
           let spanTree = [span];
           if (obj.spanTree) {
@@ -262,7 +291,7 @@ function getResult<T>(
           const iniPai = obj.iniPai;
           const path = obj.path ? obj.path + key : key;
 
-          const ini = { iniPai, spanAux: increaseSpan ? spanAux : 0, idx, iniAux };
+          const ini: any = { iniPai, spanAux: increaseSpan ? spanAux : { value: 0 }, iniAux };
 
           result.push({
             span: span,
@@ -288,7 +317,7 @@ function getResult<T>(
               [increment]: rowOrColumn + 1,
               ini: ini,
               name: obj.data[key].value,
-              path: path + "result",
+              path: path + RESULT_PATH_KEY,
             });
           }
           iniAux = ini;

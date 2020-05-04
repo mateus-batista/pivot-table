@@ -16,8 +16,7 @@ export function TableWrapper(props: any) {
         grid-template-columns: auto auto auto auto;
         place-items: center center;
         place-content: start start;
-        div,
-        span {
+        div {
           border-top: 1px solid ${theme.pallete.divider};
           border-left: 1px solid ${theme.pallete.divider};
           display: flex;
@@ -27,10 +26,10 @@ export function TableWrapper(props: any) {
           height: 100%;
           padding: 0.5rem 1rem;
         }
-        div[data-endrow] {
+        div[data-endrow="true"] {
           border-bottom: 1px solid ${theme.pallete.divider};
         }
-        div[data-endcolumn] {
+        div[data-endcolumn="true"] {
           border-right: 1px solid ${theme.pallete.divider};
         }
         ${styles}
