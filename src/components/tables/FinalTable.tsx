@@ -254,6 +254,12 @@ function getVertical<T>(
   return divs;
 }
 
+type InitialPosition = {
+  iniPai: InitialPosition;
+  iniAux: InitialPosition;
+  spanAux: { value: number };
+};
+
 function getResult<T>(
   data: Dictionary<T, keyof T> & TreeRoot,
   increment: "column" | "row",
@@ -291,7 +297,7 @@ function getResult<T>(
           const iniPai = obj.iniPai;
           const path = obj.path ? obj.path + key : key;
 
-          const ini: any = { iniPai, spanAux: increaseSpan ? spanAux : { value: 0 }, iniAux };
+          const ini: InitialPosition = { iniPai, spanAux: increaseSpan ? spanAux : { value: 0 }, iniAux };
 
           result.push({
             span: span,
@@ -328,8 +334,8 @@ function getResult<T>(
   return result;
 }
 
-function getIni(ini: any) {
-  const stack: any[] = [];
+function getIni(ini: InitialPosition) {
+  const stack: InitialPosition[] = [];
 
   stack.push(ini);
 
@@ -337,12 +343,12 @@ function getIni(ini: any) {
 
   while (stack.length) {
     const i = stack.pop();
-    if (i.spanAux) {
+    if (i?.spanAux) {
       result += i.spanAux.value;
     }
-    if (i.iniAux) {
+    if (i?.iniAux) {
       stack.push(i.iniAux);
-    } else if (i.iniPai) {
+    } else if (i?.iniPai) {
       stack.push(i.iniPai);
     }
   }
