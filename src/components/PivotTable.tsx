@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import "../css/Tabela.css";
 import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Board } from "./filter/Board";
-import { HorizontalTable } from "./tables/HorizontalTable";
+import { HorizontalTable } from "./tables/HorizontalTableNovo";
 import { MixedTable } from "./tables/MixedTable";
-import { VerticalTable } from "./tables/VerticalTable";
+import { VerticalTable } from "./tables/VerticalTableNovo";
 import { GroupResult } from "../classes/GroupResult";
 import { Aggregators } from "./filter/Aggregators";
 import { VFlow, HFlow, Cell, Grid } from "bold-ui";
+import { FinalTable } from "./tables/FinalTable";
 
 export type PivotTableProps<T> = {
   data: T[];
@@ -92,17 +93,26 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
         </Grid>
 
         {defaultTree && complemetaryTree ? (
-          <MixedTable
-            rowData={defaultTree}
-            columnData={complemetaryTree}
-            columnKeys={columnKeys}
-            rowKeys={rowKeys}
-            keysMapping={keyMapping}
-          />
+          <>
+            <FinalTable
+              rowData={defaultTree}
+              rowKeys={rowKeys}
+              columnData={complemetaryTree}
+              columnKeys={columnKeys}
+              keysMapping={keyMapping}
+            />
+            {/* <MixedTable
+              rowData={defaultTree}
+              columnData={complemetaryTree}
+              columnKeys={columnKeys}
+              rowKeys={rowKeys}
+              keysMapping={keyMapping}
+            /> */}
+          </>
         ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
-          <HorizontalTable data={defaultTree} keys={rowKeys} keysMapping={keyMapping} />
+          <FinalTable rowData={defaultTree} rowKeys={rowKeys} keysMapping={keyMapping} />
         ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
-          <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
+          <FinalTable columnData={defaultTree} columnKeys={columnKeys} keysMapping={keyMapping} />
         ) : (
           <div>
             <b>Total: {data.length}</b>

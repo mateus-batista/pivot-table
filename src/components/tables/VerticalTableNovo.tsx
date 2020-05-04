@@ -83,10 +83,10 @@ export function VerticalTable<T>(props: VerticalTableProps<T>) {
     return <div style={{ gridArea: `${startRow} / ${startColumn} / ${endRow} / ${endColumn} ` }}>{value}</div>;
   });
   divs.push(
-    ...keys.map((k, i) => <div style={{ gridArea: `${i} / 1 / ${i + 1} / 2 ` }}>{keysMapping.get(k)}</div>),
-    <div style={{ gridArea: `${maxEndRow} / 1 / ${maxEndRow + 1} / 2 ` }}>Totais</div>,
-    <div style={{ gridArea: `1 / ${maxEndColumn} / ${maxEndRow - 1} / ${maxEndColumn + 1} ` }}>Total</div>,
-    <div style={{ gridArea: `${maxEndRow - 1} / ${maxEndColumn} / ${maxEndRow} / ${maxEndColumn + 1} ` }}>
+    ...keys.map((k, i) => <div style={{ gridArea: `${i + 1} / 1 / ${i + 2} / 2 ` }}>{keysMapping.get(k)}</div>),
+    <div style={{ gridArea: `${maxEndRow - 1} / 1 / ${maxEndRow} / 2 ` }}>Totais</div>,
+    <div style={{ gridArea: `1 / ${maxEndColumn + 1} / ${maxEndRow - 1} / ${maxEndColumn + 2} ` }}>Total</div>,
+    <div style={{ gridArea: `${maxEndRow - 1} / ${maxEndColumn + 1} / ${maxEndRow} / ${maxEndColumn + 2} ` }}>
       {data.value}
     </div>
   );

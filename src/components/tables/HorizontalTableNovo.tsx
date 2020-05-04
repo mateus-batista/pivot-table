@@ -86,7 +86,9 @@ export function HorizontalTable<T>(props: HorizontalTableNovoProps<T>) {
     maxEndColumn = endColumn > maxEndColumn ? startColumn : maxEndColumn;
     divs.push(<span style={{ gridArea: `${startRow} / ${startColumn} / ${endRow} / ${endColumn} ` }}>{value}</span>);
   }
-  const keyDivs = keys.map((k, i) => <div style={{ gridArea: `1 / ${i} / 2 / ${i + 1} ` }}>{keysMapping.get(k)}</div>);
+  const keyDivs = keys.map((k, i) => (
+    <div style={{ gridArea: `1 / ${i + 1} / 2 / ${i + 2} ` }}>{keysMapping.get(k)}</div>
+  ));
   divs.push(...keyDivs);
   divs.push(
     <div style={{ gridArea: `1 / ${maxEndColumn} / 2 / ${maxEndColumn + 1} ` }}>Totais</div>,

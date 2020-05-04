@@ -40,6 +40,9 @@ export function MixedTable<T>(props: MixedTableProps<T>) {
   const countLinhas = rowKeys.length;
   const countColunas = columnKeys.length;
 
+  console.log("rowData", rowData);
+  console.log("columnData", columnData);
+
   const { elements, rowMap, resultMap, rowSpan, columnSpan: rowColumnSpan } = getRow({
     data: rowData,
     rows: [],
