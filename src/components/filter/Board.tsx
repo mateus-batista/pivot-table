@@ -1,3 +1,4 @@
+/** @jsx jsx */
 import { Button, Cell, Grid, VFlow } from "bold-ui";
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -6,7 +7,7 @@ import "../../css/Tabela.css";
 import { ItemTypes } from "../../types/ItemTypes";
 import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
-import { css } from "@emotion/core";
+import { jsx, css } from "@emotion/core";
 interface BoardProps<T> {
   keys: Map<keyof T, Set<string>>;
   keyMapping: Map<keyof T, string>;
@@ -35,11 +36,15 @@ export function Board<T>(props: BoardProps<T>) {
   const style = css`
     padding: 4px;
   `;
+  const padding = css`
+    min-width: 100px;
+    box-sizing: inherit;
+  `;
 
   return (
     <DndProvider backend={Backend}>
       <Grid>
-        <Cell xs={4}>
+        <Cell md={4}>
           <Box label="Campos disponíveis" styles={style}>
             <Dropable<T>
               filtroLocal={ignoredFilter}
@@ -52,7 +57,7 @@ export function Board<T>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell xs={8}>
+        <Cell md={8}>
           <VFlow>
             <Box label="Linhas" styles={style}>
               <Dropable<T>

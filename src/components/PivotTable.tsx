@@ -1,13 +1,10 @@
+import { Cell, Grid, VFlow } from "bold-ui";
 import React, { useEffect, useState } from "react";
-import "../css/Tabela.css";
-import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
-import { Board } from "./filter/Board";
-import { HorizontalTable } from "./tables/HorizontalTable";
-import { MixedTable } from "./tables/MixedTable";
-import { VerticalTable } from "./tables/VerticalTable";
 import { GroupResult } from "../classes/GroupResult";
+import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Aggregators } from "./filter/Aggregators";
-import { VFlow, HFlow, Cell, Grid } from "bold-ui";
+import { Board } from "./filter/Board";
+import { Table } from "./tables/Table";
 
 export type PivotTableProps<T> = {
   data: T[];
@@ -92,17 +89,17 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
         </Grid>
 
         {defaultTree && complemetaryTree ? (
-          <MixedTable
+          <Table
             rowData={defaultTree}
+            rowKeys={rowKeys}
             columnData={complemetaryTree}
             columnKeys={columnKeys}
-            rowKeys={rowKeys}
             keysMapping={keyMapping}
           />
         ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
-          <HorizontalTable data={defaultTree} keys={rowKeys} keysMapping={keyMapping} />
+          <Table rowData={defaultTree} rowKeys={rowKeys} keysMapping={keyMapping} />
         ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
-          <VerticalTable data={defaultTree} keys={columnKeys} keysMapping={keyMapping} />
+          <Table columnData={defaultTree} columnKeys={columnKeys} keysMapping={keyMapping} />
         ) : (
           <div>
             <b>Total: {data.length}</b>

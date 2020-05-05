@@ -46,18 +46,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
       props.handleFilterUpdate(props.id as keyof T, filter);
     };
   };
-  const filterList: ReactElement[] = [];
-
-  props.filterSet.forEach((element) => {
-    var id = props.id + element;
-    var selected = filter.has(element) ? "selected" : "";
-    var item: ReactElement = (
-      <div id={id} className={selected + " item"} onClick={handleSelect(element, id)}>
-        <span>{element}</span>
-      </div>
-    );
-    filterList.push(item);
-  });
 
   const style = css`
     border: 1px solid black;
@@ -71,6 +59,33 @@ export function Draggable<T>(props: DraggableProps<T>) {
     padding: 2px 4px;
     margin: 1px 1px 1px 1px;
   `;
+  const dropdownItemCss = css`
+    width: 100%;
+    cursor: pointer;
+    border-bottom: 1px solid black;
+    padding: 2px;
+  `;
+  const selectedItemCss = css`
+    text-decoration: line-through;
+  `;
+  const dropdownCss = css`
+    height: 120px;
+    max-width: 300px;
+    overflow: auto;
+  `;
+
+  const filterList: ReactElement[] = [];
+
+  props.filterSet.forEach((element) => {
+    var id = props.id + element;
+    var selected = filter.has(element) ? "selected" : "";
+    var item: ReactElement = (
+      <div id={id} css={dropdownItemCss} className={selected} onClick={handleSelect(element, id)}>
+        <span>{element}</span>
+      </div>
+    );
+    filterList.push(item);
+  });
 
   return (
     <div
@@ -92,7 +107,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
         >
-          <div className={"dropdown"}>{filterList}</div>
+          <div css={dropdownCss}>{filterList}</div>
         </Dropdown>
       </React.Fragment>
     </div>
