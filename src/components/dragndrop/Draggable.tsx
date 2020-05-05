@@ -4,7 +4,7 @@ import { useDrag } from "react-dnd";
 import "../../css/Dnd.css";
 import { ItemTypes } from "../../types/ItemTypes";
 
-import { Button, Dropdown, DropdownItem, Icon } from "bold-ui";
+import { Button, Dropdown, TextField, Icon } from "bold-ui";
 import { jsx, css } from "@emotion/core";
 
 interface DraggableProps<T> {
@@ -34,53 +34,41 @@ export function Draggable<T>(props: DraggableProps<T>) {
       isDragging: !!monitor.isDragging(),
     }),
   });
+  const filteredList: Set<String> = new Set([]);
   const buttonRef: any = useRef<HTMLButtonElement>();
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const handleSelect = (content: string, id: string) => {
-    return function e() {
-      var element = document.getElementById(id);
-      element && element.classList.toggle("selected");
+    return () => {
+      //var element = document.getElementById(id);
+      //element && element.classList.toggle("selected");
       filter.has(content) ? filter.delete(content) : filter.add(content);
       props.handleFilterUpdate(props.id as keyof T, filter);
     };
   };
-
-  const style = css`
-    border: 1px solid black;
-    border-radius: 2px;
-    color: #24252e;
-    padding-left: 0px;
-    font-size: 13px;
-  `;
-  const dndBoxCss = css`
-    display: inline-block;
-    padding: 2px 4px;
-    margin: 1px 1px 1px 1px;
-  `;
-  const dropdownItemCss = css`
-    width: 100%;
-    cursor: pointer;
-    border-bottom: 1px solid black;
-    padding: 2px;
-  `;
-  const selectedItemCss = css`
-    text-decoration: line-through;
-  `;
-  const dropdownCss = css`
-    height: 120px;
-    max-width: 300px;
-    overflow: auto;
-  `;
+  const handleSearch = () => {
+    return function e(event: any) {
+      var txt: string = event.currentTarget.value;
+      filter.forEach((element) => {
+        //if (element.search(txt)) {
+        //}
+      });
+    };
+  };
 
   const filterList: ReactElement[] = [];
 
   props.filterSet.forEach((element) => {
     var id = props.id + element;
-    var selected = filter.has(element) ? "selected" : "";
+    const selected = filter.has(element);
     var item: ReactElement = (
-      <div id={id} css={dropdownItemCss} className={selected} onClick={handleSelect(element, id)}>
+      <div
+        key={id}
+        id={id}
+        css={[styles.dropdownItem, selected && styles.selectedItem]}
+        onClick={handleSelect(element, id)}
+      >
         <span>{element}</span>
       </div>
     );
@@ -93,10 +81,17 @@ export function Draggable<T>(props: DraggableProps<T>) {
       style={{
         opacity: isDragging ? 0.5 : 1,
       }}
-      css={dndBoxCss}
+      css={styles.dndBox}
     >
       <React.Fragment>
-        <Button style={style} innerRef={buttonRef} onClick={handleClick} size="small" kind="primary" skin="outline">
+        <Button
+          style={styles.button}
+          innerRef={buttonRef}
+          onClick={handleClick}
+          size="small"
+          kind="primary"
+          skin="outline"
+        >
           <Icon icon="dots" />
           {props.value}
         </Button>
@@ -107,9 +102,45 @@ export function Draggable<T>(props: DraggableProps<T>) {
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
         >
-          <div css={dropdownCss}>{filterList}</div>
+          <TextField
+            name="iconized"
+            id="iconized"
+            placeholder="Search for anything. Ex: Hercílio Luz"
+            icon="zoomOutline"
+            onChange={handleSearch()}
+          />
+          <div css={styles.dropdown}>{filterList}</div>
         </Dropdown>
       </React.Fragment>
     </div>
   );
 }
+
+const styles = {
+  button: css`
+    border: 1px solid black;
+    border-radius: 2px;
+    color: #24252e;
+    padding-left: 0px;
+    font-size: 13px;
+  `,
+  dndBox: css`
+    display: inline-block;
+    padding: 2px 4px;
+    margin: 1px 1px 1px 1px;
+  `,
+  dropdownItem: css`
+    width: 100%;
+    cursor: pointer;
+    border-bottom: 1px solid black;
+    padding: 2px;
+  `,
+  selectedItem: css`
+    text-decoration: line-through;
+  `,
+  dropdown: css`
+    height: 120px;
+    max-width: 300px;
+    overflow: auto;
+  `,
+};
