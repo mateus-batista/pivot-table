@@ -1,9 +1,8 @@
 /** @jsx jsx */
 import { Button, Cell, Grid, VFlow } from "bold-ui";
-import React, { useState } from "react";
+import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
-import "../../css/Tabela.css";
 import { ItemTypes } from "../../types/ItemTypes";
 import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
@@ -33,19 +32,11 @@ export function Board<T>(props: BoardProps<T>) {
     setIgnoredFilter(new Map(ignoredFilter));
   };
 
-  const style = css`
-    padding: 4px;
-  `;
-  const padding = css`
-    min-width: 100px;
-    box-sizing: inherit;
-  `;
-
   return (
     <DndProvider backend={Backend}>
       <Grid>
         <Cell md={4}>
-          <Box label="Campos disponíveis" styles={style}>
+          <Box label="Campos disponíveis" styles={styles.padding}>
             <Dropable<T>
               filtroLocal={ignoredFilter}
               type={ItemTypes.FILTER}
@@ -59,7 +50,7 @@ export function Board<T>(props: BoardProps<T>) {
         </Cell>
         <Cell md={8}>
           <VFlow>
-            <Box label="Linhas" styles={style}>
+            <Box label="Linhas" styles={styles.padding}>
               <Dropable<T>
                 filtroLocal={ignoredFilter}
                 handleUpdate={handleUpdateRowKeys}
@@ -70,7 +61,7 @@ export function Board<T>(props: BoardProps<T>) {
                 id={1}
               />
             </Box>
-            <Box label="Colunas" styles={style}>
+            <Box label="Colunas" styles={styles.padding}>
               <Dropable<T>
                 id={2}
                 filtroLocal={ignoredFilter}
@@ -90,3 +81,9 @@ export function Board<T>(props: BoardProps<T>) {
     </DndProvider>
   );
 }
+
+const styles = {
+  padding: css`
+    padding: 4px;
+  `,
+};
