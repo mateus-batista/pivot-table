@@ -19,9 +19,6 @@ interface DraggableProps<T> {
 
 export function Draggable<T>(props: DraggableProps<T>) {
   const { id, type, origin, value, filterSet, previousFilter, onDragEnd, handleFilterUpdate } = props;
-
-  console.log(previousFilter);
-
   const [filter, setFilter] = useState<Set<string>>(previousFilter || new Set([]));
   const [{ isDragging }, drag] = useDrag({
     item: { type, id, origin },
@@ -49,7 +46,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
     };
   };
   const handleSearch = () => {
-    return function e(event: any) {
+    return (event: any) => {
       const txt: string = event.currentTarget.value;
       filter.forEach((element) => {
         //if (element.search(txt)) {
@@ -66,7 +63,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
     const item: ReactElement = (
       <div
         key={key}
-        id={key}
         css={[styles.dropdownItem, filter.has(element) && styles.selectedItem]}
         onClick={handleSelect(element)}
       >

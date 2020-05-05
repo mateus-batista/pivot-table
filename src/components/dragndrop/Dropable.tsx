@@ -29,13 +29,13 @@ export function Dropable<T>(props: DropableProps<T>) {
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     props.handleFilterUpdate(key, filtro);
   };
-  const [{ isOver, isDragging }, drag] = useDrop({
+  const [{ isOver }, drag] = useDrop({
     accept: type,
     drop(item: DragItem<T>) {
       if (!keys.includes(item.id)) {
-        var temp = [...keys, item.id];
-        setKeys(temp);
-        handleUpdate && handleUpdate(temp);
+        const newKeys = [...keys, item.id];
+        setKeys(newKeys);
+        handleUpdate && handleUpdate(newKeys);
         return { result: id };
       }
       return { result: -1 };
@@ -43,7 +43,6 @@ export function Dropable<T>(props: DropableProps<T>) {
     collect: (monitor) => ({
       canDrop: !!monitor.canDrop(),
       isOver: monitor.isOver() ? monitor.getItem().origin !== id : monitor.isOver(),
-      isDragging: monitor.getItem() !== null,
     }),
   });
 
