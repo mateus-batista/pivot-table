@@ -69,7 +69,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setComplementaryTree(undefined);
   };
 
-  console.log("default tree", defaultTree);
+  console.log("defaultTree", defaultTree);
 
   if (dataKeyValues) {
     return (
@@ -131,9 +131,8 @@ function group<T extends any, K extends keyof T>(
     }
     return new GroupResult(arr.length);
   }
-  const valuesToIgnore = filterKeys?.get(key);
 
-  const obj: T & TreeRoot = groupByKey(arr, key, valuesToIgnore);
+  const obj: T & TreeRoot = groupByKey(arr, key, filterKeys);
 
   obj.key = key;
 
@@ -155,12 +154,17 @@ function group<T extends any, K extends keyof T>(
   return obj;
 }
 
-function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore?: Set<T[K]>) {
+function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore?: Map<K, Set<String>>) {
   return arr.reduce((result, curr) => {
     const keyValue = curr[key];
 
-    if (valuesToIgnore?.has(keyValue)) {
-      return result;
+    if (valuesToIgnore) {
+      for (let [ignoredKey, values] of valuesToIgnore) {
+        const ignoredValue = curr[ignoredKey];
+        if (values.has(ignoredValue)) {
+          return result;
+        }
+      }
     }
 
     if (!result[keyValue]) {
