@@ -1,11 +1,10 @@
 /** @jsx jsx */
+import { css, jsx } from "@emotion/core";
+import { Button, Dropdown, Icon, TextField } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import "../../css/Dnd.css";
 import { ItemTypes } from "../../types/ItemTypes";
-
-import { Button, Dropdown, TextField, Icon } from "bold-ui";
-import { jsx, css } from "@emotion/core";
 
 interface DraggableProps<T> {
   id: keyof T;
@@ -18,38 +17,40 @@ interface DraggableProps<T> {
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
 
-function updateFilter(filter: string) {}
-
 export function Draggable<T>(props: DraggableProps<T>) {
-  const [filter, setFilter] = useState<Set<string>>(props.previousFilter || new Set([]));
+  const { id, type, origin, value, filterSet, previousFilter, onDragEnd, handleFilterUpdate } = props;
+
+  console.log(previousFilter);
+
+  const [filter, setFilter] = useState<Set<string>>(previousFilter || new Set([]));
   const [{ isDragging }, drag] = useDrag({
-    item: { type: props.type, id: props.id, origin: props.origin },
+    item: { type, id, origin },
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (dropResult != null && dropResult.result !== -1) {
-        props.onDragEnd();
+        onDragEnd();
       }
     },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   });
-  const filteredList: Set<String> = new Set([]);
   const buttonRef: any = useRef<HTMLButtonElement>();
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const handleSelect = (content: string, id: string) => {
+  const handleSelect = (element: string) => {
     return () => {
-      //var element = document.getElementById(id);
+      //const element = document.getElementById(id);
       //element && element.classList.toggle("selected");
-      filter.has(content) ? filter.delete(content) : filter.add(content);
-      props.handleFilterUpdate(props.id as keyof T, filter);
+      filter.has(element) ? filter.delete(element) : filter.add(element);
+      setFilter(new Set(filter));
+      handleFilterUpdate(id as keyof T, filter);
     };
   };
   const handleSearch = () => {
     return function e(event: any) {
-      var txt: string = event.currentTarget.value;
+      const txt: string = event.currentTarget.value;
       filter.forEach((element) => {
         //if (element.search(txt)) {
         //}
@@ -59,15 +60,15 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   const filterList: ReactElement[] = [];
 
-  props.filterSet.forEach((element) => {
-    var id = props.id + element;
-    const selected = filter.has(element);
-    var item: ReactElement = (
+  filterSet.forEach((element) => {
+    const key = id + element;
+
+    const item: ReactElement = (
       <div
-        key={id}
-        id={id}
-        css={[styles.dropdownItem, selected && styles.selectedItem]}
-        onClick={handleSelect(element, id)}
+        key={key}
+        id={key}
+        css={[styles.dropdownItem, filter.has(element) && styles.selectedItem]}
+        onClick={handleSelect(element)}
       >
         <span>{element}</span>
       </div>
@@ -93,7 +94,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
           skin="outline"
         >
           <Icon icon="dots" />
-          {props.value}
+          {value}
         </Button>
         <Dropdown
           anchorRef={buttonRef}

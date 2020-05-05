@@ -30,7 +30,7 @@ export function Board<T>(props: BoardProps<T>) {
   };
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     ignoredFilter.set(key, filtro);
-    return ignoredFilter;
+    setIgnoredFilter(new Map(ignoredFilter));
   };
 
   const style = css`
