@@ -52,6 +52,7 @@ export function Table<T>(props: TableProps<T>) {
     );
   } else if (rowData && rowKeys) {
     const rowResult = getResult(rowData, "column");
+    console.log(rowResult);
     const [divs] = getHorizontal<T>({ results: rowResult, keys: rowKeys, data: rowData, keysMapping, headerSpace: 2 });
     table.push(...divs);
   } else if (columnData && columnKeys) {
@@ -324,6 +325,7 @@ function getResult<T>(
       let iniAux: InitialPosition;
       const increaseSpan = !onlyIncreaseSpanOnKeys || onlyIncreaseSpanOnKeys.includes(obj.data.key);
       Object.keys(obj.data)
+        .sort()
         .filter((k) => !TreeRootKeys.includes(k))
         .forEach((key) => {
           let span = { value: 1 };

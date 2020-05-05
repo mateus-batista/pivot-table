@@ -69,8 +69,8 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setComplementaryTree(undefined);
   };
 
-  console.log("default tree", defaultTree);
-  console.log("data", data);
+  console.log("defaultTree", defaultTree);
+
   if (dataKeyValues) {
     return (
       <VFlow>
