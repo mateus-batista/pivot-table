@@ -1,13 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Dropdown, Icon, TextField } from "bold-ui";
+import { Button, Dropdown, Icon, DropdownItem } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
-import "../../css/Dnd.css";
 import { ItemTypes } from "../../types/ItemTypes";
 
 interface DraggableProps<T> {
-  id: keyof T;
+  name: keyof T;
   type: ItemTypes;
   origin: number;
   value: string;
@@ -18,10 +17,15 @@ interface DraggableProps<T> {
 }
 
 export function Draggable<T>(props: DraggableProps<T>) {
-  const { id, type, origin, value, filterSet, previousFilter, onDragEnd, handleFilterUpdate } = props;
+  const { name, type, origin, value, filterSet, previousFilter, onDragEnd, handleFilterUpdate } = props;
+
   const [filter, setFilter] = useState<Set<string>>(previousFilter || new Set([]));
+  const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterSet);
+  const [open, setOpen] = useState(false);
+  const buttonRef: any = useRef<HTMLButtonElement>();
+
   const [{ isDragging }, drag] = useDrag({
-    item: { type, id, origin },
+    item: { type, name: name, origin },
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (dropResult != null && dropResult.result !== -1) {
@@ -32,38 +36,36 @@ export function Draggable<T>(props: DraggableProps<T>) {
       isDragging: !!monitor.isDragging(),
     }),
   });
-  const buttonRef: any = useRef<HTMLButtonElement>();
-  const [open, setOpen] = useState(false);
+
   const handleClick = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handleSelect = (element: string) => {
-    return () => {
-      //const element = document.getElementById(id);
-      //element && element.classList.toggle("selected");
-      filter.has(element) ? filter.delete(element) : filter.add(element);
-      setFilter(new Set(filter));
-      handleFilterUpdate(id as keyof T, filter);
-    };
+  const handleClose = () => {
+    setOpen(false);
+    setSearchedFilterSet(filterSet);
   };
-  const handleSearch = () => {
-    return (event: any) => {
-      const txt: string = event.currentTarget.value;
-      filter.forEach((element) => {
-        //if (element.search(txt)) {
-        //}
-      });
-    };
+  const handleSelect = (element: string) => () => {
+    filter.has(element) ? filter.delete(element) : filter.add(element);
+    setFilter(new Set(filter));
+    handleFilterUpdate(name as keyof T, filter);
+  };
+  const handleSearch = () => (event: any) => {
+    const searchResults = new Set<string>();
+    const txt: string = (event.currentTarget.value as string).toLocaleLowerCase();
+    filterSet.forEach((element) => {
+      const loweredElement = element.toLocaleLowerCase();
+      const found = loweredElement.search(txt) !== -1;
+      found && searchResults.add(element);
+    });
+    setSearchedFilterSet(searchResults);
   };
 
   const filterList: ReactElement[] = [];
 
-  filterSet.forEach((element) => {
-    const key = id + element;
-
+  searchedFilterSet.forEach((element) => {
+    const key = name + element;
     const item: ReactElement = (
       <div
         key={key}
-        css={[styles.dropdownItem, filter.has(element) && styles.selectedItem]}
+        css={[styles.dropdownItem, filter.has(element) ? styles.selectedItem : styles.unselectedItem]}
         onClick={handleSelect(element)}
       >
         <span>{element}</span>
@@ -73,13 +75,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
   });
 
   return (
-    <div
-      ref={drag}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-      }}
-      css={styles.dndBox}
-    >
+    <div key={name as string} ref={drag} css={[styles.dndBox, isDragging && styles.dndBoxDragging]}>
       <React.Fragment>
         <Button
           style={styles.button}
@@ -98,15 +94,16 @@ export function Draggable<T>(props: DraggableProps<T>) {
           autoclose={false}
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
+          style={styles.dropdown}
         >
-          <TextField
-            name="iconized"
-            id="iconized"
-            placeholder="Search for anything. Ex: Hercílio Luz"
-            icon="zoomOutline"
-            onChange={handleSearch()}
-          />
-          <div css={styles.dropdown}>{filterList}</div>
+          <DropdownItem css={styles.noOutline}>
+            <div css={styles.dropdownArea}>
+              <div css={styles.search}>
+                <input placeholder="Pesquisa" onChange={handleSearch()} />
+              </div>
+              {filterList}
+            </div>
+          </DropdownItem>
         </Dropdown>
       </React.Fragment>
     </div>
@@ -126,18 +123,33 @@ const styles = {
     padding: 2px 4px;
     margin: 1px 1px 1px 1px;
   `,
+  dndBoxDragging: css`
+    opacity: 0.5;
+  `,
   dropdownItem: css`
     width: 100%;
     cursor: pointer;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid white;
     padding: 2px;
   `,
   selectedItem: css`
-    text-decoration: line-through;
+    background-color: #ffffff;
   `,
-  dropdown: css`
+  unselectedItem: css`
+    background-color: #ebf0f8;
+  `,
+  dropdownArea: css`
     height: 120px;
     max-width: 300px;
     overflow: auto;
+  `,
+  dropdown: css`
+    padding: 0px;
+  `,
+  search: css`
+    padding: 4px;
+  `,
+  noOutline: css`
+    outline-color: white;
   `,
 };
