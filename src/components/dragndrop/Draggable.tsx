@@ -91,6 +91,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
         >
           <Icon icon="dots" />
           {value}
+          {filter.size > 0 && <Icon icon="filterFilled" />}
         </Button>
         <Dropdown
           anchorRef={buttonRef}

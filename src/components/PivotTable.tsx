@@ -60,13 +60,15 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
   }, [data, rowKeys, columnKeys, ignoredDataKeyValues, aggregator, aggregatorKey]);
 
-  const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => {
-    const [rowKeys, columnKeys] = values;
-    setIgnoredDataKeyValue(ignoredFilter);
-    setRowKeys(rowKeys);
-    setColumnKeys(columnKeys);
-    setDefaultTree(undefined);
-    setComplementaryTree(undefined);
+  const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newIgnoredFilter: Map<keyof T, Set<string>>) => {
+    const [newRowKeys, newColumnKeys] = values;
+    setIgnoredDataKeyValue(newIgnoredFilter);
+    setRowKeys(newRowKeys);
+    setColumnKeys(newColumnKeys);
+    if (newRowKeys !== rowKeys || newColumnKeys !== columnKeys || newIgnoredFilter !== ignoredDataKeyValues) {
+      setDefaultTree(undefined);
+      setComplementaryTree(undefined);
+    }
   };
 
   console.log("defaultTree", defaultTree);
@@ -148,7 +150,7 @@ function group<T extends any, K extends keyof T>(
   if (aggregator && aggregatorKey) {
     obj.value = aggregator(count);
   } else {
-    obj.value = count.reduce((prev, curr) => prev + curr);
+    obj.value = count.reduce((prev, curr) => prev + curr, 0);
   }
 
   return obj;
