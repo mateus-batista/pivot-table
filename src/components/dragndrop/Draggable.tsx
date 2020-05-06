@@ -18,10 +18,14 @@ interface DraggableProps<T> {
 
 export function Draggable<T>(props: DraggableProps<T>) {
   const { name, type, origin, value, filterSet, previousFilter, onDragEnd, handleFilterUpdate } = props;
+
   const [filter, setFilter] = useState<Set<string>>(previousFilter || new Set([]));
   const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterSet);
+  const [open, setOpen] = useState(false);
+  const buttonRef: any = useRef<HTMLButtonElement>();
+
   const [{ isDragging }, drag] = useDrag({
-    item: { type, name, origin },
+    item: { type, name: name, origin },
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (dropResult != null && dropResult.result !== -1) {
@@ -33,32 +37,25 @@ export function Draggable<T>(props: DraggableProps<T>) {
     }),
   });
 
-  const buttonRef: any = useRef<HTMLButtonElement>();
-  const [open, setOpen] = useState(false);
   const handleClick = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     setSearchedFilterSet(filterSet);
   };
-  const handleSelect = (element: string) => {
-    return () => {
-      filter.has(element) ? filter.delete(element) : filter.add(element);
-      setFilter(new Set(filter));
-      handleFilterUpdate(name as keyof T, filter);
-    };
+  const handleSelect = (element: string) => () => {
+    filter.has(element) ? filter.delete(element) : filter.add(element);
+    setFilter(new Set(filter));
+    handleFilterUpdate(name as keyof T, filter);
   };
-  const handleSearch = () => {
-    return (event: any) => {
-      const searchResults = new Set<string>();
-      const txt: string = (event.currentTarget.value as string).toLocaleLowerCase();
-      filterSet.forEach((element) => {
-        const loweredElement = element.toLocaleLowerCase();
-        const found = loweredElement.search(txt) !== -1;
-        found && searchResults.add(element);
-      });
-      setSearchedFilterSet(searchResults);
-      setOpen(true);
-    };
+  const handleSearch = () => (event: any) => {
+    const searchResults = new Set<string>();
+    const txt: string = (event.currentTarget.value as string).toLocaleLowerCase();
+    filterSet.forEach((element) => {
+      const loweredElement = element.toLocaleLowerCase();
+      const found = loweredElement.search(txt) !== -1;
+      found && searchResults.add(element);
+    });
+    setSearchedFilterSet(searchResults);
   };
 
   const filterList: ReactElement[] = [];
@@ -78,13 +75,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
   });
 
   return (
-    <div
-      ref={drag}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-      }}
-      css={styles.dndBox}
-    >
+    <div key={name as string} ref={drag} css={[styles.dndBox, isDragging && styles.dndBoxDragging]}>
       <React.Fragment>
         <Button
           style={styles.button}
@@ -131,6 +122,9 @@ const styles = {
     display: inline-block;
     padding: 2px 4px;
     margin: 1px 1px 1px 1px;
+  `,
+  dndBoxDragging: css`
+    opacity: 0.5;
   `,
   dropdownItem: css`
     width: 100%;
