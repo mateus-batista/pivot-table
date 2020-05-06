@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Dropdown, Icon, TextField, DropdownItem } from "bold-ui";
+import { Button, Dropdown, Icon, TextField, DropdownItem, FormControl, Select } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -79,6 +79,8 @@ export function Draggable<T>(props: DraggableProps<T>) {
     );
     filterList.push(item);
   });
+
+  const itemToString = (item: any) => item;
   return (
     <div
       ref={drag}
@@ -106,6 +108,16 @@ export function Draggable<T>(props: DraggableProps<T>) {
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
         >
+          <FormControl>
+            <Select<string>
+              items={Array.from(filterSet)}
+              itemToString={itemToString}
+              name="Filter results"
+              placeholder="batatinha"
+              multiple
+            />
+          </FormControl>
+
           <DropdownItem css={styles.null}>
             <div css={styles.dropdown}>
               <TextField name="iconized" id="iconized" placeholder="Pesquisa" onChange={handleSearch()} />
