@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Dropdown, Icon, TextField, DropdownItem, FormControl, Select } from "bold-ui";
+import { Button, Dropdown, Icon, DropdownItem } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -42,8 +42,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
   };
   const handleSelect = (element: string) => {
     return () => {
-      //const element = document.getElementById(id);
-      //element && element.classList.toggle("selected");
       filter.has(element) ? filter.delete(element) : filter.add(element);
       setFilter(new Set(filter));
       handleFilterUpdate(name as keyof T, filter);
@@ -67,11 +65,10 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   searchedFilterSet.forEach((element) => {
     const key = name + element;
-
     const item: ReactElement = (
       <div
         key={key}
-        css={[styles.dropdownItem, filter.has(element) && styles.selectedItem]}
+        css={[styles.dropdownItem, filter.has(element) ? styles.selectedItem : styles.unselectedItem]}
         onClick={handleSelect(element)}
       >
         <span>{element}</span>
@@ -80,7 +77,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
     filterList.push(item);
   });
 
-  const itemToString = (item: any) => item;
   return (
     <div
       ref={drag}
@@ -107,20 +103,13 @@ export function Draggable<T>(props: DraggableProps<T>) {
           autoclose={false}
           onClose={handleClose}
           popperProps={{ placement: "bottom" }}
+          style={styles.dropdown}
         >
-          <FormControl>
-            <Select<string>
-              items={Array.from(filterSet)}
-              itemToString={itemToString}
-              name="Filter results"
-              placeholder="batatinha"
-              multiple
-            />
-          </FormControl>
-
-          <DropdownItem css={styles.null}>
-            <div css={styles.dropdown}>
-              <TextField name="iconized" id="iconized" placeholder="Pesquisa" onChange={handleSearch()} />
+          <DropdownItem css={styles.noOutline}>
+            <div css={styles.dropdownArea}>
+              <div css={styles.search}>
+                <input placeholder="Pesquisa" onChange={handleSearch()} />
+              </div>
               {filterList}
             </div>
           </DropdownItem>
@@ -146,16 +135,27 @@ const styles = {
   dropdownItem: css`
     width: 100%;
     cursor: pointer;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid white;
     padding: 2px;
   `,
   selectedItem: css`
-    text-decoration: line-through;
+    background-color: #ffffff;
   `,
-  dropdown: css`
+  unselectedItem: css`
+    background-color: #ebf0f8;
+  `,
+  dropdownArea: css`
     height: 120px;
     max-width: 300px;
     overflow: auto;
   `,
-  null: css``,
+  dropdown: css`
+    padding: 0px;
+  `,
+  search: css`
+    padding: 4px;
+  `,
+  noOutline: css`
+    outline-color: white;
+  `,
 };

@@ -48,7 +48,7 @@ export function Dropable<T>(props: DropableProps<T>) {
 
   function deleteByKey(id: keyof T) {
     let tempKeys = [...keys];
-    let index = tempKeys.indexOf(id);
+    const index = tempKeys.indexOf(id);
     if (index > -1) {
       tempKeys.splice(index, 1);
     }
