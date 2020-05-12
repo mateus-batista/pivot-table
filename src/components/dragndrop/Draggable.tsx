@@ -48,7 +48,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
       filter.has(element) ? filter.delete(element) : filter.add(element);
       setFilter(new Set(filter));
       handleFilterUpdate(name as keyof T, filter);
-      console.log("aaa");
     }
   };
   const handleSearch = () => (event: any) => {
@@ -107,9 +106,8 @@ export function Draggable<T>(props: DraggableProps<T>) {
                 onChange={handleSearch()}
               />
             </div>
+            <div css={styles.dropdownArea}>{filterList}</div>
           </DropdownItem>
-
-          {filterList}
         </Dropdown>
       </React.Fragment>
     </div>
@@ -145,18 +143,16 @@ const styles = {
     background-color: #ebf0f8;
   `,
   dropdownArea: css`
-    height: 120px;
-    max-width: 300px;
+    max-height: 150px;
     overflow: auto;
   `,
   dropdown: css`
     padding: 0px;
   `,
   search: css`
-    padding: 4px;
+    padding: 8px;
   `,
   noOutline: css`
     outline-color: white;
-    padding: 4px;
   `,
 };
