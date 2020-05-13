@@ -96,18 +96,20 @@ export function Draggable<T>(props: DraggableProps<T>) {
           popperProps={{ placement: "bottom" }}
           style={styles.dropdown}
         >
-          <DropdownItem css={styles.noOutline}>
-            <div css={styles.search}>
-              <TextField
-                name="iconized"
-                id="iconized"
-                placeholder="Placeholder"
-                icon="zoomOutline"
-                onChange={handleSearch()}
-              />
-            </div>
+          <div>
+            <DropdownItem css={styles.noOutline}>
+              <div css={styles.search}>
+                <TextField
+                  name="iconized"
+                  id="iconized"
+                  placeholder="Placeholder"
+                  icon="zoomOutline"
+                  onChange={handleSearch()}
+                />
+              </div>
+            </DropdownItem>
             <div css={styles.dropdownArea}>{filterList}</div>
-          </DropdownItem>
+          </div>
         </Dropdown>
       </React.Fragment>
     </div>
