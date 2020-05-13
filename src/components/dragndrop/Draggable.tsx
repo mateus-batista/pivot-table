@@ -1,10 +1,9 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Dropdown, Icon, DropdownItem, TextField, Checkbox } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, Icon, TextField } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
-import { EventEmitter } from "events";
 
 interface DraggableProps<T> {
   name: keyof T;
