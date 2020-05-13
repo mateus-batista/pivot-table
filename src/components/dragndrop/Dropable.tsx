@@ -58,10 +58,9 @@ export function Dropable<T>(props: DropableProps<T>) {
 
   const draggableButtons = keys.map((key) => (
     <Draggable<T>
-      key={key as string}
       type={type}
       name={key}
-      value={keyMapping.get(key) as string}
+      value={keyMapping.get(key) || (key as string)}
       origin={id}
       filterSet={props.keys.get(key) as Set<string>}
       previousFilter={props.filtroLocal.get(key) as Set<string>}

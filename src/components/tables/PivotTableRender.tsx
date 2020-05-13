@@ -1,8 +1,10 @@
-import React, { ReactElement } from "react";
+/** @jsx jsx */
+import { css, jsx } from "@emotion/core";
+import { ReactElement } from "react";
 import { GroupResult } from "../../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { Dictionary } from "../PivotTable";
-import { TableWrapper, HeaderWrapper } from "./ElementWrappers";
+import { GridArea, PivotTableCell, PivotTableCellProps } from "./PivotTableCell";
 
 export type TableProps<T> = {
   keysMapping: Map<keyof T, string>;
@@ -14,7 +16,7 @@ export type TableProps<T> = {
 
 const RESULT_PATH_KEY = "RESULT";
 
-export function Table<T>(props: TableProps<T>) {
+export function PivotTableRender<T>(props: TableProps<T>) {
   const { rowKeys, columnKeys, rowData, columnData, keysMapping } = props;
 
   const table: ReactElement[] = [];
@@ -61,7 +63,19 @@ export function Table<T>(props: TableProps<T>) {
       ...getVertical<T>({ results: columnResult, keys: columnKeys, data: columnData, keysMapping })
     );
   }
-  return <TableWrapper>{table}</TableWrapper>;
+  return (
+    <div
+      key={"table"}
+      css={css`
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        place-items: center center;
+        place-content: start start;
+      `}
+    >
+      {table}
+    </div>
+  );
 }
 
 type GetHorinzontalProps<T> = {
@@ -105,44 +119,49 @@ function getHorizontal<T>({
     const rowEnd = rowStart + rowSpan;
     maxRowEnd = rowEnd > maxRowEnd ? rowEnd : maxRowEnd;
     maxColumnEnd = columnEnd > maxColumnEnd ? columnStart : maxColumnEnd;
-    const gridArea = `${rowStart} / ${columnStart} / ${rowEnd} / ${columnEnd} `;
+
+    const gridArea = new GridArea(rowStart, columnStart, rowEnd, columnEnd);
     divs.push(
-      <div key={gridArea} data-endcolumn={result.key === RESULT_PATH_KEY && !mixedTable} style={{ gridArea: gridArea }}>
+      <PivotTableCell
+        key={gridArea.toString()}
+        gridArea={gridArea}
+        endColumn={result.key === RESULT_PATH_KEY && !mixedTable}
+      >
         {result.key !== RESULT_PATH_KEY ? <b>{value}</b> : value}
-      </div>
+      </PivotTableCell>
     );
   }
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i];
-    const gridArea = `${headerSpace} / ${i + 1} / ${headerSpace + 1} / ${i + 2} `;
+    const gridArea = new GridArea(headerSpace, i + 1, headerSpace + 1, i + 2);
     divs.push(
-      <div key={gridArea} style={{ gridArea: gridArea }}>
-        <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
-      </div>
+      <PivotTableCell key={gridArea.toString()} gridArea={gridArea}>
+        <h5>{keysMapping.get(k)?.toUpperCase()}</h5>
+      </PivotTableCell>
     );
   }
 
   if (!mixedTable) {
-    const totaisGridArea = `${headerSpace} / ${maxColumnEnd} / ${headerSpace + 1} / ${maxColumnEnd + 1} `;
-    const totalGridArea = `${maxRowEnd} / 1 / ${maxRowEnd + 1} / ${maxColumnEnd} `;
-    const totalValueGridArea = `${maxRowEnd} / ${maxColumnEnd} / ${maxRowEnd + 1} / ${maxColumnEnd + 1} `;
+    const totaisGridArea = new GridArea(headerSpace, maxColumnEnd, headerSpace + 1, maxColumnEnd + 1);
+    const totalGridArea = new GridArea(maxRowEnd, 1, maxRowEnd + 1, maxColumnEnd);
+    const dataValueGridArea = new GridArea(maxRowEnd, maxColumnEnd, maxRowEnd + 1, maxColumnEnd + 1);
     divs.push(
-      <div key={totaisGridArea} data-endcolumn={true} style={{ gridArea: totaisGridArea }}>
-        <b>TOTAIS</b>
-      </div>,
-      <div key={totalGridArea} data-endrow={true} style={{ gridArea: totalGridArea }}>
-        <b>TOTAL</b>
-      </div>,
-      <div key={totalValueGridArea} data-endrow={true} data-endcolumn={true} style={{ gridArea: totalValueGridArea }}>
-        <b>{data.value}</b>
-      </div>
+      <PivotTableCell key={totaisGridArea.toString()} endColumn gridArea={totaisGridArea}>
+        <h5>TOTAIS</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={totalGridArea.toString()} endRow={true} gridArea={totalGridArea}>
+        <h5>TOTAL</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
+        <h5>{data.value?.toString()}</h5>
+      </PivotTableCell>
     );
   } else {
-    const gridArea = `${maxRowEnd} / 1 / ${maxRowEnd + 1} / ${keys.length + 2} `;
+    const gridArea = new GridArea(maxRowEnd, 1, maxRowEnd + 1, keys.length + 2);
     divs.push(
-      <div key={gridArea} data-endrow={true} style={{ gridArea: gridArea }}>
-        <b>TOTAIS</b>
-      </div>
+      <PivotTableCell key={gridArea.toString()} endRow gridArea={gridArea}>
+        <h5>TOTAIS</h5>
+      </PivotTableCell>
     );
   }
 
@@ -177,6 +196,7 @@ function getVertical<T>({
   const mixedTableStartRowCache = new Map<string, number>();
   const mixedTableColumnTotals = new Map<number, number>();
   const cellPositions = new Set<string>();
+
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
     const value = result.value;
@@ -200,77 +220,83 @@ function getVertical<T>({
     const columnEnd = columnStart + columnSpan;
     maxRowEnd = rowEnd > maxRowEnd ? rowEnd : maxRowEnd;
     maxColumnEnd = columnEnd > maxColumnEnd ? columnStart : maxColumnEnd;
-    const gridArea = `${rowStart} / ${columnStart} / ${rowEnd} / ${columnEnd}`;
-    divs.push(
-      <div key={gridArea} data-endrow={result.key === RESULT_PATH_KEY && !mixedTable} style={{ gridArea: gridArea }}>
-        {result.key !== RESULT_PATH_KEY ? <b>{value}</b> : value}
-      </div>
-    );
-    cellPositions.add(gridArea);
+    const gridArea = new GridArea(rowStart, columnStart, rowEnd, columnEnd);
+    if (result.key === RESULT_PATH_KEY) {
+      divs.push(
+        <PivotTableCell key={gridArea.toString()} endRow={mixedTable === undefined} gridArea={gridArea}>
+          {value}
+        </PivotTableCell>
+      );
+    } else {
+      divs.push(
+        <PivotTableCell key={gridArea.toString()} gridArea={gridArea}>
+          <h5>{value}</h5>
+        </PivotTableCell>
+      );
+    }
+    cellPositions.add(gridArea.toString());
   }
   divs.push(
     ...keys.map((k, i) => {
-      const gridArea = `${i + 1} / ${columnHeaderSpace} / ${i + 2} / ${columnHeaderSpace + 1} `;
+      const gridArea = new GridArea(i + 1, columnHeaderSpace, i + 2, columnHeaderSpace + 1);
       return (
-        <div key={gridArea} style={{ gridArea: gridArea }}>
-          <HeaderWrapper>{keysMapping.get(k)}</HeaderWrapper>
-        </div>
+        <PivotTableCell key={gridArea.toString()} gridArea={gridArea}>
+          <h5>{keysMapping.get(k)?.toUpperCase()}</h5>
+        </PivotTableCell>
       );
     })
   );
   if (!mixedTable) {
-    const totaisGridArea = `${maxRowEnd - 1} / 1 / ${maxRowEnd} / 2`;
-    const totalGridArea = `1 / ${maxColumnEnd + 1} / ${maxRowEnd - 1} / ${maxColumnEnd + 2}`;
-    const totalValueGridArea = `${maxRowEnd - 1} / ${maxColumnEnd + 1} / ${maxRowEnd} / ${maxColumnEnd + 2}`;
+    const totaisGridArea = new GridArea(maxRowEnd - 1, 1, maxRowEnd, 2);
+    const totalGridArea = new GridArea(1, maxColumnEnd + 1, maxRowEnd - 1, maxColumnEnd + 2);
+    const dataValueGridArea = new GridArea(maxRowEnd - 1, maxColumnEnd + 1, maxRowEnd, maxColumnEnd + 2);
     divs.push(
-      <div key={totaisGridArea} data-endrow={true} style={{ gridArea: totaisGridArea }}>
-        <b>TOTAIS</b>
-      </div>,
-      <div key={totalGridArea} data-endcolumn={true} style={{ gridArea: totalGridArea }}>
-        <b>TOTAL</b>
-      </div>,
-      <div key={totalValueGridArea} data-endrow={true} data-endcolumn={true} style={{ gridArea: totalValueGridArea }}>
-        <b>{data.value}</b>
-      </div>
+      <PivotTableCell key={totaisGridArea.toString()} endRow gridArea={totaisGridArea}>
+        <h5>TOTAIS</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={totalGridArea.toString()} endColumn gridArea={totalGridArea}>
+        <h5>TOTAL</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
+        <h5>{data.value}</h5>
+      </PivotTableCell>
     );
   } else {
-    const keysGapCellGridArea = `${keys.length + 1} / ${columnHeaderSpace} / ${keys.length + 2} / ${
-      columnHeaderSpace + 1
-    }`;
-    divs.push(<div key={keysGapCellGridArea} style={{ gridArea: keysGapCellGridArea }}></div>);
+    const gridArea = new GridArea(keys.length + 1, columnHeaderSpace, keys.length + 2, columnHeaderSpace + 1);
+    divs.push(<PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>);
     const totalRowNumber = mixedTable.totalRowNumber;
     mixedTableColumnTotals.forEach((value, key) => {
-      const gridArea = `${totalRowNumber} / ${key} / ${totalRowNumber + 1} / ${key + 1}`;
+      const gridArea = new GridArea(totalRowNumber, key, totalRowNumber + 1, key + 1);
       divs.push(
-        <div key={gridArea} data-endrow={true} style={{ gridArea: gridArea }}>
-          <b>{value}</b>
-        </div>
+        <PivotTableCell endRow key={gridArea.toString()} gridArea={gridArea}>
+          <h5>{value}</h5>
+        </PivotTableCell>
       );
     });
     mixedTable.rowTotalValues.forEach((value, key) => {
       const rowNumber = mixedTableStartRowCache.get(key) || 0;
-      const gridArea = `${rowNumber} / ${maxColumnEnd + 1} / ${rowNumber + 1} / ${maxColumnEnd + 2}`;
+      const gridArea = new GridArea(rowNumber, maxColumnEnd + 1, rowNumber + 1, maxColumnEnd + 2);
       divs.push(
-        <div key={gridArea} data-endcolumn={true} style={{ gridArea: gridArea }}>
+        <PivotTableCell endColumn key={gridArea.toString()} gridArea={gridArea}>
           <b>{value}</b>
-        </div>
+        </PivotTableCell>
       );
     });
-    const totaisGridArea = `1 / ${maxColumnEnd + 1} / ${keys.length + 2} / ${maxColumnEnd + 2}`;
-    const totaisValueGridArea = `${totalRowNumber} / ${maxColumnEnd + 1} / ${totalRowNumber + 1} / ${maxColumnEnd + 2}`;
+    const totaisGridArea = new GridArea(1, maxColumnEnd + 1, keys.length + 2, maxColumnEnd + 2);
+    const dataValueGridArea = new GridArea(totalRowNumber, maxColumnEnd + 1, totalRowNumber + 1, maxColumnEnd + 2);
     divs.push(
-      <div key={totaisGridArea} data-endcolumn={true} style={{ gridArea: totaisGridArea }}>
-        <b>TOTAIS</b>
-      </div>,
-      <div key={totaisValueGridArea} data-endrow={true} data-endcolumn={true} style={{ gridArea: totaisValueGridArea }}>
-        <b>{data.value}</b>
-      </div>
+      <PivotTableCell key={totaisGridArea.toString()} endColumn gridArea={totaisGridArea}>
+        <h5>TOTAIS</h5>
+      </PivotTableCell>,
+      <PivotTableCell endColumn endRow key={dataValueGridArea.toString()} gridArea={dataValueGridArea}>
+        <h5>{data.value}</h5>
+      </PivotTableCell>
     );
     for (let column = columnHeaderSpace + 1; column < maxColumnEnd + 1; column++) {
       for (let row = keys.length + 2; row < totalRowNumber; row++) {
-        const gridArea = `${row} / ${column} / ${row + 1} / ${column + 1}`;
-        if (!cellPositions.has(gridArea)) {
-          divs.push(<div key={gridArea} style={{ gridArea: gridArea }}></div>);
+        const gridArea = new GridArea(row, column, row + 1, column + 1);
+        if (!cellPositions.has(gridArea.toString())) {
+          divs.push(<PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>);
         }
       }
     }
@@ -325,8 +351,8 @@ function getResult<T>(
       let iniAux: InitialPosition;
       const increaseSpan = !onlyIncreaseSpanOnKeys || onlyIncreaseSpanOnKeys.includes(obj.data.key);
       Object.keys(obj.data)
-        .sort()
         .filter((k) => !TreeRootKeys.includes(k))
+        .sort()
         .forEach((key) => {
           let span = { value: 1 };
           let spanTree = [span];

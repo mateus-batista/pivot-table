@@ -4,7 +4,7 @@ import { GroupResult } from "../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Aggregators } from "./filter/Aggregators";
 import { Board } from "./filter/Board";
-import { Table } from "./tables/Table";
+import { PivotTableRender } from "./tables/PivotTableRender";
 
 export type PivotTableProps<T> = {
   data: T[];
@@ -91,7 +91,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
         </Grid>
 
         {defaultTree && complemetaryTree ? (
-          <Table
+          <PivotTableRender
             rowData={defaultTree}
             rowKeys={rowKeys}
             columnData={complemetaryTree}
@@ -99,9 +99,9 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
             keysMapping={keyMapping}
           />
         ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
-          <Table rowData={defaultTree} rowKeys={rowKeys} keysMapping={keyMapping} />
+          <PivotTableRender rowData={defaultTree} rowKeys={rowKeys} keysMapping={keyMapping} />
         ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
-          <Table columnData={defaultTree} columnKeys={columnKeys} keysMapping={keyMapping} />
+          <PivotTableRender columnData={defaultTree} columnKeys={columnKeys} keysMapping={keyMapping} />
         ) : (
           <div>
             <b>Total: {data.length}</b>

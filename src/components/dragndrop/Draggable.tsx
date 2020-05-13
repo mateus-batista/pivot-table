@@ -140,8 +140,8 @@ const styles = {
     background-color: #ebf0f8;
   `,
   dropdownArea: css`
-    height: 120px;
     max-width: 300px;
+    max-height: 300px;
     overflow: auto;
   `,
   dropdown: css`
