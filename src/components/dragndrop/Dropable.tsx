@@ -68,35 +68,30 @@ export function Dropable<T>(props: DropableProps<T>) {
       onDragEnd={() => deleteByKey(key)}
     />
   ));
-
-  const hoverSpan = <div css={styles.textSpan}>Solte aqui o item para inserir na tabela</div>;
-  const placeholderSpan = <div css={styles.textSpan}>Arraste os itens para inserir na tabela</div>;
+  const hasKeys = keys.length > 0;
+  const styles = {
+    placeholder: css`
+      align-self: center;
+    `,
+    hoverBorder: css`
+      border: 2px dotted black;
+    `,
+    box: css`
+      display: flex;
+      justify-content: ${hasKeys ? "flex-start" : "center"};
+      min-height: inherit;
+    `,
+  };
 
   return (
-    <div ref={drag} css={styles.box}>
-      {isOver ? (
-        <div css={styles.hoverBorder}>{keys.length < 1 ? hoverSpan : draggableButtons}</div>
+    <div ref={drag} css={[styles.box, isOver && styles.hoverBorder]}>
+      {hasKeys ? (
+        <div>{draggableButtons}</div>
       ) : (
-        <div css={styles.box}>{keys.length < 1 ? placeholderSpan : draggableButtons}</div>
+        <div css={styles.placeholder}>
+          {isOver ? "Solte aqui o item para inserir na tabela" : "Arraste os itens para inserir na tabela"}
+        </div>
       )}
     </div>
   );
 }
-
-const styles = {
-  textSpan: css`
-    display: block;
-    text-align: center;
-    padding-top: 11px;
-    padding-bottom: 10px;
-  `,
-  hoverBorder: css`
-    min-height: inherit;
-    border: 2px dotted black;
-    padding: 2px;
-  `,
-  box: css`
-    min-height: inherit;
-    padding: 2px;
-  `,
-};

@@ -10,9 +10,11 @@ import { VFlow } from "bold-ui";
 
 export function Home(props: any) {
   return (
-    <VFlow vSpacing={4}>
-      <PivotTable<AtendimentoProfissional> data={atendimentos} keyMapping={AtendimentoProfissonalKeyMapping} />
-      <PivotTableRef />
-    </VFlow>
+    <div style={{ width: "90%", margin: "auto" }}>
+      <VFlow vSpacing={4}>
+        <PivotTable<AtendimentoProfissional> data={atendimentos} keyMapping={AtendimentoProfissonalKeyMapping} />
+        <PivotTableRef />
+      </VFlow>
+    </div>
   );
 }

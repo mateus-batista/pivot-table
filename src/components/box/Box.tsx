@@ -29,7 +29,7 @@ export function Box(props: any) {
       <div
         css={css`
           padding: 1rem;
-          min-height: 3rem;
+          height: 8.18rem;
           ${styles}
         `}
       >

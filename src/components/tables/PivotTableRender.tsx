@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { GroupResult } from "../../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { Dictionary } from "../PivotTable";
-import { GridArea, PivotTableCell, PivotTableCellProps } from "./PivotTableCell";
+import { GridArea, PivotTableCell } from "./PivotTableCell";
 
 export type TableProps<T> = {
   keysMapping: Map<keyof T, string>;

@@ -1,20 +1,23 @@
-/** @jsx jsx */
-import { Button, Cell, Grid, VFlow } from "bold-ui";
+import React from "react";
+import { Button, Cell, Grid, HFlow, VFlow } from "bold-ui";
 import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
 import { ItemTypes } from "../../types/ItemTypes";
 import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
-import { jsx, css } from "@emotion/core";
-interface BoardProps<T> {
+import { Aggregators } from "./Aggregators";
+interface BoardProps<T extends any> {
   keys: Map<keyof T, Set<string>>;
   keyMapping: Map<keyof T, string>;
+  sample: T;
   handleSubmit: (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => void;
+  handleAggregatorChange: (aggregator: ((values: number[]) => number) | undefined) => void;
+  handleAggregatorKeyChange: (key: keyof T) => void;
 }
 
-export function Board<T>(props: BoardProps<T>) {
-  const { keys, keyMapping, handleSubmit } = props;
+export function Board<T extends any>(props: BoardProps<T>) {
+  const { keys, keyMapping, handleSubmit, sample, handleAggregatorChange, handleAggregatorKeyChange } = props;
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
   const [ignoredFilter, setIgnoredFilter] = useState<Map<keyof T, Set<string>>>(new Map<keyof T, Set<string>>());
@@ -35,8 +38,8 @@ export function Board<T>(props: BoardProps<T>) {
   return (
     <DndProvider backend={Backend}>
       <Grid>
-        <Cell md={4}>
-          <Box label="Campos disponíveis" styles={styles.padding}>
+        <Cell md={6}>
+          <Box label="Campos disponíveis">
             <Dropable<T>
               filtroLocal={ignoredFilter}
               type={ItemTypes.FILTER}
@@ -48,42 +51,50 @@ export function Board<T>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell md={8}>
+        <Cell md={6}>
+          <Box label="Linhas">
+            <Dropable<T>
+              filtroLocal={ignoredFilter}
+              handleUpdate={handleUpdateRowKeys}
+              handleFilterUpdate={handleFilterUpdate}
+              type={ItemTypes.FILTER}
+              keyMapping={keyMapping}
+              keys={keys}
+              id={1}
+            />
+          </Box>
+        </Cell>
+        <Cell md={6}>
+          <Box label="Colunas">
+            <Dropable<T>
+              id={2}
+              filtroLocal={ignoredFilter}
+              keyMapping={keyMapping}
+              keys={keys}
+              handleUpdate={handleUpdateColumnKeys}
+              handleFilterUpdate={handleFilterUpdate}
+              type={ItemTypes.FILTER}
+            />
+          </Box>
+        </Cell>
+        <Cell md={6}>
           <VFlow>
-            <Box label="Linhas" styles={styles.padding}>
-              <Dropable<T>
-                filtroLocal={ignoredFilter}
-                handleUpdate={handleUpdateRowKeys}
-                handleFilterUpdate={handleFilterUpdate}
-                type={ItemTypes.FILTER}
+            <Box label="Valor">
+              <Aggregators
+                sample={sample}
                 keyMapping={keyMapping}
-                keys={keys}
-                id={1}
+                handleAggregatorChange={handleAggregatorChange}
+                handleAggregatorKeyChange={handleAggregatorKeyChange}
               />
             </Box>
-            <Box label="Colunas" styles={styles.padding}>
-              <Dropable<T>
-                id={2}
-                filtroLocal={ignoredFilter}
-                keyMapping={keyMapping}
-                keys={keys}
-                handleUpdate={handleUpdateColumnKeys}
-                handleFilterUpdate={handleFilterUpdate}
-                type={ItemTypes.FILTER}
-              />
-            </Box>
-            <Button kind="primary" size="small" onClick={onClick}>
-              Gerar tabela
-            </Button>
+            <HFlow justifyContent="flex-end">
+              <Button kind="primary" size="medium" onClick={onClick}>
+                Gerar tabela
+              </Button>
+            </HFlow>
           </VFlow>
         </Cell>
       </Grid>
     </DndProvider>
   );
 }
-
-const styles = {
-  padding: css`
-    padding: 4px;
-  `,
-};

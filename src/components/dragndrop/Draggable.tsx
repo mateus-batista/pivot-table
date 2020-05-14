@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Checkbox, Dropdown, DropdownItem, Icon, TextField } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, Icon, TextField, Tag, HFlow } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -84,9 +84,11 @@ export function Draggable<T>(props: DraggableProps<T>) {
           kind="primary"
           skin="outline"
         >
-          <Icon icon="dots" />
-          {value}
-          {filter.size > 0 && <Icon icon="filterFilled" />}
+          <HFlow hSpacing={0.5}>
+            <Icon icon="dots" />
+            {value}
+            {filter.size > 0 && <Tag type="normal">{filter.size}</Tag>}
+          </HFlow>
         </Button>
         <Dropdown
           anchorRef={buttonRef}
@@ -145,12 +147,7 @@ const styles = {
     background-color: #ebf0f8;
   `,
   dropdownArea: css`
-<<<<<<< HEAD
-    max-width: 300px;
-    max-height: 300px;
-=======
     max-height: 150px;
->>>>>>> ede2f02530b3a67a2cb3422e39a457b4b0131da3
     overflow: auto;
   `,
   dropdown: css`

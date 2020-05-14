@@ -37,18 +37,21 @@ export function PivotTableCell(props: PivotTableCellProps) {
 
   const handleMouseEnter = () => {
     document
-      .querySelectorAll(`div[data-rownumber="${gridArea.rowStart}"]`)
+      .querySelectorAll(`div[data-rownumber="${gridArea.rowStart}"], div[data-columnnumber="${gridArea.columnStart}"]`)
       .forEach((n) => n.setAttribute("style", `background-color: ${theme.pallete.gray.c90}`));
   };
 
   const handleMouseLeave = () => {
-    document.querySelectorAll(`div[data-rownumber="${gridArea.rowStart}"]`).forEach((n) => n.setAttribute("style", ""));
+    document
+      .querySelectorAll(`div[data-rownumber="${gridArea.rowStart}"], div[data-columnnumber="${gridArea.columnStart}"]`)
+      .forEach((n) => n.setAttribute("style", ""));
   };
   return (
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       data-rownumber={gridArea.rowStart}
+      data-columnnumber={gridArea.columnStart}
       key={gridArea.toString()}
       css={css([
         `

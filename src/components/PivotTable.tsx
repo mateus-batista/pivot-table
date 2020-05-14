@@ -1,12 +1,11 @@
-import { Cell, Grid, VFlow } from "bold-ui";
+import { VFlow } from "bold-ui";
 import React, { useEffect, useState } from "react";
 import { GroupResult } from "../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
-import { Aggregators } from "./filter/Aggregators";
 import { Board } from "./filter/Board";
 import { PivotTableRender } from "./tables/PivotTableRender";
 
-export type PivotTableProps<T> = {
+export type PivotTableProps<T extends any> = {
   data: T[];
   keyMapping: Map<keyof T, string>;
 };
@@ -32,7 +31,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [aggregatorKey, setAggregatorKey] = useState<keyof T>();
 
-  const handkeAggregatorKey = (key: keyof T) => setAggregatorKey(key);
+  const handleAggregatorKey = (key: keyof T) => setAggregatorKey(key);
   const handleAggregator = (fun: ((values: number[]) => number) | undefined) => {
     setAggregator(() => fun);
   };
@@ -71,26 +70,19 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     }
   };
 
-  console.log("defaultTree", defaultTree);
-
-  if (dataKeyValues) {
+  if (dataKeyValues && defaultTree) {
     return (
       <VFlow>
-        <Grid>
-          <Cell xs={4}>
-            <Aggregators
-              sample={data[0]}
-              keyMapping={keyMapping}
-              handleAggregatorChange={handleAggregator}
-              handleAggregatorKeyChange={handkeAggregatorKey}
-            />
-          </Cell>
-          <Cell xs={8}>
-            <Board keys={dataKeyValues} keyMapping={keyMapping} handleSubmit={handleSubmit} />
-          </Cell>
-        </Grid>
+        <Board<T>
+          keys={dataKeyValues}
+          keyMapping={keyMapping}
+          handleSubmit={handleSubmit}
+          sample={data[0]}
+          handleAggregatorChange={handleAggregator}
+          handleAggregatorKeyChange={handleAggregatorKey}
+        />
 
-        {defaultTree && complemetaryTree ? (
+        {complemetaryTree ? (
           <PivotTableRender
             rowData={defaultTree}
             rowKeys={rowKeys}
@@ -98,13 +90,13 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
             columnKeys={columnKeys}
             keysMapping={keyMapping}
           />
-        ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
+        ) : rowKeys.length > 0 && columnKeys.length === 0 ? (
           <PivotTableRender rowData={defaultTree} rowKeys={rowKeys} keysMapping={keyMapping} />
-        ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
+        ) : rowKeys.length === 0 && columnKeys.length > 0 ? (
           <PivotTableRender columnData={defaultTree} columnKeys={columnKeys} keysMapping={keyMapping} />
         ) : (
           <div>
-            <b>Total: {data.length}</b>
+            <b>Total: {defaultTree.value}</b>
           </div>
         )}
       </VFlow>
