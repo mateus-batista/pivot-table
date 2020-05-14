@@ -70,7 +70,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     }
   };
 
-  if (dataKeyValues && defaultTree) {
+  if (dataKeyValues) {
     return (
       <VFlow>
         <Board<T>
@@ -82,7 +82,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
           handleAggregatorKeyChange={handleAggregatorKey}
         />
 
-        {complemetaryTree ? (
+        {defaultTree && complemetaryTree ? (
           <PivotTableRender
             rowData={defaultTree}
             rowKeys={rowKeys}
@@ -90,13 +90,13 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
             columnKeys={columnKeys}
             keysMapping={keyMapping}
           />
-        ) : rowKeys.length > 0 && columnKeys.length === 0 ? (
+        ) : defaultTree && rowKeys.length > 0 && columnKeys.length === 0 ? (
           <PivotTableRender rowData={defaultTree} rowKeys={rowKeys} keysMapping={keyMapping} />
-        ) : rowKeys.length === 0 && columnKeys.length > 0 ? (
+        ) : defaultTree && rowKeys.length === 0 && columnKeys.length > 0 ? (
           <PivotTableRender columnData={defaultTree} columnKeys={columnKeys} keysMapping={keyMapping} />
         ) : (
           <div>
-            <b>Total: {defaultTree.value}</b>
+            <b>Total: {defaultTree && defaultTree.value}</b>
           </div>
         )}
       </VFlow>

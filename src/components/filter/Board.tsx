@@ -38,7 +38,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
   return (
     <DndProvider backend={Backend}>
       <Grid>
-        <Cell md={6}>
+        <Cell md={6} sm={12}>
           <Box label="Campos disponíveis">
             <Dropable<T>
               filtroLocal={ignoredFilter}
@@ -51,7 +51,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell md={6}>
+        <Cell md={6} sm={12}>
           <Box label="Linhas">
             <Dropable<T>
               filtroLocal={ignoredFilter}
@@ -64,7 +64,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell md={6}>
+        <Cell md={6} sm={12}>
           <Box label="Colunas">
             <Dropable<T>
               id={2}
@@ -77,7 +77,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell md={6}>
+        <Cell md={6} sm={12}>
           <VFlow>
             <Box label="Valor">
               <Aggregators

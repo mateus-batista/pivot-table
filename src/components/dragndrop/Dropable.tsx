@@ -26,6 +26,8 @@ export function Dropable<T>(props: DropableProps<T>) {
 
   const [keys, setKeys] = useState<Array<keyof T>>(initialState || []);
 
+  console.log(keys);
+
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     props.handleFilterUpdate(key, filtro);
   };
@@ -58,6 +60,7 @@ export function Dropable<T>(props: DropableProps<T>) {
 
   const draggableButtons = keys.map((key) => (
     <Draggable<T>
+      key={key as string}
       type={type}
       name={key}
       value={keyMapping.get(key) || (key as string)}
@@ -78,8 +81,8 @@ export function Dropable<T>(props: DropableProps<T>) {
     `,
     box: css`
       display: flex;
+      height: 100%;
       justify-content: ${hasKeys ? "flex-start" : "center"};
-      min-height: inherit;
     `,
   };
 

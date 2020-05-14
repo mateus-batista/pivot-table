@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Checkbox, Dropdown, DropdownItem, Icon, TextField, Tag, HFlow } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, Tag, TextField } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -74,7 +74,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
   });
 
   return (
-    <div key={name as string} ref={drag} css={[styles.dndBox, isDragging && styles.dndBoxDragging]}>
+    <div ref={drag} css={[styles.dndBox, isDragging && styles.dndBoxDragging]}>
       <React.Fragment>
         <Button
           style={styles.button}
