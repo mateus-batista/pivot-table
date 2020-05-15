@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, Tag, TextField } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, Tag, TextField, useTheme } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -22,6 +22,44 @@ export function Draggable<T>(props: DraggableProps<T>) {
   const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterSet);
   const [open, setOpen] = useState(false);
   const buttonRef: any = useRef<HTMLButtonElement>();
+  const theme = useTheme();
+
+  const styles = {
+    button: css`
+      border: solid 1px ${theme.pallete.gray.c60};
+      color: ${theme.pallete.gray.c10};
+      border-radius: 2px;
+      box-shadow: ${theme.shadows.outer[10]};
+      padding-left: 0px;
+      font-size: 13px;
+    `,
+    dndBox: css`
+      display: inline-block;
+      margin: 0.25rem 0.25rem;
+    `,
+    dndBoxDragging: css`
+      box-shadow: ${theme.shadows.outer[10]};
+    `,
+    dropdownItem: css`
+      width: 100%;
+      cursor: pointer;
+      border-top: 1px solid gray;
+      padding: 0.25rem;
+    `,
+    dropdownArea: css`
+      max-height: 10rem;
+      overflow: auto;
+    `,
+    dropdown: css`
+      padding: 0rem;
+    `,
+    search: css`
+      padding: 0.5rem;
+    `,
+    noOutline: css`
+      outline-color: ${theme.pallete.surface.main};
+    `,
+  };
 
   const [{ isDragging }, drag] = useDrag({
     item: { type, name: name, origin },
@@ -50,8 +88,9 @@ export function Draggable<T>(props: DraggableProps<T>) {
   const handleSearch = () => (event: any) => {
     const searchResults = new Set<string>();
     const txt: string = (event.currentTarget.value as string).toLocaleLowerCase();
-    filterSet.forEach((element) => {
-      const loweredElement = element.toLocaleLowerCase();
+    filterSet.forEach((element: string) => {
+      const stringElement = element + "";
+      const loweredElement = stringElement.toLocaleLowerCase();
       const found = loweredElement.search(txt) !== -1;
       found && searchResults.add(element);
     });
@@ -80,12 +119,13 @@ export function Draggable<T>(props: DraggableProps<T>) {
           onClick={handleClick}
           size="small"
           kind="primary"
-          skin="outline"
+          skin="ghost"
         >
           <HFlow hSpacing={0.5}>
             <Icon icon="dots" />
             {value}
             {ignoredValues.size > 0 && <Tag type="normal">{ignoredValues.size}</Tag>}
+            {open ? <Icon icon="angleUp" /> : <Icon icon="angleDown" />}
           </HFlow>
         </Button>
         <Dropdown
@@ -102,7 +142,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
                 <TextField
                   name="iconized"
                   id="iconized"
-                  placeholder="Placeholder"
+                  placeholder="Pesquisa"
                   icon="zoomOutline"
                   onChange={handleSearch()}
                 />
@@ -115,46 +155,3 @@ export function Draggable<T>(props: DraggableProps<T>) {
     </div>
   );
 }
-
-const styles = {
-  button: css`
-    border: 1px solid black;
-    border-radius: 2px;
-    color: #24252e;
-    padding-left: 0px;
-    font-size: 13px;
-  `,
-  dndBox: css`
-    display: inline-block;
-    padding: 2px 4px;
-    margin: 1px 1px 1px 1px;
-  `,
-  dndBoxDragging: css`
-    opacity: 0.5;
-  `,
-  dropdownItem: css`
-    width: 100%;
-    cursor: pointer;
-    border-top: 1px solid gray;
-    padding: 4px;
-  `,
-  selectedItem: css`
-    background-color: #ffffff;
-  `,
-  unselectedItem: css`
-    background-color: #ebf0f8;
-  `,
-  dropdownArea: css`
-    max-height: 150px;
-    overflow: auto;
-  `,
-  dropdown: css`
-    padding: 0px;
-  `,
-  search: css`
-    padding: 8px;
-  `,
-  noOutline: css`
-    outline-color: white;
-  `,
-};

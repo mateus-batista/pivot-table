@@ -80,7 +80,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
   return (
     <DndProvider backend={Backend}>
       <Grid>
-        <Cell md={6} sm={12}>
+        <Cell md={6} sm={12} xs={12}>
           <Box label="Campos disponíveis">
             <Dropable<T>
               filtroLocal={ignoredFilter}
@@ -93,21 +93,8 @@ export function Board<T extends any>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell md={6} sm={12}>
-          <Box label="Linhas">
-            <Dropable<T>
-              filtroLocal={ignoredFilter}
-              handleUpdate={handleUpdateRowKeys}
-              handleFilterUpdate={handleFilterUpdate}
-              type={ItemTypes.FILTER}
-              keyMapping={keyMapping}
-              keys={keys}
-              id={1}
-            />
-          </Box>
-        </Cell>
-        <Cell md={6} sm={12}>
-          <Box label="Colunas">
+        <Cell md={6} sm={12} xs={12}>
+          <Box label="Colunas" icon="hamburguerMenu" rotation="90">
             <Dropable<T>
               id={2}
               filtroLocal={ignoredFilter}
@@ -119,15 +106,36 @@ export function Board<T extends any>(props: BoardProps<T>) {
             />
           </Box>
         </Cell>
-        <Cell md={6} sm={12}>
+        <Cell md={6} sm={12} xs={12}>
+          <Box label="Linhas" icon="hamburguerMenu">
+            <Dropable<T>
+              filtroLocal={ignoredFilter}
+              handleUpdate={handleUpdateRowKeys}
+              handleFilterUpdate={handleFilterUpdate}
+              type={ItemTypes.FILTER}
+              keyMapping={keyMapping}
+              keys={keys}
+              id={1}
+            />
+          </Box>
+        </Cell>
+        <Cell md={6} sm={12} xs={12}>
           <VFlow>
             <Box label="Valor">
-              <Aggregators
-                sample={sample}
-                keyMapping={keyMapping}
-                handleAggregatorChange={handleAggregatorChange}
-                handleAggregatorKeyChange={handleAggregatorKeyChange}
-              />
+              <div
+                css={css`
+                  padding: 0.75rem;
+                  margin: 0.25rem;
+                  min-height: 7.18rem;
+                `}
+              >
+                <Aggregators
+                  sample={sample}
+                  keyMapping={keyMapping}
+                  handleAggregatorChange={handleAggregatorChange}
+                  handleAggregatorKeyChange={handleAggregatorKeyChange}
+                />
+              </div>
             </Box>
             <HFlow justifyContent="flex-end">
               <Button kind="primary" size="medium" onClick={onClick}>
