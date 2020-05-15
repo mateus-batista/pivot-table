@@ -26,8 +26,6 @@ export function Dropable<T>(props: DropableProps<T>) {
 
   const [keys, setKeys] = useState<Array<keyof T>>(initialState || []);
 
-  console.log(keys);
-
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     props.handleFilterUpdate(key, filtro);
   };
@@ -66,7 +64,7 @@ export function Dropable<T>(props: DropableProps<T>) {
       value={keyMapping.get(key) || (key as string)}
       origin={id}
       filterSet={props.keys.get(key) as Set<string>}
-      previousFilter={props.filtroLocal.get(key) as Set<string>}
+      ignoredValues={props.filtroLocal.get(key) || new Set<string>()}
       handleFilterUpdate={handleFilterUpdate}
       onDragEnd={() => deleteByKey(key)}
     />

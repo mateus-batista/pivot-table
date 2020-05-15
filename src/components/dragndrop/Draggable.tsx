@@ -11,15 +11,14 @@ interface DraggableProps<T> {
   origin: number;
   value: string;
   filterSet: Set<string>;
-  previousFilter: Set<string>;
+  ignoredValues: Set<string>;
   onDragEnd: () => void;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
 
 export function Draggable<T>(props: DraggableProps<T>) {
-  const { name, type, origin, value, filterSet, previousFilter, onDragEnd, handleFilterUpdate } = props;
+  const { name, type, origin, value, filterSet, ignoredValues, onDragEnd, handleFilterUpdate } = props;
 
-  const [filter, setFilter] = useState<Set<string>>(previousFilter || new Set([]));
   const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterSet);
   const [open, setOpen] = useState(false);
   const buttonRef: any = useRef<HTMLButtonElement>();
@@ -44,9 +43,8 @@ export function Draggable<T>(props: DraggableProps<T>) {
   };
   const handleSelect = (element: string) => (event: any) => {
     if (event.nativeEvent.isTrusted) {
-      filter.has(element) ? filter.delete(element) : filter.add(element);
-      setFilter(new Set(filter));
-      handleFilterUpdate(name as keyof T, filter);
+      ignoredValues.has(element) ? ignoredValues.delete(element) : ignoredValues.add(element);
+      handleFilterUpdate(name as keyof T, new Set<string>(ignoredValues));
     }
   };
   const handleSearch = () => (event: any) => {
@@ -64,10 +62,10 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   searchedFilterSet.forEach((element) => {
     const key = name + element;
-    const selected = filter.has(element);
+    const selected = !ignoredValues.has(element);
     const item: ReactElement = (
       <DropdownItem key={key} css={styles.dropdownItem}>
-        <Checkbox label={element} onChange={handleSelect(element)} checked={!selected} />
+        <Checkbox label={element} onChange={handleSelect(element)} checked={selected} />
       </DropdownItem>
     );
     filterList.push(item);
@@ -87,7 +85,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
           <HFlow hSpacing={0.5}>
             <Icon icon="dots" />
             {value}
-            {filter.size > 0 && <Tag type="normal">{filter.size}</Tag>}
+            {ignoredValues.size > 0 && <Tag type="normal">{ignoredValues.size}</Tag>}
           </HFlow>
         </Button>
         <Dropdown

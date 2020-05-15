@@ -8,7 +8,7 @@ export type AggregatorsProps<T extends any> = {
   handleAggregatorKeyChange: (key: keyof T) => void;
 };
 
-type ItemType = { label: string; value: ((values: number[]) => number) | undefined; default?: boolean };
+type ItemType = { id: string; label: string; value: ((values: number[]) => number) | undefined };
 
 export function Aggregators<T extends any>(props: AggregatorsProps<T>) {
   const { sample, keyMapping, handleAggregatorKeyChange, handleAggregatorChange } = props;
@@ -37,9 +37,9 @@ export function Aggregators<T extends any>(props: AggregatorsProps<T>) {
       <HFlow>
         {functionArr.map((f, idx) => (
           <Radio
-            key={idx}
+            key={f.id}
             name="aggregator"
-            checked={f.default}
+            checked={aggregator.id === f.id}
             label={f.label}
             value={idx}
             onChange={handleAggregatorSelect}
@@ -53,16 +53,19 @@ export function Aggregators<T extends any>(props: AggregatorsProps<T>) {
   );
 }
 const functionArr: ItemType[] = [
-  { label: "Contagem", value: undefined, default: true },
+  { id: "contagem", label: "Contagem", value: undefined },
   {
+    id: "media",
     label: "Média",
     value: (values: number[]): number => values.reduce((prev, curr) => prev + curr) / values.length,
   },
   {
+    id: "maximo",
     label: "Máximo",
     value: (values: number[]): number => values.reduce((prev, curr) => (prev > curr ? prev : curr)),
   },
   {
+    id: "minimo",
     label: "Mínimo",
     value: (values: number[]): number => values.reduce((prev, curr) => (prev < curr ? prev : curr)),
   },
