@@ -1,15 +1,17 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useTheme } from "bold-ui";
+import { useTheme, Icon } from "bold-ui";
 import { SerializedStyles } from "@emotion/serialize";
 
 export type BoxProps = {
   styles?: SerializedStyles;
+  icon?: string;
+  rotation?: number;
 };
 
 export function Box(props: any) {
   const theme = useTheme();
-  const { styles } = props;
+  const { styles, icon, rotation } = props;
   return (
     <div
       css={css`
@@ -18,18 +20,35 @@ export function Box(props: any) {
     >
       <div
         css={css`
-          background-color: #f0f0f5;
-          text-align: center;
-          padding: 1rem 0.62rem;
+          background-color: ${theme.pallete.gray.c90};
+          height: 2.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           border-bottom: 1px solid ${theme.pallete.divider};
         `}
       >
-        <h4>{props.label}</h4>
+        <h4
+          css={css`
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `}
+        >
+          {icon && (
+            <Icon
+              icon={icon}
+              style={css`
+                transform: rotate(${rotation}deg);
+              `}
+            />
+          )}
+          {props.label}
+        </h4>
       </div>
       <div
         css={css`
-          padding: 1rem;
-          height: 8.18rem;
+          min-height: 7.18rem;
           ${styles}
         `}
       >

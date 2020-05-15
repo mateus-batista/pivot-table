@@ -4,6 +4,7 @@ import { useDrop } from "react-dnd";
 import { Draggable } from "./Draggable";
 import { ItemTypes } from "../../types/ItemTypes";
 import { jsx, css } from "@emotion/core";
+import { useTheme } from "bold-ui";
 
 interface DropableProps<T> {
   id: number;
@@ -25,7 +26,7 @@ export function Dropable<T>(props: DropableProps<T>) {
   const { id, initialState, keyMapping, type, handleUpdate } = props;
 
   const [keys, setKeys] = useState<Array<keyof T>>(initialState || []);
-
+  const theme = useTheme();
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     props.handleFilterUpdate(key, filtro);
   };
@@ -75,11 +76,13 @@ export function Dropable<T>(props: DropableProps<T>) {
       align-self: center;
     `,
     hoverBorder: css`
-      border: 2px dotted black;
+      border: solid 1px ${theme.pallete.gray.c70};
     `,
     box: css`
       display: flex;
-      height: 100%;
+      min-height: 7.18rem;
+      margin: 0.25rem;
+      padding: 0.75rem;
       justify-content: ${hasKeys ? "flex-start" : "center"};
     `,
   };
@@ -90,7 +93,7 @@ export function Dropable<T>(props: DropableProps<T>) {
         <div>{draggableButtons}</div>
       ) : (
         <div css={styles.placeholder}>
-          {isOver ? "Solte aqui o item para inserir na tabela" : "Arraste os itens para inserir na tabela"}
+          <i>{isOver ? "Solte aqui o item para inserir na tabela" : "Arraste os itens para inserir na tabela"}</i>
         </div>
       )}
     </div>

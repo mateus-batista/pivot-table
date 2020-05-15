@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { css, jsx } from "@emotion/core";
 import { HFlow, Radio, Select, VFlow } from "bold-ui";
 import React, { useState } from "react";
 
@@ -33,23 +35,29 @@ export function Aggregators<T extends any>(props: AggregatorsProps<T>) {
   };
 
   return (
-    <VFlow>
-      <HFlow>
-        {functionArr.map((f, idx) => (
-          <Radio
-            key={f.id}
-            name="aggregator"
-            checked={aggregator.id === f.id}
-            label={f.label}
-            value={idx}
-            onChange={handleAggregatorSelect}
-          />
-        ))}
-      </HFlow>
-      {aggregator?.value && (
-        <Select<keyof T> items={numberKeys} itemToString={itemToString} value={key} onChange={handleKeySelect} />
-      )}
-    </VFlow>
+    <div
+      css={css`
+        padding: 1rem;
+      `}
+    >
+      <VFlow>
+        <HFlow>
+          {functionArr.map((f, idx) => (
+            <Radio
+              key={f.id}
+              name="aggregator"
+              checked={aggregator.id === f.id}
+              label={f.label}
+              value={idx}
+              onChange={handleAggregatorSelect}
+            />
+          ))}
+        </HFlow>
+        {aggregator?.value && (
+          <Select<keyof T> items={numberKeys} itemToString={itemToString} value={key} onChange={handleKeySelect} />
+        )}
+      </VFlow>
+    </div>
   );
 }
 const functionArr: ItemType[] = [
