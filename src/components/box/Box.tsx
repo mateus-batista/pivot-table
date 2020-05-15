@@ -1,12 +1,12 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useTheme, Icon } from "bold-ui";
+import { useTheme, Icon, Icons } from "bold-ui";
 import { SerializedStyles } from "@emotion/serialize";
 
 export type BoxProps = {
   styles?: SerializedStyles;
-  icon?: string;
-  rotation?: number;
+  icon?: Icons;
+  rotation?: "0" | "90";
 };
 
 export function Box(props: any) {

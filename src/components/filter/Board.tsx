@@ -122,12 +122,20 @@ export function Board<T extends any>(props: BoardProps<T>) {
         <Cell md={6} sm={12} xs={12}>
           <VFlow>
             <Box label="Valor">
-              <Aggregators
-                sample={sample}
-                keyMapping={keyMapping}
-                handleAggregatorChange={handleAggregatorChange}
-                handleAggregatorKeyChange={handleAggregatorKeyChange}
-              />
+              <div
+                css={css`
+                  padding: 0.75rem;
+                  margin: 0.25rem;
+                  min-height: 7.18rem;
+                `}
+              >
+                <Aggregators
+                  sample={sample}
+                  keyMapping={keyMapping}
+                  handleAggregatorChange={handleAggregatorChange}
+                  handleAggregatorKeyChange={handleAggregatorKeyChange}
+                />
+              </div>
             </Box>
             <HFlow justifyContent="flex-end">
               <Button kind="primary" size="medium" onClick={onClick}>

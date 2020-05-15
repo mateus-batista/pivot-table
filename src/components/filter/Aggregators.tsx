@@ -35,29 +35,23 @@ export function Aggregators<T extends any>(props: AggregatorsProps<T>) {
   };
 
   return (
-    <div
-      css={css`
-        padding: 1rem;
-      `}
-    >
-      <VFlow>
-        <HFlow>
-          {functionArr.map((f, idx) => (
-            <Radio
-              key={f.id}
-              name="aggregator"
-              checked={aggregator.id === f.id}
-              label={f.label}
-              value={idx}
-              onChange={handleAggregatorSelect}
-            />
-          ))}
-        </HFlow>
-        {aggregator?.value && (
-          <Select<keyof T> items={numberKeys} itemToString={itemToString} value={key} onChange={handleKeySelect} />
-        )}
-      </VFlow>
-    </div>
+    <VFlow>
+      <HFlow>
+        {functionArr.map((f, idx) => (
+          <Radio
+            key={f.id}
+            name="aggregator"
+            checked={aggregator.id === f.id}
+            label={f.label}
+            value={idx}
+            onChange={handleAggregatorSelect}
+          />
+        ))}
+      </HFlow>
+      {aggregator?.value && (
+        <Select<keyof T> items={numberKeys} itemToString={itemToString} value={key} onChange={handleKeySelect} />
+      )}
+    </VFlow>
   );
 }
 const functionArr: ItemType[] = [

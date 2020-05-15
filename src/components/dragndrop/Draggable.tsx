@@ -29,7 +29,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
       border: solid 1px ${theme.pallete.gray.c60};
       color: ${theme.pallete.gray.c10};
       border-radius: 2px;
-      box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -1px rgba(0, 0, 0, 0.04);
+      box-shadow: ${theme.shadows.outer[10]};
       padding-left: 0px;
       font-size: 13px;
     `,
@@ -38,7 +38,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
       margin: 0.25rem 0.25rem;
     `,
     dndBoxDragging: css`
-      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 4px 5px 0 rgba(0, 0, 0, 0.14);
+      box-shadow: ${theme.shadows.outer[10]};
     `,
     dropdownItem: css`
       width: 100%;
@@ -88,9 +88,9 @@ export function Draggable<T>(props: DraggableProps<T>) {
   const handleSearch = () => (event: any) => {
     const searchResults = new Set<string>();
     const txt: string = (event.currentTarget.value as string).toLocaleLowerCase();
-    filterSet.forEach((element) => {
-      const temp = element + ""; // gambiarra aqui
-      const loweredElement = temp.toLocaleLowerCase();
+    filterSet.forEach((element: string) => {
+      const stringElement = element + "";
+      const loweredElement = stringElement.toLocaleLowerCase();
       const found = loweredElement.search(txt) !== -1;
       found && searchResults.add(element);
     });
@@ -142,7 +142,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
                 <TextField
                   name="iconized"
                   id="iconized"
-                  placeholder="Placeholder"
+                  placeholder="Pesquisa"
                   icon="zoomOutline"
                   onChange={handleSearch()}
                 />
