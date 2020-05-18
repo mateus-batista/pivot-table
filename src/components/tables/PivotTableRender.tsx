@@ -100,13 +100,29 @@ function getHorizontal<T>({
   const divs: ReactElement[] = [];
   const rowTotalValues = new Map<string, number>();
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
-    if (mixedTable && result.key === mixedTable.totalKey) {
-      rowTotalValues.set(result.path.replace(result.value.toString(), ""), result.total || 0);
-    }
-    if (mixedTable && !keys.includes(result.key)) {
-      continue;
+  /**
+   * Create headers
+   */
+  keys.forEach((k, idx) => {
+    const gridArea = new GridArea(headerSpace, idx + 1, headerSpace + 1, idx + 2);
+    divs.push(
+      <PivotTableCell key={gridArea.toString()} gridArea={gridArea}>
+        <h5>{keysMapping.get(k)?.toUpperCase()}</h5>
+      </PivotTableCell>
+    );
+  });
+
+  /**
+   * Populate values
+   */
+  for (let result of results) {
+    if (mixedTable) {
+      if (result.key === mixedTable.totalKey) {
+        rowTotalValues.set(result.path.replace(result.value.toString(), ""), result.total || 0);
+      }
+      if (!keys.includes(result.key)) {
+        continue;
+      }
     }
     const lastKey = mixedTable && result.key === keys[keys.length - 1];
     const value = result.value;
@@ -129,24 +145,18 @@ function getHorizontal<T>({
       </PivotTableCell>
     );
   }
-  for (let i = 0; i < keys.length; i++) {
-    const k = keys[i];
-    const gridArea = new GridArea(headerSpace, i + 1, headerSpace + 1, i + 2);
-    divs.push(
-      <PivotTableCell key={gridArea.toString()} gridArea={gridArea}>
-        <h5>{keysMapping.get(k)?.toUpperCase()}</h5>
-      </PivotTableCell>
-    );
-  }
 
-  if (!mixedTable) {
-    const totaisGridArea = new GridArea(headerSpace, maxColumnEnd, headerSpace + 1, maxColumnEnd + 1);
+  /**
+   * Populate totals
+   */
+  let totaisGridArea;
+  if (mixedTable) {
+    totaisGridArea = new GridArea(maxRowEnd, 1, maxRowEnd + 1, keys.length + 2);
+  } else {
+    totaisGridArea = new GridArea(headerSpace, maxColumnEnd, headerSpace + 1, maxColumnEnd + 1);
     const totalGridArea = new GridArea(maxRowEnd, 1, maxRowEnd + 1, maxColumnEnd);
     const dataValueGridArea = new GridArea(maxRowEnd, maxColumnEnd, maxRowEnd + 1, maxColumnEnd + 1);
     divs.push(
-      <PivotTableCell key={totaisGridArea.toString()} endColumn gridArea={totaisGridArea}>
-        <h5>TOTAIS</h5>
-      </PivotTableCell>,
       <PivotTableCell key={totalGridArea.toString()} endRow={true} gridArea={totalGridArea}>
         <h5>TOTAL</h5>
       </PivotTableCell>,
@@ -154,14 +164,18 @@ function getHorizontal<T>({
         <h5>{data.value?.toString()}</h5>
       </PivotTableCell>
     );
-  } else {
-    const gridArea = new GridArea(maxRowEnd, 1, maxRowEnd + 1, keys.length + 2);
-    divs.push(
-      <PivotTableCell key={gridArea.toString()} endRow gridArea={gridArea}>
-        <h5>TOTAIS</h5>
-      </PivotTableCell>
-    );
   }
+
+  divs.push(
+    <PivotTableCell
+      key={totaisGridArea.toString()}
+      endColumn={mixedTable === undefined}
+      endRow={mixedTable !== undefined}
+      gridArea={totaisGridArea}
+    >
+      <h5>TOTAIS</h5>
+    </PivotTableCell>
+  );
 
   return [divs, rowTotalValues, maxRowEnd];
 }
@@ -195,23 +209,24 @@ function getVertical<T>({
   const mixedTableColumnTotals = new Map<number, number>();
   const cellPositions = new Set<string>();
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
+  for (let result of results) {
     const value = result.value;
     const columnSpan = result.span.value;
     let rowStart = result.row || 0;
     let columnStart = getIni(result.ini) + columnHeaderSpace;
-    if (mixedTable && result.key === mixedTable.totalKey) {
-      mixedTableColumnTotals.set(columnStart, result.total || 0);
-    }
-    if (mixedTable && !keys.includes(result.key) && result.key !== RESULT_PATH_KEY) {
-      continue;
-    }
-    if (mixedTable && mixedTable.rowResult && result.key === RESULT_PATH_KEY) {
-      const rows = mixedTable.rowResult.filter((rx) => result.path.indexOf(rx.path) !== -1);
-      rowStart = getIni(rows[rows.length - 1].ini) + keys.length + 1;
-      columnStart = getIni(result.ini.iniPai) + columnHeaderSpace;
-      mixedTableStartRowCache.set(rows[rows.length - 1].path, rowStart);
+    if (mixedTable) {
+      if (result.key === mixedTable.totalKey) {
+        mixedTableColumnTotals.set(columnStart, result.total || 0);
+      }
+      if (!keys.includes(result.key) && result.key !== RESULT_PATH_KEY) {
+        continue;
+      }
+      if (mixedTable.rowResult && result.key === RESULT_PATH_KEY) {
+        const rows = mixedTable.rowResult.filter((rx) => result.path.indexOf(rx.path) !== -1);
+        rowStart = getIni(rows[rows.length - 1].ini) + keys.length + 1;
+        columnStart = getIni(result.ini.iniPai) + columnHeaderSpace;
+        mixedTableStartRowCache.set(rows[rows.length - 1].path, rowStart);
+      }
     }
     const lastKey = mixedTable && result.key === keys[keys.length - 1];
     const rowEnd = lastKey ? rowStart + 2 : rowStart + 1;
@@ -244,25 +259,14 @@ function getVertical<T>({
       );
     })
   );
-  if (!mixedTable) {
-    const totaisGridArea = new GridArea(maxRowEnd - 1, 1, maxRowEnd, 2);
-    const totalGridArea = new GridArea(1, maxColumnEnd + 1, maxRowEnd - 1, maxColumnEnd + 2);
-    const dataValueGridArea = new GridArea(maxRowEnd - 1, maxColumnEnd + 1, maxRowEnd, maxColumnEnd + 2);
-    divs.push(
-      <PivotTableCell key={totaisGridArea.toString()} endRow gridArea={totaisGridArea}>
-        <h5>TOTAIS</h5>
-      </PivotTableCell>,
-      <PivotTableCell key={totalGridArea.toString()} endColumn gridArea={totalGridArea}>
-        <h5>TOTAL</h5>
-      </PivotTableCell>,
-      <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
-        <h5>{data.value}</h5>
-      </PivotTableCell>
-    );
-  } else {
-    const gridArea = new GridArea(keys.length + 1, columnHeaderSpace, keys.length + 2, columnHeaderSpace + 1);
-    divs.push(<PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>);
+
+  let totaisGridArea;
+  let dataValueGridArea;
+  if (mixedTable) {
     const totalRowNumber = mixedTable.totalRowNumber;
+    totaisGridArea = new GridArea(1, maxColumnEnd + 1, keys.length + 2, maxColumnEnd + 2);
+    dataValueGridArea = new GridArea(totalRowNumber, maxColumnEnd + 1, totalRowNumber + 1, maxColumnEnd + 2);
+
     mixedTableColumnTotals.forEach((value, key) => {
       const gridArea = new GridArea(totalRowNumber, key, totalRowNumber + 1, key + 1);
       divs.push(
@@ -271,6 +275,7 @@ function getVertical<T>({
         </PivotTableCell>
       );
     });
+
     mixedTable.rowTotalValues.forEach((value, key) => {
       const rowNumber = mixedTableStartRowCache.get(key) || 0;
       const gridArea = new GridArea(rowNumber, maxColumnEnd + 1, rowNumber + 1, maxColumnEnd + 2);
@@ -280,16 +285,10 @@ function getVertical<T>({
         </PivotTableCell>
       );
     });
-    const totaisGridArea = new GridArea(1, maxColumnEnd + 1, keys.length + 2, maxColumnEnd + 2);
-    const dataValueGridArea = new GridArea(totalRowNumber, maxColumnEnd + 1, totalRowNumber + 1, maxColumnEnd + 2);
-    divs.push(
-      <PivotTableCell key={totaisGridArea.toString()} endColumn gridArea={totaisGridArea}>
-        <h5>TOTAIS</h5>
-      </PivotTableCell>,
-      <PivotTableCell endColumn endRow key={dataValueGridArea.toString()} gridArea={dataValueGridArea}>
-        <h5>{data.value}</h5>
-      </PivotTableCell>
-    );
+
+    const gridArea = new GridArea(keys.length + 1, columnHeaderSpace, keys.length + 2, columnHeaderSpace + 1);
+    divs.push(<PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>);
+
     for (let column = columnHeaderSpace + 1; column < maxColumnEnd + 1; column++) {
       for (let row = keys.length + 2; row < totalRowNumber; row++) {
         const gridArea = new GridArea(row, column, row + 1, column + 1);
@@ -298,7 +297,30 @@ function getVertical<T>({
         }
       }
     }
+  } else {
+    totaisGridArea = new GridArea(maxRowEnd - 1, 1, maxRowEnd, 2);
+    dataValueGridArea = new GridArea(maxRowEnd - 1, maxColumnEnd + 1, maxRowEnd, maxColumnEnd + 2);
+    const totalGridArea = new GridArea(1, maxColumnEnd + 1, maxRowEnd - 1, maxColumnEnd + 2);
+    divs.push(
+      <PivotTableCell key={totalGridArea.toString()} endColumn gridArea={totalGridArea}>
+        <h5>TOTAL</h5>
+      </PivotTableCell>
+    );
   }
+
+  divs.push(
+    <PivotTableCell
+      key={totaisGridArea.toString()}
+      endRow={mixedTable === undefined}
+      endColumn={mixedTable !== undefined}
+      gridArea={totaisGridArea}
+    >
+      <h5>TOTAIS</h5>
+    </PivotTableCell>,
+    <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
+      <h5>{data.value}</h5>
+    </PivotTableCell>
+  );
 
   return divs;
 }
