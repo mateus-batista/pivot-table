@@ -54,28 +54,41 @@ export function Board<T extends any>(props: BoardProps<T>) {
     setIgnoredFilter(new Map<keyof T, Set<string>>());
   };
 
-  const ignoredFilterBox: ReactElement[] = [];
+  const ignoredFilterTags: ReactElement[] = [];
 
   for (let [key, values] of ignoredFilter) {
     const tags: ReactElement[] = [];
 
     for (let value of values) {
       tags.push(
-        <Tag key={value} removable onRemove={() => handleTagFilterRemove(key, value)} type="info">
+        <Tag
+          key={value}
+          removable
+          onRemove={() => handleTagFilterRemove(key, value)}
+          type="info"
+          style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}
+        >
           {value}
         </Tag>
       );
     }
 
-    ignoredFilterBox.push(
-      <span key={key as string}>
-        <HFlow hSpacing={0.5} alignItems="center">
-          {`${keyMapping.get(key)}`}
+    ignoredFilterTags.push(
+      <HFlow hSpacing={0.25} alignItems="center" key={key as string}>
+        <div>{`${keyMapping.get(key)}`}</div>
+        <div
+          css={css`
+            display: flex;
+            flex-wrap: wrap;
+          `}
+        >
           {tags}
-        </HFlow>
-      </span>
+        </div>
+      </HFlow>
     );
   }
+
+  const ignoredFilterBox = <VFlow>{ignoredFilterTags}</VFlow>;
 
   return (
     <DndProvider backend={Backend}>
@@ -151,15 +164,26 @@ export function Board<T extends any>(props: BoardProps<T>) {
               padding: 0.75rem 1.25rem;
             `}
           >
-            <HFlow alignItems="center" justifyContent="space-between">
-              <HFlow alignItems="center">
-                <b>Filtros aplicados: </b>
-                {ignoredFilterBox}
-              </HFlow>
-              <Button onClick={handleLimparFiltros} size="small" kind="normal" skin="outline">
-                Limpar filtros
-              </Button>
-            </HFlow>
+            <Grid wrap alignItems="center">
+              <Cell size={10}>
+                <HFlow alignItems="center">
+                  <b>Valores ignorados</b>
+                  {ignoredFilterBox}
+                </HFlow>
+              </Cell>
+              <Cell size={2}>
+                <HFlow></HFlow>
+                <Button
+                  onClick={handleLimparFiltros}
+                  size="small"
+                  kind="normal"
+                  skin="outline"
+                  style={{ float: "right" }}
+                >
+                  Limpar filtros
+                </Button>
+              </Cell>
+            </Grid>
           </div>
         </Cell>
       </Grid>

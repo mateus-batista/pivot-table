@@ -22,7 +22,12 @@ export function PivotTableRender<T>(props: TableProps<T>) {
   const table: ReactElement[] = [];
 
   if (rowData && rowKeys && columnData && columnKeys) {
+    const getResultRow = new Date().getTime();
+    console.debug("Running get result for rows...");
     const rowResult = getResult(rowData, "column", rowKeys);
+    console.debug("Get result for rows took " + (new Date().getTime() - getResultRow));
+    console.debug("Running get Horizontal divs...");
+    const getHorizontalDivs = new Date().getTime();
     const [divs, rowTotalValues, totalRowNumber] = getHorizontal({
       results: rowResult,
       keys: rowKeys,
@@ -33,9 +38,15 @@ export function PivotTableRender<T>(props: TableProps<T>) {
         totalKey: columnKeys[0],
       },
     });
+    console.debug("Get horizontal divs took " + (new Date().getTime() - getHorizontalDivs));
     table.push(...divs);
+    console.debug("Running get result for columns...");
+    const getResultColumn = new Date().getTime();
     const columnResult = getResult(columnData, "row", columnKeys);
+    console.debug("Get result for rows took " + (new Date().getTime() - getResultColumn));
 
+    console.debug("Running get Vertical divs...");
+    const data2 = new Date().getTime();
     table.push(
       ...getVertical<T>({
         results: columnResult,
@@ -51,6 +62,7 @@ export function PivotTableRender<T>(props: TableProps<T>) {
         },
       })
     );
+    console.debug("Get vertical divs took " + (new Date().getTime() - data2));
   } else if (rowData && rowKeys) {
     const rowResult = getResult(rowData, "column");
     const [divs] = getHorizontal<T>({ results: rowResult, keys: rowKeys, data: rowData, keysMapping, headerSpace: 2 });
@@ -66,7 +78,6 @@ export function PivotTableRender<T>(props: TableProps<T>) {
       key={"table"}
       css={css`
         display: grid;
-        grid-template-columns: auto auto auto auto;
         place-items: center center;
         place-content: start start;
       `}
@@ -161,7 +172,7 @@ function getHorizontal<T>({
         <h5>TOTAL</h5>
       </PivotTableCell>,
       <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
-        <h5>{data.value?.toString()}</h5>
+        <h5>{numberFormatter(data.value)}</h5>
       </PivotTableCell>
     );
   }
@@ -271,7 +282,7 @@ function getVertical<T>({
       const gridArea = new GridArea(totalRowNumber, key, totalRowNumber + 1, key + 1);
       divs.push(
         <PivotTableCell endRow key={gridArea.toString()} gridArea={gridArea}>
-          <h5>{value}</h5>
+          <h5>{numberFormatter(value)}</h5>
         </PivotTableCell>
       );
     });
@@ -281,7 +292,7 @@ function getVertical<T>({
       const gridArea = new GridArea(rowNumber, maxColumnEnd + 1, rowNumber + 1, maxColumnEnd + 2);
       divs.push(
         <PivotTableCell endColumn key={gridArea.toString()} gridArea={gridArea}>
-          <b>{value}</b>
+          <b>{numberFormatter(value)}</b>
         </PivotTableCell>
       );
     });
@@ -318,7 +329,7 @@ function getVertical<T>({
       <h5>TOTAIS</h5>
     </PivotTableCell>,
     <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
-      <h5>{data.value}</h5>
+      <h5>{numberFormatter(data.value)}</h5>
     </PivotTableCell>
   );
 
@@ -417,7 +428,7 @@ function getResult<T>(
               [increment]: rowOrColumn + 1,
               ini: ini,
               path: path + RESULT_PATH_KEY,
-              value: obj.data[key].value,
+              value: numberFormatter(obj.data[key].value),
               key: RESULT_PATH_KEY as keyof T,
             });
           }
@@ -428,6 +439,17 @@ function getResult<T>(
   }
   return result;
 }
+
+const numberFormatter = (num?: number): string => {
+  if (!num) {
+    return "0";
+  }
+  if (num % 1 !== 0) {
+    return num.toFixed(2);
+  } else {
+    return num.toString();
+  }
+};
 
 function getIni(ini: InitialPosition | undefined) {
   const stack: InitialPosition[] = [];

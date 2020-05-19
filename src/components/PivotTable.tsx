@@ -54,9 +54,15 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   useEffect(() => {
     if (rowKeys.length > 0 && columnKeys.length > 0) {
+      const complemetaryTreeTime = new Date().getTime();
+      console.debug("Building complementary tree...");
       setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
+      console.debug("Building complementary tree took " + (new Date().getTime() - complemetaryTreeTime));
     }
+    const defaultTreeTime = new Date().getTime();
+    console.debug("Building default tree...");
     setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
+    console.debug("Building default tree took " + (new Date().getTime() - defaultTreeTime));
   }, [data, rowKeys, columnKeys, ignoredDataKeyValues, aggregator, aggregatorKey]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newIgnoredFilter: Map<keyof T, Set<string>>) => {
