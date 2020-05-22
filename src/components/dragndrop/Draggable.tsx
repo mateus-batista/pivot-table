@@ -87,11 +87,11 @@ export function Draggable<T>(props: DraggableProps<T>) {
   };
   const handleSearch = () => (event: any) => {
     const searchResults = new Set<string>();
-    const txt: string = (event.currentTarget.value as string).toLocaleLowerCase();
+    const searchText: string = (event.currentTarget.value as string).toLocaleLowerCase();
     filterSet.forEach((element: string) => {
       const stringElement = element + "";
       const loweredElement = stringElement.toLocaleLowerCase();
-      const found = loweredElement.search(txt) !== -1;
+      const found = loweredElement.search(searchText) !== -1;
       found && searchResults.add(element);
     });
     setSearchedFilterSet(searchResults);
