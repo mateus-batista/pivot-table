@@ -47,7 +47,13 @@ export function Aggregators<T extends any>(props: AggregatorsProps<T>) {
         ))}
       </HFlow>
       {aggregator?.value && (
-        <Select<keyof T> items={numberKeys} itemToString={itemToString} value={key} onChange={handleKeySelect} />
+        <Select<keyof T>
+          disabled={numberKeys.length === 0}
+          items={numberKeys}
+          itemToString={itemToString}
+          value={key}
+          onChange={handleKeySelect}
+        />
       )}
     </VFlow>
   );

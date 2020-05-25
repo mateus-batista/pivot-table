@@ -67,9 +67,19 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newIgnoredFilter: Map<keyof T, Set<string>>) => {
     const [newRowKeys, newColumnKeys] = values;
+    if (dataKeyValues !== undefined) {
+      for (const [key, filterSet] of newIgnoredFilter) {
+        const keySet = dataKeyValues.get(key) || new Set<string>();
+        if (filterSet.size >= keySet.size) {
+          alert("deu pau");
+          return 0;
+        }
+      }
+    }
     setIgnoredDataKeyValue(newIgnoredFilter);
     setRowKeys(newRowKeys);
     setColumnKeys(newColumnKeys);
+
     if (newRowKeys !== rowKeys || newColumnKeys !== columnKeys || newIgnoredFilter !== ignoredDataKeyValues) {
       setDefaultTree(undefined);
       setComplementaryTree(undefined);

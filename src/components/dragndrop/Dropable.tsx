@@ -76,7 +76,7 @@ export function Dropable<T>(props: DropableProps<T>) {
       align-self: center;
     `,
     hoverBorder: css`
-      border: solid 1px ${theme.pallete.gray.c70};
+      border: dashed 2px ${theme.pallete.gray.c70};
     `,
     box: css`
       display: flex;
