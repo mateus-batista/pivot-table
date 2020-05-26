@@ -15,7 +15,7 @@ export type Dictionary<T extends any, K extends keyof T> = Record<T[K], T[]>;
 export function PivotTable<T>(props: PivotTableProps<T>) {
   const { data, keyMapping } = props;
 
-  const [dataKeyValues, setDataKeyValues] = useState<Map<keyof T, Set<string>>>();
+  const [dataKeyValues, setDataKeyValues] = useState<Map<keyof T, Array<string>>>();
 
   const [ignoredDataKeyValues, setIgnoredDataKeyValue] = useState<Map<keyof T, Set<string>>>();
 
@@ -37,18 +37,22 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
   };
 
   useEffect(() => {
-    const uniqueKeysValues = new Map<keyof T, Set<string>>();
+    const tempKeysValues = new Map<keyof T, Set<string>>();
 
     data.forEach((element: any) => {
       Object.keys(element).forEach((key) => {
-        let set = uniqueKeysValues.get(key as keyof T);
+        let set = tempKeysValues.get(key as keyof T);
         if (!set) {
           set = new Set<string>();
-          uniqueKeysValues.set(key as keyof T, set);
+          tempKeysValues.set(key as keyof T, set);
         }
         set.add(element[key]);
       });
     });
+    const uniqueKeysValues = new Map<keyof T, Array<string>>();
+    for (const [key, value] of tempKeysValues) {
+      uniqueKeysValues.set(key, Array.from(value).sort());
+    }
     setDataKeyValues(uniqueKeysValues);
   }, [data]);
 
@@ -69,8 +73,8 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     const [newRowKeys, newColumnKeys] = values;
     if (dataKeyValues !== undefined) {
       for (const [key, filterSet] of newIgnoredFilter) {
-        const keySet = dataKeyValues.get(key) || new Set<string>();
-        if (filterSet.size >= keySet.size) {
+        const keySet = dataKeyValues.get(key) || new Array<string>();
+        if (filterSet.size >= keySet.length) {
           alert("deu pau");
           return 0;
         }

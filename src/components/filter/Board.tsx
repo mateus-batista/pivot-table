@@ -10,7 +10,7 @@ import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
 import { Aggregators } from "./Aggregators";
 interface BoardProps<T extends any> {
-  keys: Map<keyof T, Set<string>>;
+  keys: Map<keyof T, Array<string>>;
   keyMapping: Map<keyof T, string>;
   sample: T;
   handleSubmit: (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => void;
