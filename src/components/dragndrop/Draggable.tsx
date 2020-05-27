@@ -10,7 +10,7 @@ interface DraggableProps<T> {
   type: ItemTypes;
   origin: number;
   value: string;
-  filterValues: Set<string>;
+  filterValues: Array<string>;
   filterState: Set<string>;
   onDragEnd: () => void;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
@@ -19,7 +19,7 @@ interface DraggableProps<T> {
 export function Draggable<T>(props: DraggableProps<T>) {
   const { name, type, origin, value, filterValues, filterState, onDragEnd, handleFilterUpdate } = props;
 
-  const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterValues);
+  const [searchedFilterSet, setSearchedFilterSet] = useState<Array<string>>(filterValues);
   const [open, setOpen] = useState(false);
   const buttonRef: any = useRef<HTMLButtonElement>();
   const theme = useTheme();
@@ -86,13 +86,13 @@ export function Draggable<T>(props: DraggableProps<T>) {
     }
   };
   const handleSearch = () => (event: any) => {
-    const searchResults = new Set<string>();
+    const searchResults = new Array<string>();
     const searchText: string = (event.currentTarget.value as string).toLocaleLowerCase();
     filterValues.forEach((element: string) => {
       const stringElement = element + "";
       const loweredElement = stringElement.toLocaleLowerCase();
       const found = loweredElement.search(searchText) !== -1;
-      found && searchResults.add(element);
+      found && searchResults.concat(element);
     });
     setSearchedFilterSet(searchResults);
   };

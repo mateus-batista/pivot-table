@@ -10,7 +10,7 @@ import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
 import { Aggregators } from "./Aggregators";
 interface BoardProps<T extends any> {
-  keys: Map<keyof T, Set<string>>;
+  keys: Map<keyof T, Array<string>>;
   keyMapping: Map<keyof T, string>;
   sample: T;
   handleSubmit: (values: [Array<keyof T>, Array<keyof T>], filterValues: Map<keyof T, Set<string>>) => void;
@@ -67,34 +67,20 @@ export function Board<T extends any>(props: BoardProps<T>) {
   for (let [key, values] of filterState) {
     const tags: ReactElement[] = [];
 
-    if (keys.get(key)?.size === values.size) {
+    if (keys.get(key)?.length === values.size) {
       continue;
     }
 
-    let idx = 0;
     for (let value of values) {
-      if (idx < 3) {
-        tags.push(
-          <Tag
-            key={value}
-            removable
-            onRemove={() => handleTagFilterRemove(key, value)}
-            type="info"
-            style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}
-          >
-            {value}
-          </Tag>
-        );
-      } else {
-        break;
-      }
-      idx++;
-    }
-
-    if (values.size > 3) {
       tags.push(
-        <Tag key={key as string} type="info" style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}>
-          {`+ ${values.size - 3} ${keyMapping.get(key)}`}
+        <Tag
+          key={value}
+          removable
+          onRemove={() => handleTagFilterRemove(key, value)}
+          type="info"
+          style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}
+        >
+          {value}
         </Tag>
       );
     }
