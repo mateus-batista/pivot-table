@@ -68,10 +68,25 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newFilters: Map<keyof T, Set<string>>) => {
     const [newRowKeys, newColumnKeys] = values;
 
-    if ((newRowKeys.length === 0 && newColumnKeys.length === 0) || newFilters?.size < 1) {
-      alert("Nenhum valor selecionado.");
+    if (newRowKeys.length === 0 && newColumnKeys.length === 0) {
+      alert("Nenhuma linha/coluna selecionada.");
       return;
     }
+
+    for (let rowKey of newRowKeys) {
+      if (!newFilters?.get(rowKey)?.size) {
+        alert("Nenhum valor selecionado para as linhas aplicadas.");
+        return;
+      }
+    }
+
+    for (let columnKey of newColumnKeys) {
+      if (!newFilters?.get(columnKey)?.size) {
+        alert("Nenhum valor selecionado para as colunas aplicadas.");
+        return;
+      }
+    }
+
     setFilterDataKeyValue(newFilters);
     setRowKeys(newRowKeys);
     setColumnKeys(newColumnKeys);

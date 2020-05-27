@@ -71,16 +71,30 @@ export function Board<T extends any>(props: BoardProps<T>) {
       continue;
     }
 
+    let idx = 0;
     for (let value of values) {
+      if (idx < 3) {
+        tags.push(
+          <Tag
+            key={value}
+            removable
+            onRemove={() => handleTagFilterRemove(key, value)}
+            type="info"
+            style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}
+          >
+            {value}
+          </Tag>
+        );
+      } else {
+        break;
+      }
+      idx++;
+    }
+
+    if (values.size > 3) {
       tags.push(
-        <Tag
-          key={value}
-          removable
-          onRemove={() => handleTagFilterRemove(key, value)}
-          type="info"
-          style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}
-        >
-          {value}
+        <Tag key={key as string} type="info" style={{ marginLeft: "0.5rem", marginBottom: "0.25rem" }}>
+          {`+ ${values.size - 3} ${keyMapping.get(key)}`}
         </Tag>
       );
     }
