@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, TextField, useTheme } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, TextField, useTheme, ButtonGroup } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -154,8 +154,14 @@ export function Draggable<T>(props: DraggableProps<T>) {
               </div>
             </DropdownItem>
             <DropdownItem>
-              <Button onClick={handleSelectAll()}>Select ALl</Button>
-              <Button onClick={handleUnselectAll()}>Unselect ALl</Button>
+              <ButtonGroup>
+                <Button size="small" onClick={handleSelectAll()}>
+                  Select All
+                </Button>
+                <Button size="small" onClick={handleUnselectAll()}>
+                  Unselect All
+                </Button>
+              </ButtonGroup>
             </DropdownItem>
             <div css={styles.dropdownArea}>{filterList}</div>
           </div>
