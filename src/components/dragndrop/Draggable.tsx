@@ -92,9 +92,15 @@ export function Draggable<T>(props: DraggableProps<T>) {
       const stringElement = element + "";
       const loweredElement = stringElement.toLocaleLowerCase();
       const found = loweredElement.search(searchText) !== -1;
-      found && searchResults.concat(element);
+      found && searchResults.push(element);
     });
     setSearchedFilterSet(searchResults);
+  };
+  const handleSelectAll = () => (event: any) => {
+    handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
+  };
+  const handleUnselectAll = () => (event: any) => {
+    handleFilterUpdate(name as keyof T, new Set<string>());
   };
 
   const filterList: ReactElement[] = [];
@@ -146,6 +152,10 @@ export function Draggable<T>(props: DraggableProps<T>) {
                   onChange={handleSearch()}
                 />
               </div>
+            </DropdownItem>
+            <DropdownItem>
+              <Button onClick={handleSelectAll()}>Select ALl</Button>
+              <Button onClick={handleUnselectAll()}>Unselect ALl</Button>
             </DropdownItem>
             <div css={styles.dropdownArea}>{filterList}</div>
           </div>
