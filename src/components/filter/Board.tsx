@@ -167,7 +167,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
             <Grid wrap alignItems="center">
               <Cell size={10}>
                 <HFlow alignItems="center">
-                  <b>Valores ignorados</b>
+                  <b>Valores filtrados</b>
                   {ignoredFilterBox}
                 </HFlow>
               </Cell>

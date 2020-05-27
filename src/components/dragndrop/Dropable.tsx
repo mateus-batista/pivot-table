@@ -65,7 +65,7 @@ export function Dropable<T>(props: DropableProps<T>) {
       value={keyMapping.get(key) || (key as string)}
       origin={id}
       filterSet={props.keys.get(key) as Set<string>}
-      ignoredValues={props.filtroLocal.get(key) || new Set<string>()}
+      filterValues={props.filtroLocal.get(key) || new Set<string>()}
       handleFilterUpdate={handleFilterUpdate}
       onDragEnd={() => deleteByKey(key)}
     />

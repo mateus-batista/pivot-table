@@ -25,7 +25,7 @@ export function PivotTableRender<T>(props: TableProps<T>) {
     const getResultRow = new Date().getTime();
     console.debug("Running get result for rows...");
     const rowResult = getResult(rowData, "column", rowKeys);
-    console.debug("Get result for rows took " + (new Date().getTime() - getResultRow));
+    console.debug("Get result for rows took " + (new Date().getTime() - getResultRow), rowResult);
     console.debug("Running get Horizontal divs...");
     const getHorizontalDivs = new Date().getTime();
     const [divs, rowTotalValues, totalRowNumber] = getHorizontal({
@@ -43,7 +43,7 @@ export function PivotTableRender<T>(props: TableProps<T>) {
     console.debug("Running get result for columns...");
     const getResultColumn = new Date().getTime();
     const columnResult = getResult(columnData, "row", columnKeys);
-    console.debug("Get result for rows took " + (new Date().getTime() - getResultColumn));
+    console.debug("Get result for rows took " + (new Date().getTime() - getResultColumn), columnResult);
 
     console.debug("Running get Vertical divs...");
     const data2 = new Date().getTime();
@@ -74,15 +74,17 @@ export function PivotTableRender<T>(props: TableProps<T>) {
     );
   }
   return (
-    <div
-      key={"table"}
-      css={css`
-        display: grid;
-        place-items: center center;
-        place-content: start start;
-      `}
-    >
-      {table}
+    <div style={{ maxWidth: "100%", overflow: "auto" }}>
+      <div
+        key={"table"}
+        css={css`
+          display: grid;
+          place-items: center center;
+          place-content: start start;
+        `}
+      >
+        {table}
+      </div>
     </div>
   );
 }
@@ -278,6 +280,7 @@ function getVertical<T>({
     totaisGridArea = new GridArea(1, maxColumnEnd + 1, keys.length + 2, maxColumnEnd + 2);
     dataValueGridArea = new GridArea(totalRowNumber, maxColumnEnd + 1, totalRowNumber + 1, maxColumnEnd + 2);
 
+    console.log("mixed totals", mixedTableColumnTotals);
     mixedTableColumnTotals.forEach((value, key) => {
       const gridArea = new GridArea(totalRowNumber, key, totalRowNumber + 1, key + 1);
       divs.push(
@@ -285,6 +288,7 @@ function getVertical<T>({
           <h5>{numberFormatter(value)}</h5>
         </PivotTableCell>
       );
+      cellPositions.add(gridArea.toString());
     });
 
     mixedTable.rowTotalValues.forEach((value, key) => {
@@ -295,16 +299,33 @@ function getVertical<T>({
           <b>{numberFormatter(value)}</b>
         </PivotTableCell>
       );
+      cellPositions.add(gridArea.toString());
     });
 
     const gridArea = new GridArea(keys.length + 1, columnHeaderSpace, keys.length + 2, columnHeaderSpace + 1);
-    divs.push(<PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>);
+    divs.push(
+      <PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>,
+      <PivotTableCell key={totaisGridArea.toString()} endRow={false} endColumn={true} gridArea={totaisGridArea}>
+        <h5>TOTAIS</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
+        <h5>{numberFormatter(data.value)}</h5>
+      </PivotTableCell>
+    );
+    cellPositions.add(dataValueGridArea.toString());
 
-    for (let column = columnHeaderSpace + 1; column < maxColumnEnd + 1; column++) {
-      for (let row = keys.length + 2; row < totalRowNumber; row++) {
+    for (let column = columnHeaderSpace + 1; column < maxColumnEnd + 2; column++) {
+      for (let row = keys.length + 2; row < totalRowNumber + 1; row++) {
         const gridArea = new GridArea(row, column, row + 1, column + 1);
         if (!cellPositions.has(gridArea.toString())) {
-          divs.push(<PivotTableCell key={gridArea.toString()} gridArea={gridArea}></PivotTableCell>);
+          divs.push(
+            <PivotTableCell
+              key={gridArea.toString()}
+              endRow={row === totalRowNumber}
+              endColumn={column === maxColumnEnd + 1}
+              gridArea={gridArea}
+            ></PivotTableCell>
+          );
         }
       }
     }
@@ -315,24 +336,15 @@ function getVertical<T>({
     divs.push(
       <PivotTableCell key={totalGridArea.toString()} endColumn gridArea={totalGridArea}>
         <h5>TOTAL</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={totaisGridArea.toString()} endRow={true} endColumn={false} gridArea={totaisGridArea}>
+        <h5>TOTAIS</h5>
+      </PivotTableCell>,
+      <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
+        <h5>{numberFormatter(data.value)}</h5>
       </PivotTableCell>
     );
   }
-
-  divs.push(
-    <PivotTableCell
-      key={totaisGridArea.toString()}
-      endRow={mixedTable === undefined}
-      endColumn={mixedTable !== undefined}
-      gridArea={totaisGridArea}
-    >
-      <h5>TOTAIS</h5>
-    </PivotTableCell>,
-    <PivotTableCell key={dataValueGridArea.toString()} endColumn endRow gridArea={dataValueGridArea}>
-      <h5>{numberFormatter(data.value)}</h5>
-    </PivotTableCell>
-  );
-
   return divs;
 }
 type SpanValue = {

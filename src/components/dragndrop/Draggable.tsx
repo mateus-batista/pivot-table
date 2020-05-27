@@ -11,13 +11,13 @@ interface DraggableProps<T> {
   origin: number;
   value: string;
   filterSet: Set<string>;
-  ignoredValues: Set<string>;
+  filterValues: Set<string>;
   onDragEnd: () => void;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
 
 export function Draggable<T>(props: DraggableProps<T>) {
-  const { name, type, origin, value, filterSet, ignoredValues, onDragEnd, handleFilterUpdate } = props;
+  const { name, type, origin, value, filterSet, filterValues, onDragEnd, handleFilterUpdate } = props;
 
   const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterSet);
   const [open, setOpen] = useState(false);
@@ -81,8 +81,8 @@ export function Draggable<T>(props: DraggableProps<T>) {
   };
   const handleSelect = (element: string) => (event: any) => {
     if (event.nativeEvent.isTrusted) {
-      ignoredValues.has(element) ? ignoredValues.delete(element) : ignoredValues.add(element);
-      handleFilterUpdate(name as keyof T, new Set<string>(ignoredValues));
+      filterValues.has(element) ? filterValues.delete(element) : filterValues.add(element);
+      handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
     }
   };
   const handleSearch = () => (event: any) => {
@@ -101,7 +101,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   searchedFilterSet.forEach((element) => {
     const key = name + element;
-    const selected = !ignoredValues.has(element);
+    const selected = filterValues.has(element);
     const item: ReactElement = (
       <DropdownItem key={key} css={styles.dropdownItem}>
         <Checkbox label={element} onChange={handleSelect(element)} checked={selected} />
@@ -124,7 +124,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
           <HFlow hSpacing={0.5}>
             <Icon icon="dots" />
             {value}
-            {ignoredValues.size > 0 && <Tag type="normal">{ignoredValues.size}</Tag>}
+            {filterValues.size > 0 && <Tag type="normal">{filterValues.size}</Tag>}
             {open ? <Icon icon="angleUp" /> : <Icon icon="angleDown" />}
           </HFlow>
         </Button>
