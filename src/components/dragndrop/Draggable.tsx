@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, Tag, TextField, useTheme } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, TextField, useTheme } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -10,16 +10,16 @@ interface DraggableProps<T> {
   type: ItemTypes;
   origin: number;
   value: string;
-  filterSet: Set<string>;
   filterValues: Set<string>;
+  filterState: Set<string>;
   onDragEnd: () => void;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
 
 export function Draggable<T>(props: DraggableProps<T>) {
-  const { name, type, origin, value, filterSet, filterValues, onDragEnd, handleFilterUpdate } = props;
+  const { name, type, origin, value, filterValues, filterState, onDragEnd, handleFilterUpdate } = props;
 
-  const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterSet);
+  const [searchedFilterSet, setSearchedFilterSet] = useState<Set<string>>(filterValues);
   const [open, setOpen] = useState(false);
   const buttonRef: any = useRef<HTMLButtonElement>();
   const theme = useTheme();
@@ -77,18 +77,18 @@ export function Draggable<T>(props: DraggableProps<T>) {
   const handleClick = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    setSearchedFilterSet(filterSet);
+    setSearchedFilterSet(filterValues);
   };
   const handleSelect = (element: string) => (event: any) => {
     if (event.nativeEvent.isTrusted) {
-      filterValues.has(element) ? filterValues.delete(element) : filterValues.add(element);
-      handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
+      filterState.has(element) ? filterState.delete(element) : filterState.add(element);
+      handleFilterUpdate(name as keyof T, new Set<string>(filterState));
     }
   };
   const handleSearch = () => (event: any) => {
     const searchResults = new Set<string>();
     const searchText: string = (event.currentTarget.value as string).toLocaleLowerCase();
-    filterSet.forEach((element: string) => {
+    filterValues.forEach((element: string) => {
       const stringElement = element + "";
       const loweredElement = stringElement.toLocaleLowerCase();
       const found = loweredElement.search(searchText) !== -1;
@@ -101,7 +101,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   searchedFilterSet.forEach((element) => {
     const key = name + element;
-    const selected = filterValues.has(element);
+    const selected = filterState.has(element);
     const item: ReactElement = (
       <DropdownItem key={key} css={styles.dropdownItem}>
         <Checkbox label={element} onChange={handleSelect(element)} checked={selected} />
@@ -124,7 +124,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
           <HFlow hSpacing={0.5}>
             <Icon icon="dots" />
             {value}
-            {filterValues.size > 0 && <Tag type="normal">{filterValues.size}</Tag>}
             {open ? <Icon icon="angleUp" /> : <Icon icon="angleDown" />}
           </HFlow>
         </Button>

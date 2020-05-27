@@ -13,7 +13,7 @@ interface BoardProps<T extends any> {
   keys: Map<keyof T, Set<string>>;
   keyMapping: Map<keyof T, string>;
   sample: T;
-  handleSubmit: (values: [Array<keyof T>, Array<keyof T>], ignoredFilter: Map<keyof T, Set<string>>) => void;
+  handleSubmit: (values: [Array<keyof T>, Array<keyof T>], filterValues: Map<keyof T, Set<string>>) => void;
   handleAggregatorChange: (aggregator: ((values: number[]) => number) | undefined) => void;
   handleAggregatorKeyChange: (key: keyof T) => void;
 }
@@ -21,13 +21,21 @@ interface BoardProps<T extends any> {
 export function Board<T extends any>(props: BoardProps<T>) {
   const { keys, keyMapping, handleSubmit, sample, handleAggregatorChange, handleAggregatorKeyChange } = props;
 
+  const deepCopy = new Map<keyof T, Set<string>>();
+
+  for (let [key, value] of keys) {
+    deepCopy.set(key, new Set(value));
+  }
+
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
-  const [ignoredFilter, setIgnoredFilter] = useState<Map<keyof T, Set<string>>>(new Map<keyof T, Set<string>>());
+  const [filterState, setFilterState] = useState<Map<keyof T, Set<string>>>(new Map<keyof T, Set<string>>(deepCopy));
   const theme = useTheme();
 
+  console.log("keys", keys);
+
   const onClick = (event: any) => {
-    handleSubmit([rowKeys, columnKeys], ignoredFilter);
+    handleSubmit([rowKeys, columnKeys], filterState);
   };
   const handleUpdateRowKeys = (rowKeys: Array<keyof T>) => {
     setRowKeys(rowKeys);
@@ -37,27 +45,31 @@ export function Board<T extends any>(props: BoardProps<T>) {
   };
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     if (filtro.size < 1) {
-      ignoredFilter.delete(key);
+      filterState.delete(key);
     } else {
-      ignoredFilter.set(key, filtro);
+      filterState.set(key, filtro);
     }
-    setIgnoredFilter(new Map(ignoredFilter));
+    setFilterState(new Map(filterState));
   };
 
   const handleTagFilterRemove = (key: keyof T, value: string) => {
-    const values = ignoredFilter.get(key) || new Set<string>();
+    const values = filterState.get(key) || new Set<string>();
     values?.delete(value);
     handleFilterUpdate(key, values);
   };
 
   const handleLimparFiltros = () => {
-    setIgnoredFilter(new Map<keyof T, Set<string>>());
+    setFilterState(new Map<keyof T, Set<string>>());
   };
 
-  const ignoredFilterTags: ReactElement[] = [];
+  const filterValuesTags: ReactElement[] = [];
 
-  for (let [key, values] of ignoredFilter) {
+  for (let [key, values] of filterState) {
     const tags: ReactElement[] = [];
+
+    if (keys.get(key)?.size === values.size) {
+      continue;
+    }
 
     for (let value of values) {
       tags.push(
@@ -73,7 +85,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
       );
     }
 
-    ignoredFilterTags.push(
+    filterValuesTags.push(
       <HFlow hSpacing={0.25} alignItems="center" key={key as string}>
         <div>{`${keyMapping.get(key)}`}</div>
         <div
@@ -88,7 +100,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
     );
   }
 
-  const ignoredFilterBox = <VFlow>{ignoredFilterTags}</VFlow>;
+  const filterValuesBox = <VFlow>{filterValuesTags}</VFlow>;
 
   return (
     <DndProvider backend={Backend}>
@@ -96,7 +108,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
         <Cell md={6} sm={12} xs={12}>
           <Box label="Campos disponíveis">
             <Dropable<T>
-              filtroLocal={ignoredFilter}
+              filterState={filterState}
               type={ItemTypes.FILTER}
               keyMapping={keyMapping}
               keys={keys}
@@ -110,10 +122,10 @@ export function Board<T extends any>(props: BoardProps<T>) {
           <Box label="Colunas" icon="hamburguerMenu" rotation="90">
             <Dropable<T>
               id={2}
-              filtroLocal={ignoredFilter}
+              filterState={filterState}
               keyMapping={keyMapping}
               keys={keys}
-              handleUpdate={handleUpdateColumnKeys}
+              handleKeyUpdate={handleUpdateColumnKeys}
               handleFilterUpdate={handleFilterUpdate}
               type={ItemTypes.FILTER}
             />
@@ -122,8 +134,8 @@ export function Board<T extends any>(props: BoardProps<T>) {
         <Cell md={6} sm={12} xs={12}>
           <Box label="Linhas" icon="hamburguerMenu">
             <Dropable<T>
-              filtroLocal={ignoredFilter}
-              handleUpdate={handleUpdateRowKeys}
+              filterState={filterState}
+              handleKeyUpdate={handleUpdateRowKeys}
               handleFilterUpdate={handleFilterUpdate}
               type={ItemTypes.FILTER}
               keyMapping={keyMapping}
@@ -168,7 +180,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
               <Cell size={10}>
                 <HFlow alignItems="center">
                   <b>Valores filtrados</b>
-                  {ignoredFilterBox}
+                  {filterValuesBox}
                 </HFlow>
               </Cell>
               <Cell size={2}>
