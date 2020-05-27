@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, TextField, useTheme } from "bold-ui";
+import { Button, Checkbox, Dropdown, DropdownItem, HFlow, Icon, TextField, useTheme, ButtonGroup } from "bold-ui";
 import React, { ReactElement, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { ItemTypes } from "../../types/ItemTypes";
@@ -92,9 +92,15 @@ export function Draggable<T>(props: DraggableProps<T>) {
       const stringElement = element + "";
       const loweredElement = stringElement.toLocaleLowerCase();
       const found = loweredElement.search(searchText) !== -1;
-      found && searchResults.concat(element);
+      found && searchResults.push(element);
     });
     setSearchedFilterSet(searchResults);
+  };
+  const handleSelectAll = () => (event: any) => {
+    handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
+  };
+  const handleUnselectAll = () => (event: any) => {
+    handleFilterUpdate(name as keyof T, new Set<string>());
   };
 
   const filterList: ReactElement[] = [];
@@ -146,6 +152,16 @@ export function Draggable<T>(props: DraggableProps<T>) {
                   onChange={handleSearch()}
                 />
               </div>
+            </DropdownItem>
+            <DropdownItem>
+              <ButtonGroup>
+                <Button size="small" onClick={handleSelectAll()}>
+                  Select All
+                </Button>
+                <Button size="small" onClick={handleUnselectAll()}>
+                  Unselect All
+                </Button>
+              </ButtonGroup>
             </DropdownItem>
             <div css={styles.dropdownArea}>{filterList}</div>
           </div>
