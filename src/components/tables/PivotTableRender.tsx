@@ -15,6 +15,7 @@ export type TableProps<T> = {
 };
 
 const RESULT_PATH_KEY = "RESULT";
+const PATH_SEPARATOR = "|";
 
 export function PivotTableRender<T>(props: TableProps<T>) {
   const { rowKeys, columnKeys, rowData, columnData, keysMapping } = props;
@@ -131,7 +132,7 @@ function getHorizontal<T>({
   for (let result of results) {
     if (mixedTable) {
       if (result.key === mixedTable.totalKey) {
-        rowTotalValues.set(result.path.replace(result.value.toString(), ""), result.total || 0);
+        rowTotalValues.set(result.path.replace(PATH_SEPARATOR + result.value.toString(), ""), result.total || 0);
       }
       if (!keys.includes(result.key)) {
         continue;
@@ -280,7 +281,6 @@ function getVertical<T>({
     totaisGridArea = new GridArea(1, maxColumnEnd + 1, keys.length + 2, maxColumnEnd + 2);
     dataValueGridArea = new GridArea(totalRowNumber, maxColumnEnd + 1, totalRowNumber + 1, maxColumnEnd + 2);
 
-    console.log("mixed totals", mixedTableColumnTotals);
     mixedTableColumnTotals.forEach((value, key) => {
       const gridArea = new GridArea(totalRowNumber, key, totalRowNumber + 1, key + 1);
       divs.push(
@@ -291,6 +291,7 @@ function getVertical<T>({
       cellPositions.add(gridArea.toString());
     });
 
+    console.log("mixed totals", mixedTable.rowTotalValues);
     mixedTable.rowTotalValues.forEach((value, key) => {
       const rowNumber = mixedTableStartRowCache.get(key) || 0;
       const gridArea = new GridArea(rowNumber, maxColumnEnd + 1, rowNumber + 1, maxColumnEnd + 2);
@@ -412,7 +413,7 @@ function getResult<T>(
 
           const rowOrColumn = obj[increment] || 0;
           const iniPai = obj.iniPai;
-          const path = obj.path ? obj.path + key : key;
+          const path = obj.path ? obj.path + (PATH_SEPARATOR + key) : key;
 
           const ini: InitialPosition = { iniPai, spanAux: increaseSpan ? spanAux : { value: 0 }, iniAux };
 
