@@ -17,7 +17,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
 
   const [dataKeyValues, setDataKeyValues] = useState<Map<keyof T, Array<string>>>();
 
-  const [ignoredDataKeyValues, setIgnoredDataKeyValue] = useState<Map<keyof T, Set<string>>>();
+  const [filterDataKeyValues, setFilterDataKeyValue] = useState<Map<keyof T, Set<string>>>();
 
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
 
@@ -60,35 +60,49 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     if (rowKeys.length > 0 && columnKeys.length > 0) {
       const complemetaryTreeTime = new Date().getTime();
       console.debug("Building complementary tree...");
-      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
+      setComplementaryTree(group(data, [...columnKeys, ...rowKeys], filterDataKeyValues, aggregator, aggregatorKey));
       console.debug("Building complementary tree took " + (new Date().getTime() - complemetaryTreeTime));
     }
     const defaultTreeTime = new Date().getTime();
     console.debug("Building default tree...");
-    setDefaultTree(group(data, [...rowKeys, ...columnKeys], ignoredDataKeyValues, aggregator, aggregatorKey));
+    setDefaultTree(group(data, [...rowKeys, ...columnKeys], filterDataKeyValues, aggregator, aggregatorKey));
     console.debug("Building default tree took " + (new Date().getTime() - defaultTreeTime));
-  }, [data, rowKeys, columnKeys, ignoredDataKeyValues, aggregator, aggregatorKey]);
+  }, [data, rowKeys, columnKeys, filterDataKeyValues, aggregator, aggregatorKey]);
 
-  const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newIgnoredFilter: Map<keyof T, Set<string>>) => {
+  const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newFilters: Map<keyof T, Set<string>>) => {
     const [newRowKeys, newColumnKeys] = values;
-    if (dataKeyValues !== undefined) {
-      for (const [key, filterSet] of newIgnoredFilter) {
-        const keySet = dataKeyValues.get(key) || new Array<string>();
-        if (filterSet.size >= keySet.length) {
-          alert("deu pau");
-          return 0;
-        }
+
+    if (newRowKeys.length === 0 && newColumnKeys.length === 0) {
+      alert("Nenhuma linha/coluna selecionada.");
+      return;
+    }
+
+    for (let rowKey of newRowKeys) {
+      if (!newFilters?.get(rowKey)?.size) {
+        alert("Nenhum valor selecionado para as linhas aplicadas.");
+        return;
       }
     }
-    setIgnoredDataKeyValue(newIgnoredFilter);
+
+    for (let columnKey of newColumnKeys) {
+      if (!newFilters?.get(columnKey)?.size) {
+        alert("Nenhum valor selecionado para as colunas aplicadas.");
+        return;
+      }
+    }
+
+    setFilterDataKeyValue(newFilters);
     setRowKeys(newRowKeys);
     setColumnKeys(newColumnKeys);
 
-    if (newRowKeys !== rowKeys || newColumnKeys !== columnKeys || newIgnoredFilter !== ignoredDataKeyValues) {
+    if (newRowKeys !== rowKeys || newColumnKeys !== columnKeys || newFilters !== filterDataKeyValues) {
       setDefaultTree(undefined);
       setComplementaryTree(undefined);
     }
   };
+
+  console.log("default", defaultTree);
+  console.log("compl", complemetaryTree);
 
   if (dataKeyValues) {
     return (
@@ -168,17 +182,12 @@ function group<T extends any, K extends keyof T>(
   return obj;
 }
 
-function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, valuesToIgnore?: Map<K, Set<String>>) {
+function groupByKey<T extends any, K extends keyof T>(arr: T[], key: K, filterKeys?: Map<K, Set<String>>) {
   return arr.reduce((result, curr) => {
     const keyValue = curr[key];
 
-    if (valuesToIgnore) {
-      for (let [ignoredKey, values] of valuesToIgnore) {
-        const ignoredValue = curr[ignoredKey];
-        if (values.has(ignoredValue)) {
-          return result;
-        }
-      }
+    if (!filterKeys?.get(key)?.has(keyValue)) {
+      return result;
     }
 
     if (!result[keyValue]) {

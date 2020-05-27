@@ -12,9 +12,9 @@ interface DropableProps<T> {
   keyMapping: Map<keyof T, string>;
   initialState?: Array<keyof T>;
   keys: Map<keyof T, Array<string>>;
-  filtroLocal: Map<keyof T, Set<string>>;
+  filterState: Map<keyof T, Set<string>>;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
-  handleUpdate?: (values: Array<keyof T>) => void;
+  handleKeyUpdate?: (values: Array<keyof T>) => void;
 }
 export interface DragItem<T> {
   type: ItemTypes;
@@ -23,7 +23,7 @@ export interface DragItem<T> {
 }
 
 export function Dropable<T>(props: DropableProps<T>) {
-  const { id, initialState, keyMapping, type, handleUpdate } = props;
+  const { id, initialState, keyMapping, type, handleKeyUpdate: handleUpdate } = props;
 
   const [keys, setKeys] = useState<Array<keyof T>>(initialState || []);
   const theme = useTheme();
@@ -64,8 +64,8 @@ export function Dropable<T>(props: DropableProps<T>) {
       name={key}
       value={keyMapping.get(key) || (key as string)}
       origin={id}
-      filterSet={props.keys.get(key) as Array<string>}
-      ignoredValues={props.filtroLocal.get(key) || new Set<string>()}
+      filterValues={props.keys.get(key) as Array<string>}
+      filterState={props.filterState.get(key) || new Set<string>()}
       handleFilterUpdate={handleFilterUpdate}
       onDragEnd={() => deleteByKey(key)}
     />
