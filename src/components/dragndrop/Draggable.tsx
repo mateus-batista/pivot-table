@@ -21,6 +21,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   const [searchedFilterSet, setSearchedFilterSet] = useState<Array<string>>(filterValues);
   const [open, setOpen] = useState(false);
+  const [all, setAll] = useState<0 | 1 | 2>(2);
   const buttonRef: any = useRef<HTMLButtonElement>();
   const theme = useTheme();
 
@@ -83,6 +84,13 @@ export function Draggable<T>(props: DraggableProps<T>) {
     if (event.nativeEvent.isTrusted) {
       filterState.has(element) ? filterState.delete(element) : filterState.add(element);
       handleFilterUpdate(name as keyof T, new Set<string>(filterState));
+      if (filterState.size === 0) {
+        setAll(0);
+      } else if (filterState.size === filterValues.length) {
+        setAll(2);
+      } else {
+        setAll(1);
+      }
     }
   };
   const handleSearch = () => (event: any) => {
@@ -97,17 +105,31 @@ export function Draggable<T>(props: DraggableProps<T>) {
     setSearchedFilterSet(searchResults);
   };
   const handleSelectAll = () => (event: any) => {
-    handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
-  };
-  const handleUnselectAll = () => (event: any) => {
-    handleFilterUpdate(name as keyof T, new Set<string>());
+    if (event.nativeEvent.isTrusted) {
+      if (all === 0) {
+        setAll(2);
+        handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
+      } else if (all === 2) {
+        setAll(0);
+        handleFilterUpdate(name as keyof T, new Set<string>(new Set<string>()));
+      } else {
+        setAll(2);
+        handleFilterUpdate(name as keyof T, new Set<string>(filterValues));
+      }
+    }
   };
 
   const filterList: ReactElement[] = [];
-
+  const checkboxAll: ReactElement = (
+    <DropdownItem key="todos" css={styles.dropdownItem}>
+      <Checkbox label="Todos" onChange={handleSelectAll()} checked={all === 2} indeterminate={all === 1} />
+    </DropdownItem>
+  );
+  filterList.push(checkboxAll);
   searchedFilterSet.forEach((element) => {
     const key = name + element;
     const selected = filterState.has(element);
+
     const item: ReactElement = (
       <DropdownItem key={key} css={styles.dropdownItem}>
         <Checkbox label={element} onChange={handleSelect(element)} checked={selected} />
@@ -152,16 +174,6 @@ export function Draggable<T>(props: DraggableProps<T>) {
                   onChange={handleSearch()}
                 />
               </div>
-            </DropdownItem>
-            <DropdownItem>
-              <ButtonGroup>
-                <Button size="small" onClick={handleSelectAll()}>
-                  Select All
-                </Button>
-                <Button size="small" onClick={handleUnselectAll()}>
-                  Unselect All
-                </Button>
-              </ButtonGroup>
             </DropdownItem>
             <div css={styles.dropdownArea}>{filterList}</div>
           </div>
