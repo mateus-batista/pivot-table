@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { GroupResult } from "../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Board } from "./filter/Board";
-import { PivotTableRender } from "./tables/PivotTableRender";
+import { PivotTableRender } from "./table/PivotTableRender";
 
 export type PivotTableProps<T extends any> = {
   data: T[];
@@ -50,23 +50,16 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
       });
     });
     const uniqueKeysValues = new Map<keyof T, Array<string>>();
-    for (const [key, value] of tempKeysValues) {
-      uniqueKeysValues.set(key, Array.from(value).sort());
-    }
+    tempKeysValues.forEach((value, key) => uniqueKeysValues.set(key, Array.from(value).sort()));
+
     setDataKeyValues(uniqueKeysValues);
   }, [data]);
 
   useEffect(() => {
     if (rowKeys.length > 0 && columnKeys.length > 0) {
-      const complemetaryTreeTime = new Date().getTime();
-      console.debug("Building complementary tree...");
       setComplementaryTree(group(data, [...columnKeys, ...rowKeys], filterDataKeyValues, aggregator, aggregatorKey));
-      console.debug("Building complementary tree took " + (new Date().getTime() - complemetaryTreeTime));
     }
-    const defaultTreeTime = new Date().getTime();
-    console.debug("Building default tree...");
     setDefaultTree(group(data, [...rowKeys, ...columnKeys], filterDataKeyValues, aggregator, aggregatorKey));
-    console.debug("Building default tree took " + (new Date().getTime() - defaultTreeTime));
   }, [data, rowKeys, columnKeys, filterDataKeyValues, aggregator, aggregatorKey]);
 
   const handleSubmit = (values: [Array<keyof T>, Array<keyof T>], newFilters: Map<keyof T, Set<string>>) => {
@@ -78,15 +71,24 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     }
 
     for (let rowKey of newRowKeys) {
-      if (!newFilters?.get(rowKey)?.size) {
+      const size = newFilters?.get(rowKey)?.size;
+      if (!size) {
         alert("Nenhum valor selecionado para as linhas aplicadas.");
+        return;
+      } else if (size && size > 50) {
+        alert("O limite de 50 valores para uma chave foi excedido, filtre mais itens.");
         return;
       }
     }
 
     for (let columnKey of newColumnKeys) {
-      if (!newFilters?.get(columnKey)?.size) {
+      const size = newFilters?.get(columnKey)?.size;
+
+      if (!size) {
         alert("Nenhum valor selecionado para as colunas aplicadas.");
+        return;
+      } else if (size && size > 50) {
+        alert("O limite de 50 valores para uma chave foi excedido, filtre mais itens.");
         return;
       }
     }
@@ -100,9 +102,6 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
       setComplementaryTree(undefined);
     }
   };
-
-  console.log("default", defaultTree);
-  console.log("compl", complemetaryTree);
 
   if (dataKeyValues) {
     return (
@@ -169,8 +168,16 @@ function group<T extends any, K extends keyof T>(
     .filter((k) => !TreeRootKeys.includes(k))
     .forEach((k) => {
       const arr = obj[k];
-      obj[k] = group(arr, keys.slice(1, keys.length), filterKeys, aggregator, aggregatorKey);
-      count.push(obj[k].value);
+      const groupResult = group(arr, keys.slice(1, keys.length), filterKeys, aggregator, aggregatorKey);
+      if (
+        !(groupResult instanceof GroupResult) &&
+        Object.keys(groupResult).filter((k) => !TreeRootKeys.includes(k)).length === 0
+      ) {
+        delete obj[k];
+      } else {
+        obj[k] = groupResult;
+        count.push(obj[k].value);
+      }
     });
 
   if (aggregator && aggregatorKey) {

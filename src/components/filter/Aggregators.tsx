@@ -63,16 +63,16 @@ const functionArr: ItemType[] = [
   {
     id: "media",
     label: "Média",
-    value: (values: number[]): number => values.reduce((prev, curr) => prev + curr) / values.length,
+    value: (values: number[]): number => values.reduce((prev, curr) => prev + curr, 0) / values.length,
   },
   {
     id: "maximo",
     label: "Máximo",
-    value: (values: number[]): number => values.reduce((prev, curr) => (prev > curr ? prev : curr)),
+    value: (values: number[]): number => values.reduce((prev, curr) => (prev > curr ? prev : curr), 0),
   },
   {
     id: "minimo",
     label: "Mínimo",
-    value: (values: number[]): number => values.reduce((prev, curr) => (prev < curr ? prev : curr)),
+    value: (values: number[]): number => values.reduce((prev, curr) => (prev < curr ? prev : curr), 0),
   },
 ];

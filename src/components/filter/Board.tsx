@@ -9,6 +9,7 @@ import { ItemTypes } from "../../types/ItemTypes";
 import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
 import { Aggregators } from "./Aggregators";
+
 interface BoardProps<T extends any> {
   keys: Map<keyof T, Array<string>>;
   keyMapping: Map<keyof T, string>;
@@ -23,16 +24,12 @@ export function Board<T extends any>(props: BoardProps<T>) {
 
   const deepCopy = new Map<keyof T, Set<string>>();
 
-  for (let [key, value] of keys) {
-    deepCopy.set(key, new Set(value));
-  }
+  keys.forEach((value, key) => deepCopy.set(key, new Set(value)));
 
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
   const [filterState, setFilterState] = useState<Map<keyof T, Set<string>>>(new Map<keyof T, Set<string>>(deepCopy));
   const theme = useTheme();
-
-  console.log("keys", keys);
 
   const onClick = (event: any) => {
     handleSubmit([rowKeys, columnKeys], filterState);
@@ -59,7 +56,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
   };
 
   const handleLimparFiltros = () => {
-    setFilterState(new Map<keyof T, Set<string>>());
+    setFilterState(deepCopy);
   };
 
   const filterValuesTags: ReactElement[] = [];

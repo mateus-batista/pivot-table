@@ -3,35 +3,18 @@ import { css, jsx } from "@emotion/core";
 import { SerializedStyles } from "@emotion/serialize";
 import { useTheme } from "bold-ui";
 import { ReactNode } from "react";
-
-export class GridArea {
-  rowStart: number;
-  columnStart: number;
-  rowEnd: number;
-  columnEnd: number;
-  constructor(rowStart: number, columnStart: number, rowEnd: number, columnEnd: number) {
-    if (rowStart > rowEnd || columnStart > columnEnd) {
-      throw new SyntaxError("Valores de fim devem ser maiores que valores de inicio.");
-    }
-    this.rowStart = rowStart;
-    this.columnStart = columnStart;
-    this.rowEnd = rowEnd;
-    this.columnEnd = columnEnd;
-  }
-  toString() {
-    return `${this.rowStart}/${this.columnStart}/${this.rowEnd}/${this.columnEnd}`;
-  }
-}
+import { GridArea } from "../../classes/GridArea";
 
 export type PivotTableCellProps = {
   gridArea: GridArea;
+  type: Array<"header" | "value" | "total">;
   children?: ReactNode;
   endColumn?: boolean;
   endRow?: boolean;
   styles?: SerializedStyles;
 };
 export function PivotTableCell(props: PivotTableCellProps) {
-  const { endColumn, endRow, styles, gridArea } = props;
+  const { endColumn, endRow, styles, gridArea, type } = props;
 
   const theme = useTheme();
 
@@ -59,7 +42,8 @@ export function PivotTableCell(props: PivotTableCellProps) {
       border-top: 1px solid ${theme.pallete.divider};
       border-left: 1px solid ${theme.pallete.divider};
       display: flex;
-      justify-content: flex-start;
+      justify-content: ${type.includes("value") ? "flex-end" : "flex-start"};
+      font-weight: ${type.includes("total") ? "bold" : "normal"};
       align-items: center;
       width: 100%;
       height: 100%;
@@ -73,7 +57,7 @@ export function PivotTableCell(props: PivotTableCellProps) {
         styles,
       ])}
     >
-      {props.children}
+      {type.includes("header") ? <h5>{props.children}</h5> : props.children}
     </div>
   );
 }
