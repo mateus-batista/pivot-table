@@ -21,7 +21,9 @@ export function Draggable<T>(props: DraggableProps<T>) {
 
   const [searchedFilterSet, setSearchedFilterSet] = useState<Array<string>>(filterValues);
   const [open, setOpen] = useState(false);
-  const [all, setAll] = useState<0 | 1 | 2>(2);
+  const [all, setAll] = useState<0 | 1 | 2>(
+    filterState.size === 0 ? 0 : filterState.size === filterValues.length ? 2 : 1
+  );
   const buttonRef: any = useRef<HTMLButtonElement>();
   const theme = useTheme();
 
