@@ -84,7 +84,7 @@ export function PivotTableRender<T>(props: TableProps<T>) {
       css={css`
         max-width: 100%;
         overflow: auto;
-        border: 1px solid ${theme.pallete.divider};
+        box-shadow: ${theme.shadows.outer[20]};
       `}
     >
       <div
