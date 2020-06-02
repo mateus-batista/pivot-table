@@ -26,20 +26,25 @@ export function Board<T extends any>(props: BoardProps<T>) {
 
   keys.forEach((value, key) => deepCopy.set(key, new Set(value)));
 
+  const [availableKeys, setAvailableKeys] = useState<Array<keyof T>>(Array.from(keys.keys()));
   const [rowKeys, setRowKeys] = useState<Array<keyof T>>([]);
   const [columnKeys, setColumnKeys] = useState<Array<keyof T>>([]);
   const [filterState, setFilterState] = useState<Map<keyof T, Set<string>>>(new Map<keyof T, Set<string>>(deepCopy));
   const theme = useTheme();
 
-  const onClick = (event: any) => {
+  const onGerarTabela = () => {
     handleSubmit([rowKeys, columnKeys], filterState);
   };
-  const handleUpdateRowKeys = (rowKeys: Array<keyof T>) => {
-    setRowKeys(rowKeys);
+  const onLimparCampos = () => {
+    handleUpdateColumnKeys([]);
+    handleUpdateRowKeys([]);
+    handleLimparFiltros();
+    handleUpdateAvailableKeys(Array.from(keys.keys()));
   };
-  const handleUpdateColumnKeys = (columnKeys: Array<keyof T>) => {
-    setColumnKeys(columnKeys);
-  };
+  const handleUpdateAvailableKeys = (availableKeys: Array<keyof T>) => setAvailableKeys(availableKeys);
+  const handleUpdateRowKeys = (rowKeys: Array<keyof T>) => setRowKeys(rowKeys);
+  const handleUpdateColumnKeys = (columnKeys: Array<keyof T>) => setColumnKeys(columnKeys);
+
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     if (filtro.size < 1) {
       filterState.delete(key);
@@ -111,19 +116,21 @@ export function Board<T extends any>(props: BoardProps<T>) {
     );
   }
 
-  const filterValuesBox = <VFlow>{filterValuesTags}</VFlow>;
+  const filterValuesBox = <VFlow vSpacing={0.5}>{filterValuesTags}</VFlow>;
 
+  console.log("render board");
   return (
     <DndProvider backend={Backend}>
       <Grid>
         <Cell md={6} sm={12} xs={12}>
           <Box label="Campos disponíveis">
             <Dropable<T>
+              keyState={availableKeys}
               filterState={filterState}
               type={ItemTypes.FILTER}
               keyMapping={keyMapping}
               keys={keys}
-              initialState={Array.from(keys.keys())}
+              handleKeyUpdate={handleUpdateAvailableKeys}
               handleFilterUpdate={handleFilterUpdate}
               id={0}
             />
@@ -133,6 +140,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
           <Box label="Colunas" icon="hamburguerMenu" rotation="90">
             <Dropable<T>
               id={2}
+              keyState={columnKeys}
               filterState={filterState}
               keyMapping={keyMapping}
               keys={keys}
@@ -145,6 +153,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
         <Cell md={6} sm={12} xs={12}>
           <Box label="Linhas" icon="hamburguerMenu">
             <Dropable<T>
+              keyState={rowKeys}
               filterState={filterState}
               handleKeyUpdate={handleUpdateRowKeys}
               handleFilterUpdate={handleFilterUpdate}
@@ -174,7 +183,10 @@ export function Board<T extends any>(props: BoardProps<T>) {
               </div>
             </Box>
             <HFlow justifyContent="flex-end">
-              <Button kind="primary" size="medium" onClick={onClick}>
+              <Button kind="normal" size="medium" onClick={onLimparCampos}>
+                Limpar campos
+              </Button>
+              <Button kind="primary" size="medium" onClick={onGerarTabela}>
                 Gerar tabela
               </Button>
             </HFlow>
@@ -190,12 +202,11 @@ export function Board<T extends any>(props: BoardProps<T>) {
             <Grid wrap alignItems="center">
               <Cell size={10}>
                 <HFlow alignItems="center">
-                  <b>Valores filtrados</b>
+                  <b>Filtros aplicados</b>
                   {filterValuesBox}
                 </HFlow>
               </Cell>
               <Cell size={2}>
-                <HFlow></HFlow>
                 <Button
                   onClick={handleLimparFiltros}
                   size="small"

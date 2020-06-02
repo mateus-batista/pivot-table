@@ -1,20 +1,19 @@
 /** @jsx jsx */
-import { useState } from "react";
-import { useDrop } from "react-dnd";
-import { Draggable } from "./Draggable";
-import { ItemTypes } from "../../types/ItemTypes";
-import { jsx, css } from "@emotion/core";
+import { css, jsx } from "@emotion/core";
 import { useTheme } from "bold-ui";
+import { useDrop } from "react-dnd";
+import { ItemTypes } from "../../types/ItemTypes";
+import { Draggable } from "./Draggable";
 
 interface DropableProps<T> {
   id: number;
   type: ItemTypes;
-  keyMapping: Map<keyof T, string>;
-  initialState?: Array<keyof T>;
   keys: Map<keyof T, Array<string>>;
+  keyMapping: Map<keyof T, string>;
+  keyState: Array<keyof T>;
   filterState: Map<keyof T, Set<string>>;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
-  handleKeyUpdate?: (values: Array<keyof T>) => void;
+  handleKeyUpdate: (values: Array<keyof T>) => void;
 }
 export interface DragItem<T> {
   type: ItemTypes;
@@ -23,9 +22,8 @@ export interface DragItem<T> {
 }
 
 export function Dropable<T>(props: DropableProps<T>) {
-  const { id, initialState, keyMapping, type, handleKeyUpdate: handleUpdate } = props;
+  const { id, keyState, keyMapping, type, handleKeyUpdate } = props;
 
-  const [keys, setKeys] = useState<Array<keyof T>>(initialState || []);
   const theme = useTheme();
   const handleFilterUpdate = (key: keyof T, filtro: Set<string>) => {
     props.handleFilterUpdate(key, filtro);
@@ -33,10 +31,9 @@ export function Dropable<T>(props: DropableProps<T>) {
   const [{ isOver }, drag] = useDrop({
     accept: type,
     drop(item: DragItem<T>) {
-      if (!keys.includes(item.name)) {
-        const newKeys = [...keys, item.name];
-        setKeys(newKeys);
-        handleUpdate && handleUpdate(newKeys);
+      if (!keyState.includes(item.name)) {
+        const newKeys = [...keyState, item.name];
+        handleKeyUpdate && handleKeyUpdate(newKeys);
         return { result: 0 };
       }
       return { result: -1 };
@@ -48,16 +45,15 @@ export function Dropable<T>(props: DropableProps<T>) {
   });
 
   function deleteByKey(id: keyof T) {
-    let tempKeys = [...keys];
+    let tempKeys = [...keyState];
     const index = tempKeys.indexOf(id);
     if (index > -1) {
       tempKeys.splice(index, 1);
     }
-    setKeys(tempKeys);
-    handleUpdate && handleUpdate(tempKeys);
+    handleKeyUpdate && handleKeyUpdate(tempKeys);
   }
 
-  const draggableButtons = keys.map((key) => (
+  const draggableButtons = keyState.map((key) => (
     <Draggable<T>
       key={key as string}
       type={type}
@@ -70,7 +66,7 @@ export function Dropable<T>(props: DropableProps<T>) {
       onDragEnd={() => deleteByKey(key)}
     />
   ));
-  const hasKeys = keys.length > 0;
+  const hasKeys = keyState.length > 0;
   const styles = {
     placeholder: css`
       align-self: center;
