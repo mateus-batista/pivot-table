@@ -3,8 +3,8 @@ import { css, jsx } from "@emotion/core";
 import { ReactElement } from "react";
 import { Button, Cell, Grid, HFlow, VFlow, Tag, useTheme } from "bold-ui";
 import { useState } from "react";
-import { DndProvider } from "react-dnd";
-import Backend from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd-multi-backend";
+import HTML5toTouch from "react-dnd-multi-backend/dist/esm/HTML5toTouch";
 import { ItemTypes } from "../../types/ItemTypes";
 import { Box } from "../box/Box";
 import { Dropable } from "../dragndrop/Dropable";
@@ -115,9 +115,8 @@ export function Board<T extends any>(props: BoardProps<T>) {
   }
 
   const filterValuesBox = <VFlow>{filterValuesTags}</VFlow>;
-
   return (
-    <DndProvider backend={Backend}>
+    <DndProvider options={HTML5toTouch}>
       <Grid>
         <Cell md={6} sm={12} xs={12}>
           <Box label="Campos disponíveis">
