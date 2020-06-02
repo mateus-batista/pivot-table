@@ -1,6 +1,6 @@
 import { ThemeProvider, useTheme } from "bold-ui";
 import React from "react";
-import { Home } from "./components/Home";
+import { Home } from "./components/HomeData";
 const App: React.FC = () => {
   const theme = useTheme();
   return (
