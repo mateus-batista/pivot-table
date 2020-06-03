@@ -88,9 +88,6 @@ export function PivotTableRender<T>(props: TableProps<T>) {
     if (tableContainerRef.current) {
       setTableExceeds(tableContainerRef.current.scrollWidth > tableContainerRef.current.clientWidth);
     }
-    console.log("widht element", tableContainerRef.current?.scrollWidth);
-    console.log("clientWidth", tableContainerRef.current?.clientWidth);
-    console.log("client", tableContainerRef.current?.scrollLeft);
   }, []);
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -109,18 +106,15 @@ export function PivotTableRender<T>(props: TableProps<T>) {
       }
     }
   };
-  //box-shadow: ${theme.shadows.outer[20]};
+
   return (
     <div
+      onScrollCapture={handleScroll}
+      ref={tableContainerRef}
+      key={"table"}
       css={css`
         max-width: 100%;
         overflow: auto;
-        ${
-          tableExceeds &&
-          `
-        border: 1px solid ${theme.pallete.divider};
-        `
-        }
         ${
           tableExceeds &&
           displayLeftShadow &&
@@ -148,25 +142,13 @@ export function PivotTableRender<T>(props: TableProps<T>) {
           -moz-box-shadow: inset 36px 0px 24px -24px ${theme.pallete.divider};
         `
         }
-      `}
-      onScrollCapture={handleScroll}
-      ref={tableContainerRef}
-    >
-      <div
-        key={"table"}
-        css={css`
+
           display: grid;
           place-items: center center;
           place-content: start start;
-          ${tableExceeds &&
-          `
-          margin-left: -1px;
-          margin-top: -1px;
-          `}
         `}
-      >
-        {table}
-      </div>
+    >
+      {table}
     </div>
   );
 }

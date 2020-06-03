@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { SerializedStyles } from "@emotion/serialize";
 import { useTheme } from "bold-ui";
-import { ReactNode } from "react";
+import { ReactNode, MouseEvent } from "react";
 import { GridArea } from "../../classes/GridArea";
 
 export type PivotTableCellProps = {
@@ -18,23 +18,44 @@ export function PivotTableCell(props: PivotTableCellProps) {
 
   const theme = useTheme();
 
-  const handleMouseEnter = () => {
-    document
-      .querySelectorAll(`div[data-rownumber="${gridArea.rowStart}"], div[data-columnnumber="${gridArea.columnStart}"]`)
-      .forEach((n) => n.setAttribute("style", `background-color: ${theme.pallete.gray.c90}`));
+  const handleMouseEnter = (evt: MouseEvent<HTMLDivElement>) => {
+    if (type.includes("value")) {
+      document
+        .querySelectorAll(
+          `div[data-rownumber~="${gridArea.rowStart}"], div[data-columnnumber~="${gridArea.columnStart}"]`
+        )
+        .forEach((n) => {
+          if (n !== evt.currentTarget) {
+            n.setAttribute("style", `background-color: ${theme.pallete.gray.c90}; position: relative; z-index: -1`);
+          }
+        });
+    }
   };
 
   const handleMouseLeave = () => {
-    document
-      .querySelectorAll(`div[data-rownumber="${gridArea.rowStart}"], div[data-columnnumber="${gridArea.columnStart}"]`)
-      .forEach((n) => n.setAttribute("style", ""));
+    if (type.includes("value")) {
+      document
+        .querySelectorAll(
+          `div[data-rownumber~="${gridArea.rowStart}"], div[data-columnnumber~="${gridArea.columnStart}"]`
+        )
+        .forEach((n) => n.removeAttribute("style"));
+    }
   };
+  const rowNumbers = [];
+  for (let i = gridArea.rowStart; i < gridArea.rowEnd; i++) {
+    rowNumbers.push(i);
+  }
+
+  const columnNumbers = [];
+  for (let i = gridArea.columnStart; i < gridArea.columnEnd; i++) {
+    columnNumbers.push(i);
+  }
   return (
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      data-rownumber={gridArea.rowStart}
-      data-columnnumber={gridArea.columnStart}
+      data-rownumber={rowNumbers.join(" ")}
+      data-columnnumber={columnNumbers.join(" ")}
       key={gridArea.toString()}
       css={css([
         `
@@ -48,12 +69,13 @@ export function PivotTableCell(props: PivotTableCellProps) {
       width: 100%;
       height: 100%;
       padding: 0.5rem 1rem;
-      &hover: {
-        background-color: ${theme.pallete.gray.c90}
-      }
-    `,
+      `,
         endColumn && `border-right: 1px solid ${theme.pallete.divider};`,
         endRow && `border-bottom: 1px solid ${theme.pallete.divider};`,
+        type.includes("value") &&
+          `&: hover {
+          background-color: ${theme.pallete.gray.c90}
+        }`,
         styles,
       ])}
     >
