@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { ReactElement } from "react";
+import { ReactElement, UIEvent, useRef, useEffect, useState } from "react";
 import { GroupResult } from "../../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../../types/TreeRoot";
 import { Dictionary } from "../PivotTable";
@@ -29,6 +29,11 @@ const PATH_SEPARATOR = "|";
 
 export function PivotTableRender<T>(props: TableProps<T>) {
   const { rowKeys, columnKeys, rowData, columnData, keysMapping } = props;
+
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [tableExceeds, setTableExceeds] = useState(false);
+  const [displayRightShadow, setDisplayRightShadow] = useState(true);
+  const [displayLeftShadow, setDisplayLeftShadow] = useState(false);
 
   const theme = useTheme();
 
@@ -79,13 +84,73 @@ export function PivotTableRender<T>(props: TableProps<T>) {
     );
   }
 
+  useEffect(() => {
+    if (tableContainerRef.current) {
+      setTableExceeds(tableContainerRef.current.scrollWidth > tableContainerRef.current.clientWidth);
+    }
+    console.log("widht element", tableContainerRef.current?.scrollWidth);
+    console.log("clientWidth", tableContainerRef.current?.clientWidth);
+    console.log("client", tableContainerRef.current?.scrollLeft);
+  }, []);
+
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (tableContainerRef.current) {
+      const displayRight =
+        tableContainerRef.current.scrollLeft !==
+        tableContainerRef.current.scrollWidth - tableContainerRef.current.clientWidth;
+
+      const displayLeft = tableContainerRef.current.scrollLeft > 10;
+
+      if (displayLeftShadow !== displayLeft) {
+        setDisplayLeftShadow(displayLeft);
+      }
+      if (displayRight !== displayRightShadow) {
+        setDisplayRightShadow(displayRight);
+      }
+    }
+  };
+  //box-shadow: ${theme.shadows.outer[20]};
   return (
     <div
       css={css`
         max-width: 100%;
         overflow: auto;
-        box-shadow: ${theme.shadows.outer[20]};
+        ${
+          tableExceeds &&
+          `
+        border: 1px solid ${theme.pallete.divider};
+        `
+        }
+        ${
+          tableExceeds &&
+          displayLeftShadow &&
+          displayRightShadow &&
+          `
+        box-shadow: inset -36px 0px 24px -24px ${theme.pallete.divider}, inset 36px 0px 24px -24px ${theme.pallete.divider};
+        -moz-box-shadow: inset -36px 0px 24px -24px ${theme.pallete.divider}, inset 36px 0px 24px -24px ${theme.pallete.divider};
+        `
+        }
+        ${
+          tableExceeds &&
+          displayRightShadow &&
+          !displayLeftShadow &&
+          `
+        box-shadow: inset -36px 0px 24px -24px ${theme.pallete.divider};
+        -moz-box-shadow: inset -36px 0px 24px -24px ${theme.pallete.divider};
+        `
+        }
+        ${
+          tableExceeds &&
+          displayLeftShadow &&
+          !displayRightShadow &&
+          `
+          box-shadow: inset 36px 0px 24px -24px ${theme.pallete.divider};
+          -moz-box-shadow: inset 36px 0px 24px -24px ${theme.pallete.divider};
+        `
+        }
       `}
+      onScrollCapture={handleScroll}
+      ref={tableContainerRef}
     >
       <div
         key={"table"}
@@ -93,8 +158,11 @@ export function PivotTableRender<T>(props: TableProps<T>) {
           display: grid;
           place-items: center center;
           place-content: start start;
+          ${tableExceeds &&
+          `
           margin-left: -1px;
           margin-top: -1px;
+          `}
         `}
       >
         {table}
