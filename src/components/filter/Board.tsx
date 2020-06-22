@@ -15,12 +15,21 @@ interface BoardProps<T extends any> {
   keyMapping: Map<keyof T, string>;
   sample: T;
   handleSubmit: (values: [Array<keyof T>, Array<keyof T>], filterValues: Map<keyof T, Set<string>>) => void;
+  handleCsv: () => void;
   handleAggregatorChange: (aggregator: ((values: number[]) => number) | undefined) => void;
   handleAggregatorKeyChange: (key: keyof T) => void;
 }
 
 export function Board<T extends any>(props: BoardProps<T>) {
-  const { keys, keyMapping, handleSubmit, sample, handleAggregatorChange, handleAggregatorKeyChange } = props;
+  const {
+    keys,
+    keyMapping,
+    handleSubmit,
+    handleCsv,
+    sample,
+    handleAggregatorChange,
+    handleAggregatorKeyChange,
+  } = props;
 
   const deepCopy = new Map<keyof T, Set<string>>();
 
@@ -35,11 +44,26 @@ export function Board<T extends any>(props: BoardProps<T>) {
   const onGerarTabela = () => {
     handleSubmit([rowKeys, columnKeys], filterState);
   };
+  const onGerarCsv = () => {
+    handleCsv();
+  };
   const onLimparCampos = () => {
     handleUpdateColumnKeys([]);
     handleUpdateRowKeys([]);
     handleLimparFiltros();
     handleUpdateAvailableKeys(Array.from(keys.keys()));
+  };
+  const onKeyNav = (key: keyof T, dir: "left" | "right", origin: number) => {
+    if (origin === 0) {
+      dir === "right" && setColumnKeys([...columnKeys, key]);
+      dir === "left" && setRowKeys([...rowKeys, key]);
+    } else if (origin === 1) {
+      dir === "right" && setColumnKeys([...columnKeys, key]);
+      dir === "left" && setAvailableKeys([...availableKeys, key]);
+    } else {
+      dir === "right" && setRowKeys([...rowKeys, key]);
+      dir === "left" && setAvailableKeys([...availableKeys, key]);
+    }
   };
   const handleUpdateAvailableKeys = (availableKeys: Array<keyof T>) => setAvailableKeys(availableKeys);
   const handleUpdateRowKeys = (rowKeys: Array<keyof T>) => setRowKeys(rowKeys);
@@ -132,6 +156,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
               keys={keys}
               handleKeyUpdate={handleUpdateAvailableKeys}
               handleFilterUpdate={handleFilterUpdate}
+              onKeyNav={onKeyNav}
               id={0}
             />
           </Box>
@@ -146,6 +171,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
               keys={keys}
               handleKeyUpdate={handleUpdateColumnKeys}
               handleFilterUpdate={handleFilterUpdate}
+              onKeyNav={onKeyNav}
               type={ItemTypes.FILTER}
             />
           </Box>
@@ -157,6 +183,7 @@ export function Board<T extends any>(props: BoardProps<T>) {
               filterState={filterState}
               handleKeyUpdate={handleUpdateRowKeys}
               handleFilterUpdate={handleFilterUpdate}
+              onKeyNav={onKeyNav}
               type={ItemTypes.FILTER}
               keyMapping={keyMapping}
               keys={keys}
@@ -188,6 +215,9 @@ export function Board<T extends any>(props: BoardProps<T>) {
               </Button>
               <Button kind="primary" size="medium" onClick={onGerarTabela}>
                 Gerar tabela
+              </Button>
+              <Button kind="primary" size="medium" onClick={onGerarCsv}>
+                Gerar csv
               </Button>
             </HFlow>
           </VFlow>

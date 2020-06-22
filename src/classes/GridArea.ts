@@ -15,4 +15,7 @@ export class GridArea {
   toString() {
     return `${this.rowStart}/${this.columnStart}/${this.rowEnd}/${this.columnEnd}`;
   }
+  toCsvFormat() {
+    return [this.columnStart, this.rowEnd - this.rowStart, this.rowStart];
+  }
 }
