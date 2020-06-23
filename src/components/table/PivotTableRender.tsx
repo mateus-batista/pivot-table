@@ -38,11 +38,23 @@ export function PivotTableRender<T>(props: TableProps<T>) {
   const theme = useTheme();
 
   const table: ReactElement[] = [];
+  const csvTable: Array<Array<string>> = [[]];
+  const mergeTable = (mainTable: Array<Array<string>>, addedTable: Array<Array<string>>) => {
+    addedTable.forEach((row, rowIdx) => {
+      row.forEach((col, colIdx) => {
+        if (mainTable[rowIdx]) {
+          mainTable[rowIdx][colIdx] = col;
+        } else {
+          mainTable[rowIdx] = [col];
+        }
+      });
+    });
+  };
 
   if (rowData && rowKeys && columnData && columnKeys) {
     const rowResult = getResult(rowData, "column", rowKeys);
 
-    const [divs, rowTotalValues, totalRowNumber, cellPosition] = getHorizontal({
+    const [csvHorizontalTable, horizontalDivs, rowTotalValues, totalRowNumber, cellPosition] = getHorizontal({
       results: rowResult,
       keys: rowKeys,
       data: rowData,
@@ -52,36 +64,50 @@ export function PivotTableRender<T>(props: TableProps<T>) {
         totalKey: columnKeys[0],
       },
     });
-
-    table.push(...divs);
+    mergeTable(csvTable, csvHorizontalTable);
+    table.push(...horizontalDivs);
 
     const columnResult = getResult(columnData, "row", columnKeys);
 
-    table.push(
-      ...getVertical<T>({
-        results: columnResult,
-        keys: columnKeys,
-        data: columnData,
-        keysMapping,
-        columnHeaderSpace: rowKeys.length + 1,
-        mixedTable: {
-          rowResult: rowResult,
-          rowTotalValues: rowTotalValues,
-          totalKey: rowKeys[0],
-          totalRowNumber: totalRowNumber,
-          cellPosition: cellPosition,
-        },
-      })
-    );
+    const [csvVerticalTable, verticalDivs] = getVertical<T>({
+      results: columnResult,
+      keys: columnKeys,
+      data: columnData,
+      keysMapping,
+      columnHeaderSpace: rowKeys.length + 1,
+      mixedTable: {
+        rowResult: rowResult,
+        rowTotalValues: rowTotalValues,
+        totalKey: rowKeys[0],
+        totalRowNumber: totalRowNumber,
+        cellPosition: cellPosition,
+      },
+    });
+
+    mergeTable(csvTable, csvVerticalTable);
+    table.push(...verticalDivs);
   } else if (rowData && rowKeys) {
     const rowResult = getResult(rowData, "column");
-    const [divs] = getHorizontal<T>({ results: rowResult, keys: rowKeys, data: rowData, keysMapping, headerSpace: 2 });
-    table.push(...divs);
+    const [csvHorizontalTable, horizontalDivs] = getHorizontal<T>({
+      results: rowResult,
+      keys: rowKeys,
+      data: rowData,
+      keysMapping,
+      headerSpace: 2,
+    });
+    mergeTable(csvTable, csvHorizontalTable);
+    table.push(...horizontalDivs);
   } else if (columnData && columnKeys) {
     const columnResult = getResult(columnData, "row");
-    table.push(
-      ...getVertical<T>({ results: columnResult, keys: columnKeys, data: columnData, keysMapping })
-    );
+    const [csvVerticalTable, verticalDivs] = getVertical<T>({
+      results: columnResult,
+      keys: columnKeys,
+      data: columnData,
+      keysMapping,
+    });
+
+    mergeTable(csvTable, csvVerticalTable);
+    table.push(...verticalDivs);
   }
 
   useEffect(() => {
@@ -153,6 +179,79 @@ export function PivotTableRender<T>(props: TableProps<T>) {
   );
 }
 
+export function PivotCsvRender<T>(props: TableProps<T>) {
+  const { rowKeys, columnKeys, rowData, columnData, keysMapping } = props;
+  const csvTable: Array<Array<string>> = [[]];
+  const mergeTable = (mainTable: Array<Array<string>>, addedTable: Array<Array<string>>) => {
+    addedTable.forEach((row, rowIdx) => {
+      row.forEach((col, colIdx) => {
+        if (mainTable[rowIdx]) {
+          mainTable[rowIdx][colIdx] = col;
+        } else {
+          mainTable[rowIdx] = [col];
+        }
+      });
+    });
+  };
+
+  if (rowData && rowKeys && columnData && columnKeys) {
+    const rowResult = getResult(rowData, "column", rowKeys);
+
+    const [csvHorizontalTable, , rowTotalValues, totalRowNumber, cellPosition] = getHorizontal({
+      results: rowResult,
+      keys: rowKeys,
+      data: rowData,
+      keysMapping,
+      headerSpace: columnKeys.length + 1,
+      mixedTable: {
+        totalKey: columnKeys[0],
+      },
+    });
+    mergeTable(csvTable, csvHorizontalTable);
+
+    const columnResult = getResult(columnData, "row", columnKeys);
+
+    const [csvVerticalTable] = getVertical<T>({
+      results: columnResult,
+      keys: columnKeys,
+      data: columnData,
+      keysMapping,
+      columnHeaderSpace: rowKeys.length + 1,
+      mixedTable: {
+        rowResult: rowResult,
+        rowTotalValues: rowTotalValues,
+        totalKey: rowKeys[0],
+        totalRowNumber: totalRowNumber,
+        cellPosition: cellPosition,
+      },
+    });
+
+    mergeTable(csvTable, csvVerticalTable);
+  } else if (rowData && rowKeys) {
+    const rowResult = getResult(rowData, "column");
+    const [csvHorizontalTable] = getHorizontal<T>({
+      results: rowResult,
+      keys: rowKeys,
+      data: rowData,
+      keysMapping,
+      headerSpace: 2,
+    });
+    mergeTable(csvTable, csvHorizontalTable);
+  } else if (columnData && columnKeys) {
+    const columnResult = getResult(columnData, "row");
+    const [csvVerticalTable] = getVertical<T>({
+      results: columnResult,
+      keys: columnKeys,
+      data: columnData,
+      keysMapping,
+    });
+
+    mergeTable(csvTable, csvVerticalTable);
+  }
+
+  return csvTable;
+}
+
 function getHorizontal<T>({
   results,
   keys,
@@ -160,10 +259,11 @@ function getHorizontal<T>({
   keysMapping,
   headerSpace = 1,
   mixedTable,
-}: GetHorinzontalProps<T>): [ReactElement[], Map<string, number>, number, Set<string>] {
+}: GetHorinzontalProps<T>): [string[][], ReactElement[], Map<string, number>, number, Set<string>] {
   let maxRowEnd = 0;
   let maxColumnEnd = 0;
   const divs: ReactElement[] = [];
+  const csvTable: string[][] = new Array<Array<string>>();
   const rowTotalValues = new Map<string, number>();
   const cellPosition = new Set<string>();
 
@@ -177,6 +277,14 @@ function getHorizontal<T>({
         {keysMapping.get(k)?.toUpperCase()}
       </PivotTableCell>
     );
+    const [row, spacing, col] = gridArea.toCsvFormat();
+    const tempData = ",".repeat(headerSpace - 1) + keysMapping.get(k)?.toUpperCase() + ",".repeat(spacing);
+    if (csvTable[row]) {
+      csvTable[row][col] = tempData;
+    } else {
+      csvTable[row] = [];
+      csvTable[row][col] = tempData;
+    }
   });
 
   /**
@@ -212,6 +320,14 @@ function getHorizontal<T>({
         {value}
       </PivotTableCell>
     );
+    const [row, spacing, col] = gridArea.toCsvFormat();
+    const tempData = value + ",".repeat(spacing);
+    if (csvTable[row]) {
+      csvTable[row][col] = tempData;
+    } else {
+      csvTable[row] = [];
+      csvTable[row][col] = ",".repeat(rowStart - 1) + tempData;
+    }
     cellPosition.add(gridArea.toString());
   }
 
@@ -239,6 +355,22 @@ function getHorizontal<T>({
         {numberFormatter(data.value)}
       </PivotTableCell>
     );
+    const [row, spacing, col] = totalGridArea.toCsvFormat();
+    const tempData = "TOTAL" + ",".repeat(spacing);
+    if (csvTable[row]) {
+      csvTable[row][col] = tempData;
+    } else {
+      csvTable[row] = [];
+      csvTable[row][col] = tempData;
+    }
+
+    const [row2, spacing2, col2] = dataValueGridArea.toCsvFormat();
+    const tempData2 = numberFormatter(data.value) + ",".repeat(spacing2);
+    if (csvTable[row2]) {
+      csvTable[row2][col2] = tempData2;
+    } else {
+      csvTable[row2] = [tempData2];
+    }
   }
 
   divs.push(
@@ -252,9 +384,17 @@ function getHorizontal<T>({
       TOTAIS
     </PivotTableCell>
   );
+  const [row, spacing, col] = totaisGridArea.toCsvFormat();
+  const tempData = "TOTAL" + ",".repeat(spacing);
+  if (csvTable[row]) {
+    csvTable[row][col] = tempData;
+  } else {
+    csvTable[row] = [];
+    csvTable[row][col] = tempData;
+  }
 
   cellPosition.add(totaisGridArea.toString());
-  return [divs, rowTotalValues, maxRowEnd, cellPosition];
+  return [csvTable, divs, rowTotalValues, maxRowEnd, cellPosition];
 }
 
 function getVertical<T>({
@@ -264,9 +404,10 @@ function getVertical<T>({
   keysMapping,
   columnHeaderSpace = 1,
   mixedTable,
-}: GetVerticalProps<T>): ReactElement[] {
+}: GetVerticalProps<T>): [string[][], ReactElement[]] {
   let maxRowEnd = 0;
   let maxColumnEnd = 0;
+  const csvTable: string[][] = new Array<Array<string>>();
   const divs: ReactElement[] = [];
   const mixedTableStartRowCache = new Map<string, number>();
   const mixedTableColumnTotals = new Map<number, number>();
@@ -308,18 +449,42 @@ function getVertical<T>({
           {value}
         </PivotTableCell>
       );
+      const [row, spacing, col] = gridArea.toCsvFormat();
+      const tempData = value + ",".repeat(spacing);
+      if (csvTable[row]) {
+        csvTable[row][col] = tempData;
+      } else {
+        csvTable[row] = [];
+        csvTable[row][col] = ",".repeat(rowStart - 1) + tempData;
+      }
     } else {
       divs.push(
         <PivotTableCell type={["header"]} key={gridArea.toString()} gridArea={gridArea}>
           {value}
         </PivotTableCell>
       );
+      const [row, spacing, col] = gridArea.toCsvFormat();
+      const tempData = value + ",".repeat(spacing);
+      if (csvTable[row]) {
+        csvTable[row][col] = tempData;
+      } else {
+        csvTable[row] = [];
+        csvTable[row][col] = ",".repeat(rowStart - 1) + tempData;
+      }
     }
     cellPositions.add(gridArea.toString());
   }
   divs.push(
     ...keys.map((k, i) => {
       const gridArea = new GridArea(i + 1, columnHeaderSpace, i + 2, columnHeaderSpace + 1);
+      const [row, spacing, col] = gridArea.toCsvFormat();
+      const tempData = keysMapping.get(k)?.toUpperCase() + ",".repeat(spacing);
+      if (csvTable[row]) {
+        csvTable[row][col] = tempData;
+      } else {
+        csvTable[row] = [];
+        csvTable[row][col] = tempData;
+      }
       return (
         <PivotTableCell type={["header"]} key={gridArea.toString()} gridArea={gridArea}>
           {keysMapping.get(k)?.toUpperCase()}
@@ -342,6 +507,14 @@ function getVertical<T>({
           {numberFormatter(value)}
         </PivotTableCell>
       );
+      const [row, spacing, col] = gridArea.toCsvFormat();
+      const tempData = numberFormatter(value) + ",".repeat(spacing);
+      if (csvTable[row]) {
+        csvTable[row][col] = tempData;
+      } else {
+        csvTable[row] = [];
+        csvTable[row][col] = tempData;
+      }
       cellPositions.add(gridArea.toString());
     });
 
@@ -354,6 +527,14 @@ function getVertical<T>({
             {numberFormatter(value)}
           </PivotTableCell>
         );
+        const [row, spacing, col] = gridArea.toCsvFormat();
+        const tempData = numberFormatter(value) + ",".repeat(spacing);
+        if (csvTable[row]) {
+          csvTable[row][col] = tempData;
+        } else {
+          csvTable[row] = [];
+          csvTable[row][col] = tempData;
+        }
         cellPositions.add(gridArea.toString());
       }
     });
@@ -380,6 +561,28 @@ function getVertical<T>({
         {numberFormatter(data.value)}
       </PivotTableCell>
     );
+    const [row, spacing, col] = gridArea.toCsvFormat();
+    const tempData = ",".repeat(spacing);
+    if (csvTable[row]) {
+      csvTable[row][col] = tempData;
+    } else {
+      csvTable[row] = [];
+      csvTable[row][col] = tempData;
+    }
+    const [row2, spacing2, col2] = totaisGridArea.toCsvFormat();
+    const tempData2 = "TOTAIS" + ",".repeat(spacing2);
+    if (csvTable[row2]) {
+      csvTable[row2][col2] = tempData2;
+    } else {
+      csvTable[row2] = [tempData2];
+    }
+    const [row3, spacing3, col3] = dataValueGridArea.toCsvFormat();
+    const tempData3 = numberFormatter(data.value) + ",".repeat(spacing3);
+    if (csvTable[row3]) {
+      csvTable[row3][col3] = tempData3;
+    } else {
+      csvTable[row3] = [tempData3];
+    }
     cellPositions.add(dataValueGridArea.toString());
 
     for (let column = columnHeaderSpace + 1; column < maxColumnEnd + 2; column++) {
@@ -395,6 +598,14 @@ function getVertical<T>({
               gridArea={gridArea}
             ></PivotTableCell>
           );
+          const [row2, spacing, col] = gridArea.toCsvFormat();
+          const tempData = ",".repeat(spacing);
+          if (csvTable[row2]) {
+            csvTable[row2][col] = tempData;
+          } else {
+            csvTable[row2] = [];
+            csvTable[row2][col] = tempData;
+          }
         }
       }
     }
@@ -425,8 +636,30 @@ function getVertical<T>({
         {numberFormatter(data.value)}
       </PivotTableCell>
     );
+    const [row, spacing, col] = totalGridArea.toCsvFormat();
+    const tempData = "TOTAL" + ",".repeat(spacing);
+    if (csvTable[row]) {
+      csvTable[row][col] = tempData;
+    } else {
+      csvTable[row] = [];
+      csvTable[row][col] = tempData;
+    }
+    const [row2, spacing2, col2] = totaisGridArea.toCsvFormat();
+    const tempData2 = "TOTAIS" + ",".repeat(spacing2);
+    if (csvTable[row2]) {
+      csvTable[row2][col2] = tempData2;
+    } else {
+      csvTable[row2] = [tempData2];
+    }
+    const [row3, spacing3, col3] = dataValueGridArea.toCsvFormat();
+    const tempData3 = numberFormatter(data.value) + ",".repeat(spacing3);
+    if (csvTable[row3]) {
+      csvTable[row3][col3] = tempData3;
+    } else {
+      csvTable[row3] = [tempData3];
+    }
   }
-  return divs;
+  return [csvTable, divs];
 }
 
 function getResult<T>(

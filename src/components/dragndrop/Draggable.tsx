@@ -13,11 +13,12 @@ interface DraggableProps<T> {
   filterValues: Array<string>;
   filterState: Set<string>;
   onDragEnd: () => void;
+  onKeyNav: (key: keyof T, dir: "left" | "right", origin: number) => void;
   handleFilterUpdate: (key: keyof T, filtro: Set<string>) => void;
 }
 
 export function Draggable<T>(props: DraggableProps<T>) {
-  const { name, type, origin, value, filterValues, filterState, onDragEnd, handleFilterUpdate } = props;
+  const { name, type, origin, value, filterValues, filterState, onDragEnd, handleFilterUpdate, onKeyNav } = props;
 
   const [searchedFilterSet, setSearchedFilterSet] = useState<Array<string>>(filterValues);
   const [open, setOpen] = useState(false);
@@ -95,6 +96,16 @@ export function Draggable<T>(props: DraggableProps<T>) {
       }
     }
   };
+  const handleKeyDown = (filterKey: keyof T) => (event: any) => {
+    const key = event.nativeEvent.key;
+    if (key === "ArrowRight") {
+      onKeyNav(filterKey, "right", origin);
+      onDragEnd();
+    } else if (key === "ArrowLeft") {
+      onKeyNav(filterKey, "left", origin);
+      onDragEnd();
+    }
+  };
   const handleSearch = () => (event: any) => {
     const searchResults = new Array<string>();
     const searchText: string = (event.currentTarget.value as string).toLocaleLowerCase();
@@ -147,6 +158,7 @@ export function Draggable<T>(props: DraggableProps<T>) {
           style={styles.button}
           innerRef={buttonRef}
           onClick={handleClick}
+          onKeyDown={handleKeyDown(name)}
           size="small"
           kind="primary"
           skin="ghost"

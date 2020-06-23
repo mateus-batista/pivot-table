@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { GroupResult } from "../classes/GroupResult";
 import { TreeRoot, TreeRootKeys } from "../types/TreeRoot";
 import { Board } from "./filter/Board";
-import { PivotTableRender } from "./table/PivotTableRender";
+import { PivotTableRender, PivotCsvRender } from "./table/PivotTableRender";
 
 export type PivotTableProps<T extends any> = {
   data: T[];
@@ -103,6 +103,31 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
     }
   };
 
+  const handleCsv = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    if (rowKeys && columnKeys) {
+      const csvTable = PivotCsvRender<T>({
+        rowData: defaultTree,
+        rowKeys,
+        columnData: complemetaryTree,
+        columnKeys,
+        keysMapping: keyMapping,
+      });
+      csvTable.forEach((line, idl) => {
+        line.forEach((column, idc) => {
+          csvContent += column;
+        });
+        csvContent += "\n";
+      });
+    }
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "my_data.csv");
+    link.click();
+  };
+
   if (dataKeyValues) {
     return (
       <VFlow>
@@ -110,6 +135,7 @@ export function PivotTable<T>(props: PivotTableProps<T>) {
           keys={dataKeyValues}
           keyMapping={keyMapping}
           handleSubmit={handleSubmit}
+          handleCsv={handleCsv}
           sample={data[0]}
           handleAggregatorChange={handleAggregator}
           handleAggregatorKeyChange={handleAggregatorKey}
